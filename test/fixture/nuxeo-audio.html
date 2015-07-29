@@ -1,0 +1,9 @@
+<div class="media">
+  <div ng-if="entry.type === 'Audio'" class="ng-scope">
+    <img alt="audio" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png">
+    <audio controls="" preload="none">
+      <source ng-src="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav" src="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
+    </audio>
+  </div>
+</div>
+<div class="caption"><span class="ng-binding">test.wav</span></div>

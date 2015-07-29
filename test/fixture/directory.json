@@ -1,0 +1,15 @@
+{
+  "entity-type": "directoryEntries",
+  "entries": [
+    {
+      "entity-type": "directoryEntry",
+      "directoryName": "continent",
+      "properties": {
+        "ordering": 10000000,
+        "obsolete": 0,
+        "id": "africa",
+        "label": "label.directories.continent.africa"
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+<div class="demo">
+
+  <h1 id="panels" class="page-header">Nuxeo client and ui demo</h1>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <span class="panel-title">Search api demo</span>
+    </div>
+
+    <div class="panel-body panel-text">
+
+      <!-- ########################################################################## SEARCH FORM -->
+      <form class="form-inline col-xs-12 well text-center" novalidate>
+        <div class="basic-search row">
+          <!-- ########################################################################## MEDIA TYPE CHOOSE -->
+          <div class="form-group">
+            <div class="btn-group">
+              <label class="btn btn-default" ng-class="{'btn-primary active': fn.isActive('Picture')}" ng-click="fn.toggle('Picture')">Picture</label>
+              <label class="btn btn-default" ng-class="{'btn-primary active': fn.isActive('Audio')}" ng-click="fn.toggle('Audio')">Audio</label>
+              <label class="btn btn-default" ng-class="{'btn-primary active': fn.isActive('Video')}" ng-click="fn.toggle('Video')">Video</label>
+              <label class="btn btn-default" ng-class="{'btn-primary active': fn.isActive('Note')}" ng-click="fn.toggle('Note')">Text</label>
+            </div>
+          </div>
+
+          <!-- ########################################################################## MEDIA TERM SEARCH -->
+          <div class="form-group">
+            <label class="sr-only" for="search">Search</label>
+
+            <div class="input-group">
+              <input id="search" type="text" class="form-control ng-pristine ng-valid ng-touched" placeholder="Search for..." ng-model="search.terms">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+              </span>
+            </div>
+          </div>
+
+          <!-- ########################################################################## TOGGLE ADVANCED SEARCH -->
+          <div class="form-group pull-right">
+            <button class="btn btn-default" type="button" ng-click="search.advanced = !search.advanced"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></button>
+          </div>
+        </div>
+
+        <!-- ########################################################################## ADVANCED SEARCH -->
+        <div class="advanced-search row" ng-show="search.advanced">
+          <div class="form-group col-xs-12">
+            <label class="col-xs-4 text-right" for="continent">Continent</label>
+            <select class="col-xs-7 text-left" id="continent" name="select" ng-model="search.selectedContinent" ng-options="continent.properties.label for continent in search.continents" ng-change="fn.reduceCountry()"><!-- Continents --></select>
+          </div>
+          <div class="form-group col-xs-12">
+            <label class="col-xs-4 text-right" for="country">Country</label>
+            <select class="col-xs-7 text-left" id="country" name="select" ng-model="search.selectedCountry" ng-options="country.properties.label for country in search.countries" ng-change="fn.reduceContinent()"><!-- Countries --></select>
+          </div>
+          <div class="form-group col-xs-12">
+            <label class="col-xs-4 text-right" for="nature">Natures</label>
+            <select class="col-xs-7 text-left" id="nature" name="select" ng-model="search.selectedNature" ng-options="nature.properties.label for nature in search.natures"><!-- Natures --></select>
+          </div>
+          <div class="form-group col-xs-12">
+            <label class="col-xs-4 text-right" for="subject">Subjects</label>
+            <select class="col-xs-7 text-left"  id="subject" name="select" ng-model="search.selectedSubject" ng-options="subject.properties.label for subject in search.subjects"><!-- Subjects --></select>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- ########################################################################## RESULTS -->
+      <nuxeo-documents><!-- Search results --></nuxeo-documents>
+
+      <div class="clearfix"></div>
+
+      <!-- ########################################################################## PAGINATION -->
+      <nav>
+        <ul class="pagination">
+          <li ng-class="{active: documents.pageIndex === page}" ng-repeat="page in documents.pages">
+            <a href="javascript:void(0)" ng-click="documents.pageIndex = page">{{page + 1}}</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</div>

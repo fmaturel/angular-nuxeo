@@ -1,0 +1,58 @@
+{
+  "entity-type": "document",
+  "repository": "default",
+  "uid": "0123456789",
+  "path": "/domain/workspaces/test.jpg",
+  "type": "Picture",
+  "state": "project",
+  "parentRef": "9876543210",
+  "isCheckedOut": true,
+  "changeToken": "1437747620000",
+  "title": "test.jpg",
+  "lastModified": "2015-07-28T20:30:45.00Z",
+  "properties": {
+    "dc:description": null,
+    "dc:language": "FR",
+    "dc:coverage": "africa/Algeria",
+    "dc:valid": null,
+    "dc:creator": "Administrator",
+    "dc:modified": "2015-07-24T14:20:20.00Z",
+    "dc:lastContributor": "Administrator",
+    "dc:rights": null,
+    "dc:expired": "2017-12-30T23:00:00.00Z",
+    "dc:format": null,
+    "dc:created": "2015-07-24T14:00:00.00Z",
+    "dc:title": "test.jpg",
+    "dc:issued": null,
+    "dc:nature": null,
+    "dc:subjects": [],
+    "dc:contributors": [
+      "Administrator"
+    ],
+    "dc:source": null,
+    "dc:publisher": null,
+    "file:filename": null,
+    "file:content": {
+      "name": "test.jpg",
+      "mime-type": "image/jpeg",
+      "encoding": null,
+      "digest": "abcdefghijklmnopqrstuvwxyz",
+      "length": "100000",
+      "data": "http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg"
+    }
+  },
+  "facets": [
+    "Versionable",
+    "Publishable",
+    "Picture",
+    "Commentable",
+    "HasRelatedText",
+    "Thumbnail"
+  ],
+  "contextParameters": {
+    "thumbnail": {
+      "url": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg"
+    }
+  },
+  "$$hashKey": "object:1"
+}
