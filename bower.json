@@ -6,7 +6,15 @@
   "homepage": "https://github.com/fmaturel/angular-nuxeo",
   "license": "MIT",
   "main": [
-    "dist/js/ng-nuxeo.js"
+    "dist/js/ng-nuxeo.js",
+    "dist/js/ng-nuxeo-ui.js"
+  ],
+  "ignore": [
+    "**/.*",
+    "Gruntfile.js",
+    "node_modules",
+    "bower_components",
+    "test"
   ],
   "dependencies": {
     "angular": "~1.3.0",
