@@ -67,7 +67,7 @@
           src: [
             '<%= yeoman.app %>/nuxeo/**/*.js'
           ],
-          dest: '.tmp/js/ng-nuxeo.js',
+          dest: '<%= yeoman.dist %>/js/ng-nuxeo.js',
           options: {
             banner: ';(function( window, undefined ){ \n \'use strict\';\n\n',
             footer: '}( window ));'
@@ -77,7 +77,7 @@
           src: [
             '<%= yeoman.app %>/nuxeo-ui/**/*.js'
           ],
-          dest: '.tmp/js/ng-nuxeo-ui.js',
+          dest: '<%= yeoman.dist %>/js/ng-nuxeo-ui.js',
           options: {
             banner: ';(function( window, undefined ){ \n \'use strict\';\n\n',
             footer: '}( window ));'
@@ -100,7 +100,7 @@
             },
             middleware: function (connect) {
               return [
-                connect.static('.tmp'),
+                connect.static(appConfig.dist + '/js'),
                 connect.static(appConfig.app)
               ];
             }
@@ -112,7 +112,7 @@
             middleware: function (connect) {
               return [
                 connect.static('test'),
-                connect.static('.tmp'),
+                connect.static(appConfig.dist + '/js'),
                 connect.static(appConfig.app)
               ];
             }
@@ -137,7 +137,7 @@
         all: {
           src: [
             'Gruntfile.js',
-            '.tmp/js/ng-timeline.js'
+            '<%= yeoman.dist %>/js/*.js'
           ]
         },
         test: {
@@ -154,13 +154,11 @@
           files: [{
             dot: true,
             src: [
-              '.tmp',
               '<%= yeoman.dist %>/{,*/}*',
               '!<%= yeoman.dist %>/.git{,*/}*'
             ]
           }]
-        },
-        server: '.tmp'
+        }
       },
 
       // ng-annotate tries to make the code safe for minification automatically
@@ -169,9 +167,9 @@
         dist: {
           files: [{
             expand: true,
-            cwd: '.tmp/js',
+            cwd: '<%= yeoman.dist %>/js',
             src: '*.js',
-            dest: '.tmp/js'
+            dest: '<%= yeoman.dist %>/js'
           }]
         }
       },
@@ -188,23 +186,11 @@
               'demo/**'
             ]
           }, {
-           expand: true,
-           dot: true,
-           cwd: '.tmp',
-           dest: '<%= yeoman.dist %>',
-           src: ['js/*.js']
-          }, {
             expand: true,
             cwd: '<%= yeoman.app %>/bower_components',
             src: '**',
             dest: '<%= yeoman.dist %>/bower_components'
           }]
-        },
-        styles: {
-          expand: true,
-          cwd: '<%= yeoman.app %>/styles',
-          dest: '.tmp/styles/',
-          src: '{,*/}*.css'
         }
       },
 
@@ -223,7 +209,6 @@
       }
 
       grunt.task.run([
-        'clean:server',
         'concat',
         'connect:livereload',
         'watch'
@@ -231,7 +216,6 @@
     });
 
     grunt.registerTask('test', [
-      'clean:server',
       'connect:test',
       'karma'
     ]);

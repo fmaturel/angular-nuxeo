@@ -13,7 +13,7 @@
     "**/.*",
     "Gruntfile.js",
     "node_modules",
-    "bower_components",
+    "app",
     "test"
   ],
   "dependencies": {

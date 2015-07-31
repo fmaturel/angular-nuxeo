@@ -8,7 +8,7 @@ angular.module('ngNuxeoDemoApp')
         masters: {},
 
         path: {},
-        mediaTypes: {'Picture': true, 'Audio': false, 'Video': false, 'Note': false},
+        mediaTypes: {'Picture': true, 'Audio': false, 'Video': false, 'Note': false, 'File': false},
         continents: {},
         selectedContinent: null,
         countries: {},

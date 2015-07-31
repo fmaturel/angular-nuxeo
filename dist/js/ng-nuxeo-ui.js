@@ -88,6 +88,7 @@ angular.module('template/nuxeo/nuxeo-document.html', []).run(['$templateCache', 
     '    <nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture>' +
     '    <nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio>' +
     '    <nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video>' +
+    '    <nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file>' +
     '  </div>' +
     '  <div class="caption">' +
     '    <span>{{entry.title | limitTo:25}}</span>' +
@@ -120,6 +121,22 @@ angular.module('template/nuxeo/nuxeo-documents.html', []).run(['$templateCache',
 }]);
 
 
+angular.module('ngNuxeoUI')
+
+  .directive('nuxeoFile', [function () {
+    return {
+      restrict: 'E',
+      replace: true, // replaces the <nuxeo-file> element
+      templateUrl: 'template/nuxeo/nuxeo-file.html'
+    };
+  }]);
+
+angular.module('template/nuxeo/nuxeo-file.html', []).run(['$templateCache', function ($templateCache) {
+  $templateCache.put('template/nuxeo/nuxeo-file.html',
+    '<div ng-if="entry.type === \'File\'">' +
+    '  <img alt="file" ng-src="{{thumbnailURL}}">' +
+    '</div>');
+}]);
 angular.module('ngNuxeoUI')
 
   .directive('nuxeoPicture', [function () {
