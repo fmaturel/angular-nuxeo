@@ -20,7 +20,7 @@ angular.module('ngNuxeoQuery', [
   .constant('nuxeoConstants', {
     path: '/nuxeo',
     nuxeo: {
-      baseURL: 'http://demo.nuxeo.local/nuxeo',
+      baseURL: 'http://media.mylocalad.com/',
       apiPath: '/api/v1',
       automationPath: '/api/v1/automation',
       timeout: 5 // Timeout in seconds

@@ -1,7 +1,7 @@
 ;(function( window, undefined ){ 
  'use strict';
 
-angular.module('ngNuxeoTemplate', [
+angular.module('ngNuxeoUITemplate', [
     'template/nuxeo/nuxeo-documents.html',
     'template/nuxeo/nuxeo-document.html',
     'template/nuxeo/nuxeo-audio.html',
@@ -13,7 +13,7 @@ angular.module('ngNuxeoTemplate', [
 );
 
 angular.module('ngNuxeoUI', [
-  'ngNuxeoTemplate',
+  'ngNuxeoUITemplate',
   'ngNuxeoClient'
 ])
 
