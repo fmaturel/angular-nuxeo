@@ -6,7 +6,9 @@ angular.module('ngNuxeoTemplate', [
     'template/nuxeo/nuxeo-document.html',
     'template/nuxeo/nuxeo-audio.html',
     'template/nuxeo/nuxeo-picture.html',
-    'template/nuxeo/nuxeo-video.html'
+    'template/nuxeo/nuxeo-video.html',
+    'template/nuxeo/nuxeo-note.html',
+    'template/nuxeo/nuxeo-file.html'
   ]
 );
 
@@ -83,11 +85,12 @@ angular.module('ngNuxeoUI')
 
 angular.module('template/nuxeo/nuxeo-document.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-document.html',
-    '<a class="thumbnail" href="{{srcURL}}">' +
+    '<a class="thumbnail" href="{{srcURL || \'javascript:void(0)\'}}">' +
     '  <div class="media">' +
     '    <nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture>' +
     '    <nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio>' +
     '    <nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video>' +
+    '    <nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note>' +
     '    <nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file>' +
     '  </div>' +
     '  <div class="caption">' +
@@ -135,6 +138,31 @@ angular.module('template/nuxeo/nuxeo-file.html', []).run(['$templateCache', func
   $templateCache.put('template/nuxeo/nuxeo-file.html',
     '<div ng-if="entry.type === \'File\'">' +
     '  <img alt="file" ng-src="{{thumbnailURL}}">' +
+    '</div>');
+}]);
+angular.module('ngNuxeoUI')
+
+  .directive('nuxeoNote', [function () {
+    return {
+      restrict: 'E',
+      replace: true, // replaces the <nuxeo-note> element
+      templateUrl: 'template/nuxeo/nuxeo-note.html',
+      controller: ['$scope', function ($scope) {
+        var ctx = $scope.entry.contextParameters;
+        if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
+          $scope.thumbnailURL = ctx.thumbnail.url;
+        }
+
+        var fileProps = $scope.entry.properties['file:content'];
+        $scope.srcURL = fileProps && fileProps.data;
+      }]
+    };
+  }]);
+
+angular.module('template/nuxeo/nuxeo-note.html', []).run(['$templateCache', function ($templateCache) {
+  $templateCache.put('template/nuxeo/nuxeo-note.html',
+    '<div ng-if="entry.type === \'Note\'">' +
+    '  <img alt="note" ng-src="/images/notes.png">' +
     '</div>');
 }]);
 angular.module('ngNuxeoUI')

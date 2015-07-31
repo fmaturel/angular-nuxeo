@@ -3,7 +3,9 @@ angular.module('ngNuxeoTemplate', [
     'template/nuxeo/nuxeo-document.html',
     'template/nuxeo/nuxeo-audio.html',
     'template/nuxeo/nuxeo-picture.html',
-    'template/nuxeo/nuxeo-video.html'
+    'template/nuxeo/nuxeo-video.html',
+    'template/nuxeo/nuxeo-note.html',
+    'template/nuxeo/nuxeo-file.html'
   ]
 );
 

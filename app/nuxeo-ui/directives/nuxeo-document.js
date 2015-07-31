@@ -42,11 +42,12 @@ angular.module('ngNuxeoUI')
 
 angular.module('template/nuxeo/nuxeo-document.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-document.html',
-    '<a class="thumbnail" href="{{srcURL}}">' +
+    '<a class="thumbnail" href="{{srcURL || \'javascript:void(0)\'}}">' +
     '  <div class="media">' +
     '    <nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture>' +
     '    <nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio>' +
     '    <nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video>' +
+    '    <nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note>' +
     '    <nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file>' +
     '  </div>' +
     '  <div class="caption">' +
