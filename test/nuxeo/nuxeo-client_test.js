@@ -15,7 +15,7 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeoClient service', function () {
 
     it("should fetch directories when requested", function () {
-      httpBackend.whenGET("http://demo.nuxeo.local/nuxeo/api/v1/directory/something").respond(dataDirectory);
+      httpBackend.whenGET("http://demo.nuxeo.local/nuxeo/site/api/v1/directory/something").respond(dataDirectory);
       nuxeoClient.request('directory/something').get(function (result) {
         expect(result).toBeDefined();
         expect(result.entries).toBeDefined();
