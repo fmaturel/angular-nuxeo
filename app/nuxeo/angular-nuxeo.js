@@ -22,12 +22,4 @@ angular.module('ngNuxeoQuery', [
       automationPath: '/site/api/v1/automation',
       timeout: 5 // Timeout in seconds
     }
-  })
-
-  .config(['nuxeoConstants', '$httpProvider',
-    function (cst, $httpProvider) {
-
-      /*- SECURITY : REGISTER SECURED PATH ------------------------------------------------------------------------ */
-      $httpProvider.interceptors.push('BasicAuthInterceptor');
-    }]);
-
+  });

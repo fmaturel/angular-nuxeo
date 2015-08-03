@@ -73,7 +73,7 @@ angular.module('ngNuxeoDemoApp')
             .withSubject($scope.search.selectedSubject)
 
             // Pagination
-            .paginate(120, $scope.documents.pageIndex)
+            .paginate(12, $scope.documents.pageIndex)
 
             // Ordering
             //.sortBy('dc:title')
