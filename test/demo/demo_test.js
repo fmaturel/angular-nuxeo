@@ -1,6 +1,5 @@
-'use strict';
-
 describe('ngNuxeoDemoApp module', function () {
+  'use strict';
 
   var scope, createController;
 

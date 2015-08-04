@@ -3,14 +3,13 @@ angular.module('ngNuxeoClient')
   .service('nuxeoUrl', ['nuxeoConstants',
     function (cst) {
 
-      var apiBase = cst.nuxeo.baseURL + cst.nuxeo.apiPath;
+      var apiBase = cst.nuxeo.baseURL + cst.nuxeo.apiPath, automationBase = cst.nuxeo.baseURL + cst.nuxeo.automationPath;
 
-      var automationBase = cst.nuxeo.baseURL + cst.nuxeo.automationPath;
+      this.request = apiBase;
 
-      this.nuxeo = {
-        automate: automationBase,
-        file: automationBase + '/Document.GetBlob',
-        query: apiBase + '/query?query=:query',
-        request: apiBase
-      };
+      this.automate = automationBase;
+
+      this.query = apiBase + '/query?query=:query';
+
+      this.user = apiBase + '/user/:userName';
     }]);

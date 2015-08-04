@@ -16,5 +16,5 @@ angular.module('ngNuxeoUI', [
 
   .config(['$compileProvider',
     function ($compileProvider) {
-      $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|blob):/);
+      $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|javascript|blob):/);
     }]);

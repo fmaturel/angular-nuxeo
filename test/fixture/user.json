@@ -1,0 +1,25 @@
+{
+  "entity-type": "user",
+  "id": "fmaturel@github.com",
+  "properties": {
+    "firstName": "F.",
+    "lastName": "Maturel",
+    "password": "",
+    "groups": [
+      "administrators",
+      "user"
+    ],
+    "company": "fmaturel@github.com",
+    "email": "fmaturel@github.com",
+    "username": "fmaturel@github.com"
+  },
+  "extendedGroups": [
+    {
+      "name": "user",
+      "label": "user group",
+      "url": "group/user"
+    }
+  ],
+  "isAdministrator": false,
+  "isAnonymous": false
+}

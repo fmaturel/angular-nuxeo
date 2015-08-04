@@ -1,11 +1,11 @@
 angular.module('ngNuxeoSecurity')
 
-  .factory('BasicAuthInterceptor', [
-    function () {
+  .service('basicAuthInterceptor', ['nuxeoConstants',
+    function (cst) {
       return {
         request: function (config) {
           config.headers = config.headers || {};
-          config.headers.Authorization = 'Basic QWRtaW5pc3RyYXRvcjpBZG1pbmlzdHJhdG9y';
+          config.headers.Authorization = 'Basic ' + window.btoa(cst.nuxeo.user.userName + ':' + cst.nuxeo.user.password);
           return config;
         }
       };

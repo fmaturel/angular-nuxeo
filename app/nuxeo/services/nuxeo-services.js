@@ -1,7 +1,11 @@
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['NuxeoDirectory', 'NuxeoFile', 'NuxeoQuery', 'NuxeoTag',
-    function (NuxeoDirectory, NuxeoFile, NuxeoQuery, NuxeoTag) {
+  .service('nuxeo', ['Document', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
+    function (Document, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
+
+      this.Document = Document;
+
+      this.Query = NuxeoQuery;
 
       this.continents = NuxeoDirectory.continents;
 
@@ -10,10 +14,6 @@ angular.module('ngNuxeoClient')
       this.natures = NuxeoDirectory.natures;
 
       this.subjects = NuxeoDirectory.subjects;
-
-      this.File = NuxeoFile;
-
-      this.Query = NuxeoQuery;
 
       this.tags = NuxeoTag;
     }]);

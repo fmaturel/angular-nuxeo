@@ -50,6 +50,18 @@ body {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
+.thumbnail .action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.thumbnail .action a {
+  display: block;
+  padding: 1px 6px;
+}
+
 .thumbnail:hover {
   top: -3px;
   left: -3px;

@@ -100,8 +100,8 @@
             },
             middleware: function (connect) {
               return [
-                connect.static(appConfig.dist + '/js'),
-                connect.static(appConfig.app)
+                connect.static(appConfig.app),
+                connect.static(appConfig.dist)
               ];
             }
           }
@@ -112,8 +112,8 @@
             middleware: function (connect) {
               return [
                 connect.static('test'),
-                connect.static(appConfig.dist + '/js'),
-                connect.static(appConfig.app)
+                connect.static(appConfig.app),
+                connect.static(appConfig.dist)
               ];
             }
           }

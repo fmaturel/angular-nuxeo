@@ -1,0 +1,137 @@
+{
+  "entity-type": "documents",
+  "isPaginable": true,
+  "resultsCount": 2,
+  "pageSize": 12,
+  "maxPageSize": 0,
+  "currentPageSize": 2,
+  "currentPageIndex": 0,
+  "numberOfPages": 1,
+  "isPreviousPageAvailable": false,
+  "isNextPageAvailable": false,
+  "isLastPageAvailable": false,
+  "isSortable": true,
+  "hasError": false,
+  "errorMessage": null,
+  "totalSize": 2,
+  "pageIndex": 0,
+  "pageCount": 1,
+  "entries": [
+    {
+      "entity-type": "document",
+      "repository": "default",
+      "uid": "123456789",
+      "path": "/default-domain/workspaces/test.png",
+      "type": "Picture",
+      "state": "project",
+      "parentRef": "112233445566778899",
+      "isCheckedOut": true,
+      "changeToken": "1438000000000",
+      "title": "test.png",
+      "lastModified": "2015-01-01T20:00:00.00Z",
+      "properties": {
+        "dc:description": null,
+        "dc:language": null,
+        "dc:coverage": null,
+        "dc:valid": null,
+        "dc:creator": "Administrator",
+        "dc:modified": "2015-01-01T20:00:00.00Z",
+        "dc:lastContributor": "Administrator",
+        "dc:rights": null,
+        "dc:expired": "2016-01-01T20:00:00.00Z",
+        "dc:format": null,
+        "dc:created": "2015-01-01T20:00:00.00Z",
+        "dc:title": "test.png",
+        "dc:issued": null,
+        "dc:nature": null,
+        "dc:subjects": [
+          "art/cinema"
+        ],
+        "dc:contributors": [
+          "Administrator"
+        ],
+        "dc:source": null,
+        "dc:publisher": null,
+        "file:filename": null,
+        "file:content": {
+          "name": "test.png",
+          "mime-type": "image/png",
+          "encoding": null,
+          "digest": "c5b2c162daa1bf718701cec4a1d3de6b",
+          "length": "10000",
+          "data": "http://localhost:9132/nuxeo/nxbigfile/default/123456789/file:content/test.png"
+        }
+      },
+      "facets": [
+        "Versionable",
+        "Publishable",
+        "Picture",
+        "Commentable",
+        "HasRelatedText",
+        "Thumbnail"
+      ],
+      "contextParameters": {
+        "thumbnail": {
+          "url": "http://localhost:9132/nuxeo/nxthumb/default/123456789/thumb:thumbnail/Small_test.png"
+        }
+      }
+    },
+    {
+      "entity-type": "document",
+      "repository": "default",
+      "uid": "987654321",
+      "path": "/default-domain/workspaces/yetanothertest.jpg",
+      "type": "Picture",
+      "state": "project",
+      "parentRef": "112233445566778899",
+      "isCheckedOut": true,
+      "changeToken": "1438000000000",
+      "title": "yetanothertest.jpg",
+      "lastModified": "2015-01-01T21:00:00.00Z",
+      "properties": {
+        "dc:description": null,
+        "dc:language": "FR",
+        "dc:coverage": "africa/Algeria",
+        "dc:valid": null,
+        "dc:creator": "Administrator",
+        "dc:modified": "2015-01-01T21:00:00.00Z",
+        "dc:lastContributor": "Administrator",
+        "dc:rights": null,
+        "dc:expired": "2017-12-31T00:00:00.00Z",
+        "dc:format": null,
+        "dc:created": "2015-01-01T21:00:00.00Z",
+        "dc:title": "yetanothertest.jpg",
+        "dc:issued": null,
+        "dc:nature": null,
+        "dc:subjects": [],
+        "dc:contributors": [
+          "Administrator"
+        ],
+        "dc:source": null,
+        "dc:publisher": null,
+        "file:filename": null,
+        "file:content": {
+          "name": "yetanothertest.jpg",
+          "mime-type": "image/jpeg",
+          "encoding": null,
+          "digest": "987654321",
+          "length": "10000",
+          "data": "http://localhost:9132/nuxeo/nxbigfile/default/987654321/file:content/yetanothertest.jpg"
+        }
+      },
+      "facets": [
+        "Versionable",
+        "Publishable",
+        "Picture",
+        "Commentable",
+        "HasRelatedText",
+        "Thumbnail"
+      ],
+      "contextParameters": {
+        "thumbnail": {
+          "url": "http://localhost:9132/nuxeo/nxthumb/default/987654321/thumb:thumbnail/Small_yetanothertest.jpg"
+        }
+      }
+    }
+  ]
+}

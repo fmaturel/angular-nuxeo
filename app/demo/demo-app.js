@@ -9,17 +9,21 @@ angular.module('ngNuxeoDemoApp', [
  */
   .constant('nuxeoConstants', {
     nuxeo: {
-      baseURL: 'http://demo.nuxeo.local/nuxeo/site',
-      apiPath: '/api/v1',
-      automationPath: '/api/v1/automation',
-      timeout: 5 // Timeout in seconds
+      baseURL: 'http://demo.nuxeo.local/nuxeo',
+      apiPath: '/site/api/v1',
+      automationPath: '/site/api/v1/automation',
+      timeout: 5, // Timeout in seconds
+      user: {
+        userName: 'xpallot@etiskapp.com',
+        password: 'test'
+      }
     }
   })
 
   .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
 
     /*- SECURITY : REGISTER A REQUEST AUTH INTERCEPTOR ------------------------------------------------------ */
-    $httpProvider.interceptors.push('BasicAuthInterceptor');
+    $httpProvider.interceptors.push('basicAuthInterceptor');
 
     /*- DEMO ROUTES ----------------------------------------------------------------------------------------- */
     $routeProvider

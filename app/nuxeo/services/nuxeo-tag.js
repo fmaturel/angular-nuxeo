@@ -1,11 +1,11 @@
 angular.module('ngNuxeoClient')
 
-  .service('NuxeoTag', ['nuxeoClient', '$log',
-    function (nuxeoClient, $log) {
+  .service('NuxeoTag', ['nuxeoQueryClient',
+    function (nuxeoQueryClient) {
 
       var tagQuery = 'SELECT * FROM Document WHERE ecm:primaryType = \'Tag\'';
 
       this.get = function (searchChars, successCallback) {
-        return nuxeoClient.Query.get({query: tagQuery}, successCallback);
+        return nuxeoQueryClient.get({query: tagQuery}, successCallback);
       };
     }]);

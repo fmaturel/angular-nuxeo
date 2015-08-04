@@ -9,25 +9,51 @@ angular.module('ngNuxeoQueryPart')
         return '(ecm:path STARTSWITH \'' + val + '\')';
       }
 
-      this.$get = [function () {
+      this.$get = ['nuxeoUser', function (nuxeoUser) {
         return function (options) {
 
-          this.onPath = function (path) {
-            options.path = path;
+          function addPath(path) {
+            if (!angular.isString(path)) {
+              throw 'Path should be a String';
+            }
+            if (angular.isUndefined(options.paths)) {
+              options.paths = [];
+            }
+            options.paths.push(path);
+          }
+
+          /**
+           * Documents have to be placed in target path
+           * @param path
+           * @returns {*}
+           */
+          this.inPath = function (path) {
+            addPath(path);
+            return this;
+          };
+
+          /**
+           * Documents have to be placed in user's personal workspace
+           * @returns {*}
+           */
+          this.inUserWorkspace = function () {
+            nuxeoUser.onResolved(function (user) {
+              addPath('/default-domain/UserWorkspaces/' + user.pathId);
+            });
             return this;
           };
 
           this.getPart = function () {
-            if (angular.isArray(options.path)) {
-              var terms = _(options.path).reduce(function (memo, val) {
+            if (angular.isArray(options.paths)) {
+              var terms = _(options.paths).reduce(function (result, val) {
                 if (val.length) {
-                  memo += (memo.length ? ' OR ' : '' ) + pathQuery(val);
+                  result += (result.length ? ' OR ' : '' ) + pathQuery(val);
                 }
-                return memo;
+                return result;
               }, '');
               return terms.length ? ' AND (' + terms + ')' : '';
-            } else if (angular.isString(options.path) && options.path.length) {
-              return ' AND ' + pathQuery(options.path);
+            } else if (angular.isString(options.paths) && options.paths.length) {
+              return ' AND ' + pathQuery(options.paths);
             }
             return '';
           };

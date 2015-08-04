@@ -5,9 +5,9 @@ angular.module('ngNuxeoClient')
 
       var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
-      return function (client, queryPartFactoryName, $log) {
+      return function (NuxeoQueryClient, queryPartFactoryName, nuxeoUser, $log) {
 
-        var QueryBuilder = function () {
+        var NuxeoQuery = function () {
 
           var options = {}, partBuilders = [];
 
@@ -32,18 +32,19 @@ angular.module('ngNuxeoClient')
 
           //********************************** PUBLIC METHODS
           this.get = function (successCallback, errorCallback) {
-            var query = baseQuery;// + getPath() + getNotDeleted() + getNotExpired() + getTerms() + getMedia() + getPagination();
-
-            angular.forEach(partBuilders, function (builder) {
-              query += builder(options);
-            });
-
-            $log.debug('Nuxeo query built by NuxeoQuery Service: ' + query);
-            return client.Query.get({query: query}, successCallback, errorCallback);
+            function doGet() {
+              var query = baseQuery;
+              angular.forEach(partBuilders, function (builder) {
+                query += builder(options);
+              });
+              $log.debug('Nuxeo query built by NuxeoQuery Service: ' + query);
+              return NuxeoQueryClient.get({query: query}, successCallback, errorCallback);
+            }
+            return nuxeoUser.$resolved ? doGet() : nuxeoUser.onResolved(doGet);
           };
         };
 
-        return QueryBuilder;
+        return NuxeoQuery;
       };
 
     }]);

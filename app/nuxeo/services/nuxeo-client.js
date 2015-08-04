@@ -3,7 +3,7 @@ angular.module('ngNuxeoClient')
   .service('nuxeoClient', ['$resource', 'nuxeoUrl', 'nuxeoConstants',
     function ($resource, url, cst) {
 
-      var File = $resource(url.nuxeo.file, {}, {
+      var File = $resource(url.file, {}, {
         get: {
           method: 'POST',
           headers: {
@@ -21,7 +21,7 @@ angular.module('ngNuxeoClient')
         }
       });
 
-      var Query = $resource(url.nuxeo.query, {}, {
+      var Query = $resource(url.query, {}, {
         get: {
           method: 'GET',
           headers: {
@@ -49,7 +49,7 @@ angular.module('ngNuxeoClient')
         Query: Query,
 
         request: function (path) {
-          return $resource(url.nuxeo.request + '/' + path);
+          return $resource(url.request + '/' + path);
         }
       };
     }]);

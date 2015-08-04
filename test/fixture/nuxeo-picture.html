@@ -1,7 +1,15 @@
-<div class="media">
-  <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" ng-if="entry.type === 'Picture'" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg">
+<a href="javascript:void(0)">
+  <div class="media">
+    <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" ng-if="entry.type === 'Picture'" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg"></div>
+  <div class="caption">
+    <span class="ng-binding">test.jpg</span>
+  </div>
+</a>
+<div class="action">
+  <a href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg">
+    <span class="glyphicon glyphicon-download-alt"></span>
+  </a>
+  <a href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="fn.delete($index)" class="ng-hide">
+    <span class="glyphicon glyphicon-trash"></span>
+  </a>
 </div>
-<div class="caption">
-  <span class="ng-binding">test.jpg</span>
-</div>
-

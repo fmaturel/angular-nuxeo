@@ -1,14 +1,18 @@
 angular.module('ngNuxeoClient')
 
-  .service('NuxeoDirectory', ['nuxeoClient', '$log',
-    function (nuxeoClient, $log) {
+  .service('NuxeoDirectory', ['$resource', 'nuxeoUrl',
+    function ($resource, url) {
 
-      this.continents = nuxeoClient.request('directory/continent');
+      var request = function (path) {
+        return $resource(url.request + '/directory/' + path);
+      };
 
-      this.countries = nuxeoClient.request('directory/country');
+      this.continents = request('continent');
 
-      this.natures = nuxeoClient.request('directory/nature');
+      this.countries = request('country');
 
-      this.subjects = nuxeoClient.request('directory/subject');
+      this.natures = request('nature');
+
+      this.subjects = request('subject');
 
     }]);

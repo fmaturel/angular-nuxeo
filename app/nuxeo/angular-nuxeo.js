@@ -19,7 +19,17 @@ angular.module('ngNuxeoQuery', [
     nuxeo: {
       baseURL: 'http://demo.nuxeo.local/nuxeo',
       apiPath: '/site/api/v1',
-      automationPath: '/site/api/v1/automation',
-      timeout: 5 // Timeout in seconds
+      automationPath: '/api/v1/site/automation',
+      timeout: 5, // Timeout in seconds
+      user: {
+        userName: 'Administrator',
+        password: 'Administrator'
+      }
     }
-  });
+  })
+
+  .config(['$httpProvider', function ($httpProvider) {
+
+    /*- SECURITY : REGISTER A REQUEST AUTH INTERCEPTOR ------------------------------------------------------ */
+    $httpProvider.interceptors.push('userAuthInterceptor');
+  }]);

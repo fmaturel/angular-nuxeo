@@ -7,18 +7,23 @@ angular.module('ngNuxeoDemoApp')
       $scope.search = {
         masters: {},
 
-        path: {},
+        path: '',
         mediaTypes: {'Picture': true, 'Audio': false, 'Video': false, 'Note': false, 'File': false},
-        continents: {},
-        selectedContinent: null,
-        countries: {},
-        selectedCountry: null,
-        natures: {},
-        selectedNature: null,
-        subjects: {},
-        selectedSubject: null,
         tags: [],
-        terms: ''
+        terms: '',
+
+        advanced: {
+          continents: {},
+          selectedContinent: null,
+          countries: {},
+          selectedCountry: null,
+          natures: {},
+          selectedNature: null,
+          subjects: {},
+          selectedSubject: null
+        },
+
+        upload: {}
       };
 
       // ######################################################################### SCOPE FUNCTIONS
@@ -37,79 +42,104 @@ angular.module('ngNuxeoDemoApp')
           $scope.search.mediaTypes = angular.copy($scope.search.mediaTypes);
         },
         reduceContinent: function () {
-          if ($scope.search.selectedCountry) {
-            $scope.search.continents = _.filter($scope.search.masters.continents, {properties: {'id': $scope.search.selectedCountry.properties.parent}})
-            $scope.search.selectedContinent = $scope.search.continents[0];
+          if ($scope.search.advanced.selectedCountry) {
+            $scope.search.advanced.continents = _.filter($scope.search.masters.continents, {properties: {'id': $scope.search.advanced.selectedCountry.properties.parent}});
+            $scope.search.advanced.selectedContinent = $scope.search.advanced.continents[0];
           }
         },
         reduceCountry: function () {
-          if ($scope.search.selectedContinent) {
-            $scope.search.countries = _.filter($scope.search.masters.countries, {properties: {'parent': $scope.search.selectedContinent.properties.id}})
+          if ($scope.search.advanced.selectedContinent) {
+            $scope.search.advanced.countries = _.filter($scope.search.masters.countries, {properties: {'parent': $scope.search.advanced.selectedContinent.properties.id}});
           }
+        },
+        upload: function () {
+          var f = document.getElementById('file').files[0], r = new FileReader();
+          r.onloadend = function(){
+            var file = new nuxeo.Document({
+              type: 'Picture',
+              name: 'Test',
+              properties: {
+                'dc:title': f.name
+              }
+            });
+            file.upload(f, query);
+          };
+          r.readAsBinaryString(f);
+        },
+        delete: function (index) {
+          var file = $scope.documents.entries[index];
+          file.delete(function () {
+            $scope.documents.entries.splice(index, 1);
+          }, function () {
+            window.alert('An error occurred deleting document');
+          });
         }
       };
 
       // ######################################################################### SEARCH WATCHER
+      var query = function () {
+        new nuxeo.Query()
+          // Requested path
+          .inPath($scope.search.path || '/')
+          .inUserWorkspace()
+
+          // Defaults override if needed
+          //.includeDeleted()
+          .includeExpired()
+
+          // Basic search
+          .withTerms($scope.search.terms.split(' '))
+          .withMedia($scope.search.mediaTypes)
+
+          // Directory search
+          .withCoverage($scope.search.advanced.selectedCountry || $scope.search.advanced.selectedContinent)
+          .withNature($scope.search.advanced.selectedNature)
+          .withSubject($scope.search.advanced.selectedSubject)
+
+          // Pagination
+          .paginate(12, $scope.documents.pageIndex)
+
+          // Ordering
+          //.sortBy('dc:title')
+          //.sortBy('dc:title', 'DESC')
+          //.sortBy(['dc:title', 'dc:description'])
+          .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'})
+
+          // Finally get documents
+          .get(function (data) {
+            $log.debug(data);
+            $scope.documents = angular.extend(data, {
+              pages: _.range(data.pageCount)
+            });
+          });
+      };
+
       $scope.$watchGroup([
           'search.path', 'search.terms', 'search.mediaTypes', 'documents.pageIndex',
-          'search.selectedContinent', 'search.selectedCountry', 'search.selectedNature', 'search.selectedSubject'
-        ],
-        function () {
-          new nuxeo.Query()
-            // Requested path
-            .onPath($scope.search.path || '/')
-
-            // Defaults override if needed
-            //.includeDeleted()
-            .includeExpired()
-
-            // Basic search
-            .withTerms($scope.search.terms.split(' '))
-            .withMedia($scope.search.mediaTypes)
-
-            // Directory search
-            .withCoverage($scope.search.selectedCountry || $scope.search.selectedContinent)
-            .withNature($scope.search.selectedNature)
-            .withSubject($scope.search.selectedSubject)
-
-            // Pagination
-            .paginate(12, $scope.documents.pageIndex)
-
-            // Ordering
-            //.sortBy('dc:title')
-            //.sortBy('dc:title', 'DESC')
-            //.sortBy(['dc:title', 'dc:description'])
-            .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'})
-
-            // Finally get documents
-            .get(function (data) {
-              $log.debug(data);
-              $scope.documents = angular.extend(data, {
-                pages: _.range(data.pageCount)
-              });
-            });
-        }, true);
+          'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
+          'search.advanced.selectedNature', 'search.advanced.selectedSubject'
+        ], query, true);
 
       nuxeo.continents.get(function (data) {
         $log.debug(data);
         $scope.search.masters.continents = data.entries;
-        $scope.search.continents = angular.copy(data.entries);
+        $scope.search.advanced.continents = angular.copy(data.entries);
       });
 
       nuxeo.countries.get(function (data) {
         $log.debug(data);
         $scope.search.masters.countries = data.entries;
-        $scope.search.countries = angular.copy(data.entries);
+        $scope.search.advanced.countries = angular.copy(data.entries);
       });
 
       nuxeo.natures.get(function (data) {
         $log.debug(data);
-        $scope.search.natures = data.entries;
+        $scope.search.advanced.natures = data.entries;
       });
 
       nuxeo.subjects.get(function (data) {
         $log.debug(data);
-        $scope.search.subjects = data.entries;
+        $scope.search.advanced.subjects = data.entries;
       });
 
       nuxeo.tags.get(function (data) {
