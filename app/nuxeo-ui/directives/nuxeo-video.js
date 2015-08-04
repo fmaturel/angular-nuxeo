@@ -3,7 +3,6 @@ angular.module('ngNuxeoUI')
   .directive('nuxeoVideo', [function () {
     return {
       restrict: 'E',
-      require: '^nuxeoDocument',
       replace: true, // replaces the <nuxeo-video> element
       templateUrl: 'template/nuxeo/nuxeo-video.html'
     };

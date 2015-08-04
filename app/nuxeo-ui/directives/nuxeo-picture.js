@@ -1,11 +1,15 @@
 angular.module('ngNuxeoUI')
 
-  .directive('nuxeoPicture', [function () {
+  .directive('nuxeoPicture', ['nuxeoConstants', function (cst) {
     return {
       restrict: 'E',
-      require: '^nuxeoDocument',
       replace: true, // replaces the <nuxeo-picture> element
-      templateUrl: 'template/nuxeo/nuxeo-picture.html'
+      templateUrl: 'template/nuxeo/nuxeo-picture.html',
+      link: function (scope, element, attrs) {
+        if(attrs.size === 'large') {
+          scope.thumbnailURL = cst.nuxeo.baseURL + '/nxbigfile/default/' + scope.entry.uid + '/picture:views/2/content/Medium_Photos.jpg';
+        }
+      }
     };
   }]);
 

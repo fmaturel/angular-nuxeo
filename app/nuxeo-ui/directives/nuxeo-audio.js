@@ -3,7 +3,6 @@ angular.module('ngNuxeoUI')
   .directive('nuxeoAudio', [function () {
     return {
       restrict: 'E',
-      require: '^nuxeoDocument',
       replace: true, // replaces the <nuxeo-audio> element
       templateUrl: 'template/nuxeo/nuxeo-audio.html'
     };
