@@ -14,8 +14,8 @@ angular.module('ngNuxeoDemoApp', [
       automationPath: '/site/api/v1/automation',
       timeout: 5, // Timeout in seconds
       user: {
-        userName: 'xpallot@etiskapp.com',
-        password: 'test'
+        userName: 'Administrator',
+        password: 'Administrator'
       }
     }
   })
