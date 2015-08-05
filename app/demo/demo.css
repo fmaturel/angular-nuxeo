@@ -9,6 +9,10 @@ body {
   margin-top: 20px;
 }
 
+.demo .advanced-search .checkbox {
+  padding: 0 20px;
+}
+
 .demo > select {
   float: right;
 }

@@ -27,6 +27,17 @@ angular.module('ngNuxeoClient')
             return angular.extend(result, {
               entries: angular.isArray(result.entries) ? result.entries.map(function (entry) {
                 var document = new Document(entry);
+
+                var ctx = entry.contextParameters;
+                if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
+                  document.thumbnailURL = ctx.thumbnail.url;
+                }
+
+                var fileContent = entry.properties['file:content'];
+                if (fileContent && fileContent.data) {
+                  document.srcURL = fileContent.data;
+                }
+
                 document.isDeletable = entry.path.startsWith('/default-domain/UserWorkspaces/' + nuxeoUser.pathId);
                 $log.debug(document.title + ' = ' + document.uid);
                 return document;

@@ -74,7 +74,9 @@
         "thumbnail": {
           "url": "http://localhost:9132/nuxeo/nxthumb/default/123456789/thumb:thumbnail/Small_test.png"
         }
-      }
+      },
+      "srcURL": "http://localhost:9132/nuxeo/nxbigfile/default/123456789/file:content/test.png",
+      "thumbnailURL": "http://localhost:9132/nuxeo/nxthumb/default/123456789/thumb:thumbnail/Small_test.png"
     },
     {
       "entity-type": "document",
@@ -131,7 +133,9 @@
         "thumbnail": {
           "url": "http://localhost:9132/nuxeo/nxthumb/default/987654321/thumb:thumbnail/Small_yetanothertest.jpg"
         }
-      }
+      },
+      "srcURL": "http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav",
+      "thumbnailURL": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png"
     }
   ]
 }

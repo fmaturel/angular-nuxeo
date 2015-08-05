@@ -7,12 +7,12 @@ angular.module('ngNuxeoDemoApp')
       $scope.search = {
         masters: {},
 
-        path: '',
         mediaTypes: {'Picture': true, 'Audio': false, 'Video': false, 'Note': false, 'File': false},
         tags: [],
         terms: '',
 
         advanced: {
+          myMediaOnly: false,
           continents: {},
           selectedContinent: null,
           countries: {},
@@ -54,7 +54,7 @@ angular.module('ngNuxeoDemoApp')
         },
         upload: function () {
           var f = document.getElementById('file').files[0], r = new FileReader();
-          r.onloadend = function(){
+          r.onloadend = function () {
             var file = new nuxeo.Document({
               type: 'Picture',
               name: 'Test',
@@ -62,26 +62,23 @@ angular.module('ngNuxeoDemoApp')
                 'dc:title': f.name
               }
             });
-            file.upload(f, query);
+            file.upload(f, uiChange, function () {
+              window.alert('An error occurred uploading document');
+            });
           };
           r.readAsBinaryString(f);
         },
         delete: function (index) {
           var file = $scope.documents.entries[index];
-          file.delete(function () {
-            $scope.documents.entries.splice(index, 1);
-          }, function () {
+          file.delete(uiChange, function () {
             window.alert('An error occurred deleting document');
           });
         }
       };
 
       // ######################################################################### SEARCH WATCHER
-      var query = function () {
-        new nuxeo.Query()
-          // Requested path
-          .inPath($scope.search.path || '/')
-          .inUserWorkspace()
+      var uiChange = function () {
+        var query = new nuxeo.Query()
 
           // Defaults override if needed
           //.includeDeleted()
@@ -103,22 +100,30 @@ angular.module('ngNuxeoDemoApp')
           //.sortBy('dc:title')
           //.sortBy('dc:title', 'DESC')
           //.sortBy(['dc:title', 'dc:description'])
-          .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'})
+          .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'});
 
-          // Finally get documents
-          .get(function (data) {
-            $log.debug(data);
-            $scope.documents = angular.extend(data, {
-              pages: _.range(data.pageCount)
-            });
+        // If my media is selected
+        if(!$scope.search.advanced.myMediaOnly) {
+          query.inPath('/');
+        } else {
+          query.inUserWorkspace();
+        }
+
+        // Finally get documents
+        query.get(function (data) {
+          $log.debug(data);
+          $scope.documents = angular.extend(data, {
+            pages: _.range(data.pageCount)
           });
+        });
       };
 
       $scope.$watchGroup([
-          'search.path', 'search.terms', 'search.mediaTypes', 'documents.pageIndex',
-          'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
-          'search.advanced.selectedNature', 'search.advanced.selectedSubject'
-        ], query, true);
+        'search.path', 'search.terms', 'search.mediaTypes', 'documents.pageIndex',
+        'search.advanced.myMediaOnly',
+        'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
+        'search.advanced.selectedNature', 'search.advanced.selectedSubject'
+      ], uiChange, true);
 
       nuxeo.continents.get(function (data) {
         $log.debug(data);

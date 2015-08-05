@@ -6,16 +6,7 @@ angular.module('ngNuxeoUI')
       restrict: 'E',
       require: '^nuxeoDocuments',
       replace: true, // replaces the <nuxeo-document> element
-      templateUrl: 'template/nuxeo/nuxeo-document.html',
-      controller: ['$scope', function ($scope) {
-        var ctx = $scope.entry.contextParameters;
-        if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
-          $scope.thumbnailURL = ctx.thumbnail.url;
-        }
-
-        var fileProps = $scope.entry.properties['file:content'];
-        $scope.srcURL = fileProps && fileProps.data;
-      }]
+      templateUrl: 'template/nuxeo/nuxeo-document.html'
     };
   }]);
 
@@ -35,7 +26,7 @@ angular.module('template/nuxeo/nuxeo-document.html', []).run(['$templateCache', 
     '    </div>' +
     '  </a>' +
     '  <div class="action">' +
-    '    <a href="{{srcURL || \'javascript:void(0)\'}}">' +
+    '    <a href="{{entry.srcURL || \'javascript:void(0)\'}}">' +
     '      <span class="glyphicon glyphicon-download-alt"></span>' +
     '    </a>' +
     '    <a href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="fn.delete($index)">' +

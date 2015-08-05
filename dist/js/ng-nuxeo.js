@@ -163,9 +163,9 @@ angular.module('ngNuxeoClient')
   .factory('User', ['$resource', 'nuxeoUrl',
     function ($resource, url) {
 
-      var User = $resource(url.user, {}, {
+      var User = $resource(url.user, {userName: '@userName'}, {
         get: {
-          transformResponse: function(data) {
+          transformResponse: function (data) {
             var result = angular.fromJson(data);
             result.pathId = result.id.replace(/[@\.]/g, '-');
             return result;
@@ -175,7 +175,10 @@ angular.module('ngNuxeoClient')
 
       User.prototype.callbacks = [];
       User.prototype.onResolved = function (callback) {
-        return this.callbacks.push(callback);
+        if(this.$resolved) {
+          callback(this);
+        }
+        this.callbacks.push(callback);
       };
       User.prototype.resolve = function (user) {
         this.callbacks.forEach(function (callback) {
@@ -202,9 +205,9 @@ angular.module('ngNuxeoSecurity')
 
   .service('nuxeoUser', ['User', 'nuxeoConstants',
     function (User, cst) {
-      var nuxeoUser = new User();
+      var nuxeoUser = new User({userName: cst.nuxeo.user.userName});
 
-      nuxeoUser.promise = nuxeoUser.$get({userName: cst.nuxeo.user.userName}, function (user) {
+      nuxeoUser.promise = nuxeoUser.$get(function (user) {
         angular.extend(nuxeoUser, user);
         nuxeoUser.resolve(user);
       }, function () {
@@ -348,6 +351,17 @@ angular.module('ngNuxeoClient')
             return angular.extend(result, {
               entries: angular.isArray(result.entries) ? result.entries.map(function (entry) {
                 var document = new Document(entry);
+
+                var ctx = entry.contextParameters;
+                if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
+                  document.thumbnailURL = ctx.thumbnail.url;
+                }
+
+                var fileContent = entry.properties['file:content'];
+                if (fileContent && fileContent.data) {
+                  document.srcURL = fileContent.data;
+                }
+
                 document.isDeletable = entry.path.startsWith('/default-domain/UserWorkspaces/' + nuxeoUser.pathId);
                 $log.debug(document.title + ' = ' + document.uid);
                 return document;
@@ -685,14 +699,14 @@ angular.module('ngNuxeoQueryPart')
       this.$get = ['nuxeoUser', function (nuxeoUser) {
         return function (options) {
 
-          function addPath(path) {
+          function addPath(path, negate) {
             if (!angular.isString(path)) {
               throw 'Path should be a String';
             }
             if (angular.isUndefined(options.paths)) {
               options.paths = [];
             }
-            options.paths.push(path);
+            options.paths.push({value: path, negate: negate});
           }
 
           /**
@@ -716,11 +730,20 @@ angular.module('ngNuxeoQueryPart')
             return this;
           };
 
+          /**
+           * Documents are not in any user's personal workspace
+           * @returns {*}
+           */
+          this.notInUserWorkspace = function () {
+            addPath('/default-domain/UserWorkspaces/', true);
+            return this;
+          };
+
           this.getPart = function () {
             if (angular.isArray(options.paths)) {
-              var terms = _(options.paths).reduce(function (result, val) {
-                if (val.length) {
-                  result += (result.length ? ' OR ' : '' ) + pathQuery(val);
+              var terms = _(options.paths).reduce(function (result, path) {
+                if (path.value.length) {
+                  result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
                 }
                 return result;
               }, '');

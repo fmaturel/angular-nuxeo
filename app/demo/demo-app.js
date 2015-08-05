@@ -20,16 +20,21 @@ angular.module('ngNuxeoDemoApp', [
     }
   })
 
-  .config(['$httpProvider', '$routeProvider', function ($httpProvider, $routeProvider) {
+  .config(['$httpProvider', '$sceDelegateProvider', '$routeProvider', 'nuxeoConstants',
+    function ($httpProvider, $sceDelegateProvider, $routeProvider, cst) {
 
-    /*- SECURITY : REGISTER A REQUEST AUTH INTERCEPTOR ------------------------------------------------------ */
-    $httpProvider.interceptors.push('basicAuthInterceptor');
+      /*- SECURITY : REGISTER A REQUEST AUTH INTERCEPTOR ------------------------------------------------------ */
+      $httpProvider.interceptors.push('basicAuthInterceptor');
 
-    /*- DEMO ROUTES ----------------------------------------------------------------------------------------- */
-    $routeProvider
-      .when('/demo', {
-        templateUrl: 'demo.html',
-        controller: 'DemoController'
-      })
-      .otherwise({redirectTo: '/demo'});
-  }]);
+      /*- TRUST URL FROM THOSE SOURCE ----------------------------------------------------------------------------- */
+      $sceDelegateProvider.resourceUrlWhitelist(['self', cst.nuxeo.baseURL + '*']);
+
+      /*- DEMO ROUTES ----------------------------------------------------------------------------------------- */
+      $routeProvider
+        .when('/demo', {
+          templateUrl: 'demo.html',
+          controller: 'DemoController'
+        })
+        .otherwise({redirectTo: '/demo'});
+
+    }]);

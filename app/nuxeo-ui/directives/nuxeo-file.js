@@ -11,6 +11,6 @@ angular.module('ngNuxeoUI')
 angular.module('template/nuxeo/nuxeo-file.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-file.html',
     '<div ng-if="entry.type === \'File\'">' +
-    '  <img alt="file" ng-src="{{thumbnailURL}}">' +
+    '  <img alt="file" ng-src="{{entry.thumbnailURL}}">' +
     '</div>');
 }]);

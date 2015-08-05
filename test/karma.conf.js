@@ -45,16 +45,16 @@ module.exports = function (config) {
     frameworks: ['jasmine'],
 
     browsers: [
-      'Chrome',
-      //'PhantomJS'
+      //'Chrome',
+      'PhantomJS'
     ],
 
     // web server port
     port: 9132,
 
     plugins: [
-      'karma-chrome-launcher',
-      //'karma-phantomjs-launcher',
+      //'karma-chrome-launcher',
+      'karma-phantomjs-launcher',
       'karma-ng-html2js-preprocessor',
       'karma-ng-json2js-preprocessor',
       'karma-jasmine'

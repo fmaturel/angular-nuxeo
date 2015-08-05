@@ -44,9 +44,18 @@
 
         <!-- ########################################################################## ADVANCED SEARCH -->
         <div class="advanced-search row" ng-show="search.advanced.show">
+
+          <div class="form-group col-xs-12">
+            <div class="checkbox">
+              <label for="mymedia">
+                <input id="mymedia" type="checkbox" ng-model="search.advanced.myMediaOnly"> My media only
+              </label>
+            </div>
+          </div>
+
           <div class="form-group col-xs-12">
             <label for="continent" class="col-xs-4 text-right">Continent</label>
-            <select id="continent" class="col-xs-7 text-left" name="select"
+            <select id="continent" class="col-xs-4 text-left" name="select"
                     ng-model="search.advanced.selectedContinent"
                     ng-options="continent.properties.label for continent in search.advanced.continents"
                     ng-change="fn.reduceCountry()">
@@ -55,7 +64,7 @@
           </div>
           <div class="form-group col-xs-12">
             <label for="country" class="col-xs-4 text-right">Country</label>
-            <select id="country" class="col-xs-7 text-left" name="select"
+            <select id="country" class="col-xs-4 text-left" name="select"
                     ng-model="search.advanced.selectedCountry"
                     ng-options="country.properties.label for country in search.advanced.countries"
                     ng-change="fn.reduceContinent()">
@@ -64,7 +73,7 @@
           </div>
           <div class="form-group col-xs-12">
             <label for="nature" class="col-xs-4 text-right">Natures</label>
-            <select id="nature" class="col-xs-7 text-left" name="select"
+            <select id="nature" class="col-xs-4 text-left" name="select"
                     ng-model="search.advanced.selectedNature"
                     ng-options="nature.properties.label for nature in search.advanced.natures">
               <!-- Natures -->
@@ -72,7 +81,7 @@
           </div>
           <div class="form-group col-xs-12">
             <label for="subject" class="col-xs-4 text-right">Subjects</label>
-            <select id="subject" class="col-xs-7 text-left" name="select"
+            <select id="subject" class="col-xs-4 text-left" name="select"
                     ng-model="search.advanced.selectedSubject"
                     ng-options="subject.properties.label for subject in search.advanced.subjects">
               <!-- Subjects -->

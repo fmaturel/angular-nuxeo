@@ -34,9 +34,9 @@ angular.module('ngNuxeoUI')
 angular.module('template/nuxeo/nuxeo-audio.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-audio.html',
     '<div ng-if="entry.type === \'Audio\'">' +
-    '  <img alt="audio" ng-src="{{thumbnailURL}}">' +
+    '  <img alt="audio" ng-src="{{entry.thumbnailURL}}">' +
     '  <audio controls preload="none">' +
-    '    <source ng-src="{{srcURL}}">' +
+    '    <source ng-src="{{entry.srcURL}}">' +
     '  </audio>' +
     '</div>');
 }]);
@@ -48,16 +48,7 @@ angular.module('ngNuxeoUI')
       restrict: 'E',
       require: '^nuxeoDocuments',
       replace: true, // replaces the <nuxeo-document> element
-      templateUrl: 'template/nuxeo/nuxeo-document.html',
-      controller: ['$scope', function ($scope) {
-        var ctx = $scope.entry.contextParameters;
-        if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
-          $scope.thumbnailURL = ctx.thumbnail.url;
-        }
-
-        var fileProps = $scope.entry.properties['file:content'];
-        $scope.srcURL = fileProps && fileProps.data;
-      }]
+      templateUrl: 'template/nuxeo/nuxeo-document.html'
     };
   }]);
 
@@ -77,7 +68,7 @@ angular.module('template/nuxeo/nuxeo-document.html', []).run(['$templateCache', 
     '    </div>' +
     '  </a>' +
     '  <div class="action">' +
-    '    <a href="{{srcURL || \'javascript:void(0)\'}}">' +
+    '    <a href="{{entry.srcURL || \'javascript:void(0)\'}}">' +
     '      <span class="glyphicon glyphicon-download-alt"></span>' +
     '    </a>' +
     '    <a href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="fn.delete($index)">' +
@@ -125,7 +116,7 @@ angular.module('ngNuxeoUI')
 angular.module('template/nuxeo/nuxeo-file.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-file.html',
     '<div ng-if="entry.type === \'File\'">' +
-    '  <img alt="file" ng-src="{{thumbnailURL}}">' +
+    '  <img alt="file" ng-src="{{entry.thumbnailURL}}">' +
     '</div>');
 }]);
 angular.module('ngNuxeoUI')
@@ -169,7 +160,7 @@ angular.module('ngNuxeoUI')
   }]);
 
 angular.module('template/nuxeo/nuxeo-picture.html', []).run(['$templateCache', function ($templateCache) {
-  $templateCache.put('template/nuxeo/nuxeo-picture.html', '<img alt="{{entry.title}}" ng-src="{{thumbnailURL}}">');
+  $templateCache.put('template/nuxeo/nuxeo-picture.html', '<img alt="{{entry.title}}" ng-src="{{entry.thumbnailURL}}">');
 }]);
 angular.module('ngNuxeoUI')
 
@@ -183,7 +174,7 @@ angular.module('ngNuxeoUI')
 
 angular.module('template/nuxeo/nuxeo-video.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-video.html',
-    '<video ng-if="entry.type === \'Video\'" controls preload="none" ng-attr-poster="{{thumbnailURL}}">' +
-    '  <source ng-src="{{srcURL}}">' +
+    '<video ng-if="entry.type === \'Video\'" controls preload="none" ng-attr-poster="{{entry.thumbnailURL}}">' +
+    '  <source ng-src="{{entry.srcURL}}">' +
     '</video>');
 }]);}( window ));

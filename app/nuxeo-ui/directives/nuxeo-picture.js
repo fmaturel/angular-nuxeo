@@ -14,5 +14,5 @@ angular.module('ngNuxeoUI')
   }]);
 
 angular.module('template/nuxeo/nuxeo-picture.html', []).run(['$templateCache', function ($templateCache) {
-  $templateCache.put('template/nuxeo/nuxeo-picture.html', '<img alt="{{entry.title}}" ng-src="{{thumbnailURL}}">');
+  $templateCache.put('template/nuxeo/nuxeo-picture.html', '<img alt="{{entry.title}}" ng-src="{{entry.thumbnailURL}}">');
 }]);

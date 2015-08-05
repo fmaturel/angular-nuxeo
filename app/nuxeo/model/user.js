@@ -3,9 +3,9 @@ angular.module('ngNuxeoClient')
   .factory('User', ['$resource', 'nuxeoUrl',
     function ($resource, url) {
 
-      var User = $resource(url.user, {}, {
+      var User = $resource(url.user, {userName: '@userName'}, {
         get: {
-          transformResponse: function(data) {
+          transformResponse: function (data) {
             var result = angular.fromJson(data);
             result.pathId = result.id.replace(/[@\.]/g, '-');
             return result;
@@ -15,7 +15,10 @@ angular.module('ngNuxeoClient')
 
       User.prototype.callbacks = [];
       User.prototype.onResolved = function (callback) {
-        return this.callbacks.push(callback);
+        if(this.$resolved) {
+          callback(this);
+        }
+        this.callbacks.push(callback);
       };
       User.prototype.resolve = function (user) {
         this.callbacks.forEach(function (callback) {

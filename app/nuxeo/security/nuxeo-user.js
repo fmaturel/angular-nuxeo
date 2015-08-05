@@ -2,9 +2,9 @@ angular.module('ngNuxeoSecurity')
 
   .service('nuxeoUser', ['User', 'nuxeoConstants',
     function (User, cst) {
-      var nuxeoUser = new User();
+      var nuxeoUser = new User({userName: cst.nuxeo.user.userName});
 
-      nuxeoUser.promise = nuxeoUser.$get({userName: cst.nuxeo.user.userName}, function (user) {
+      nuxeoUser.promise = nuxeoUser.$get(function (user) {
         angular.extend(nuxeoUser, user);
         nuxeoUser.resolve(user);
       }, function () {

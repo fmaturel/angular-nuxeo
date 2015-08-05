@@ -11,9 +11,9 @@ angular.module('ngNuxeoUI')
 angular.module('template/nuxeo/nuxeo-audio.html', []).run(['$templateCache', function ($templateCache) {
   $templateCache.put('template/nuxeo/nuxeo-audio.html',
     '<div ng-if="entry.type === \'Audio\'">' +
-    '  <img alt="audio" ng-src="{{thumbnailURL}}">' +
+    '  <img alt="audio" ng-src="{{entry.thumbnailURL}}">' +
     '  <audio controls preload="none">' +
-    '    <source ng-src="{{srcURL}}">' +
+    '    <source ng-src="{{entry.srcURL}}">' +
     '  </audio>' +
     '</div>');
 }]);
