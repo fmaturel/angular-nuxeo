@@ -198,7 +198,7 @@
       karma: {
         unit: {
           configFile: 'test/karma.conf.js',
-          //singleRun: true
+          singleRun: true
         }
       }
     });
