@@ -5,10 +5,8 @@ angular.module('ngNuxeoUI')
       restrict: 'E',
       replace: true, // replaces the <nuxeo-documents> element
       templateUrl: 'template/nuxeo/nuxeo-documents.html',
-      controller: ['$scope', function($scope) {
-
+      controller: ['$scope', function ($scope) {
         $scope.documents = {pageIndex: 0};
-
       }]
     };
   }]);

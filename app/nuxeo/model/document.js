@@ -44,7 +44,7 @@ angular.module('ngNuxeoClient')
 
         this.upload = function (file, successCallback, errorCallback) {
 
-          var nuxeoUser = $injector.get('nuxeoUser');
+          var nuxeoUserPromise = $injector.get('nuxeoUserPromise');
 
           // First create a document
           executeHttp({
@@ -53,7 +53,7 @@ angular.module('ngNuxeoClient')
               'X-NXVoidOperation': 'false'
             },
             data: {
-              input: 'doc:/default-domain/UserWorkspaces/' + nuxeoUser.pathId,
+              input: 'doc:/default-domain/UserWorkspaces/' + nuxeoUserPromise.pathId,
               params: this,
               context: {}
             }

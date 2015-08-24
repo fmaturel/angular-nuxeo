@@ -5,9 +5,9 @@ angular.module('ngNuxeoClient')
 
       var apiBase = cst.nuxeo.baseURL + cst.nuxeo.apiPath, automationBase = cst.nuxeo.baseURL + cst.nuxeo.automationPath;
 
-      this.request = apiBase;
-
       this.automate = automationBase;
+
+      this.request = apiBase + '/directory/:object';
 
       this.query = apiBase + '/query?query=:query';
 

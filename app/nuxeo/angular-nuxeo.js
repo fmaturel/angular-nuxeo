@@ -20,11 +20,7 @@ angular.module('ngNuxeoQuery', [
       baseURL: 'http://demo.nuxeo.local/nuxeo',
       apiPath: '/site/api/v1',
       automationPath: '/api/v1/site/automation',
-      timeout: 5, // Timeout in seconds
-      user: {
-        userName: 'Administrator',
-        password: 'Administrator'
-      }
+      timeout: 5 // Timeout in seconds
     }
   })
 

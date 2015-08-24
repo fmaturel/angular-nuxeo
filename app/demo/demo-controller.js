@@ -1,7 +1,10 @@
 angular.module('ngNuxeoDemoApp')
 
-  .controller('DemoController', ['$scope', 'nuxeo', '$log',
-    function ($scope, nuxeo, $log) {
+  .controller('DemoController', ['$scope', 'nuxeo', 'nuxeoUser', '$log',
+    function ($scope, nuxeo, nuxeoUser, $log) {
+
+      // ######################################################################### USER SCOPE OBJECT
+      $scope.user = nuxeoUser;
 
       // ######################################################################### SEARCH SCOPE OBJECT
       $scope.search = {
@@ -103,7 +106,7 @@ angular.module('ngNuxeoDemoApp')
           .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'});
 
         // If my media is selected
-        if(!$scope.search.advanced.myMediaOnly) {
+        if (!$scope.search.advanced.myMediaOnly) {
           query.inPath('/');
         } else {
           query.inUserWorkspace();

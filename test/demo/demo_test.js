@@ -8,7 +8,7 @@ describe('ngNuxeoDemoApp module', function () {
   beforeEach(inject(function ($rootScope, $controller, nuxeo) {
     scope = $rootScope.$new();
 
-    createController = function() {
+    createController = function () {
       return $controller('DemoController', {
         '$scope': scope,
         'nuxeo': nuxeo

@@ -13,8 +13,8 @@ angular.module('ngNuxeoQuery')
         queryParts.push(queryPart);
       };
 
-      this.$get = ['NuxeoQueryFactory', 'nuxeoQueryClient', 'nuxeoUser', '$log', function (NuxeoQueryFactory, nuxeoQueryClient, nuxeoUser, $log) {
-        return new NuxeoQueryFactory(nuxeoQueryClient, queryParts, nuxeoUser, $log);
+      this.$get = ['NuxeoQueryFactory', function (NuxeoQueryFactory) {
+        return new NuxeoQueryFactory(queryParts);
       }];
 
     }]);

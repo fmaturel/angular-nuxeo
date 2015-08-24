@@ -5,7 +5,7 @@ angular.module('ngNuxeoQueryPart')
 
       NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
 
-      this.$get = [ '$filter', function ($filter) {
+      this.$get = ['$filter', function ($filter) {
         return function (options) {
 
           this.defaultOptions = {excludeExpired: true};

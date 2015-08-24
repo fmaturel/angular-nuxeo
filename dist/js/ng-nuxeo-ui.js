@@ -87,10 +87,8 @@ angular.module('ngNuxeoUI')
       restrict: 'E',
       replace: true, // replaces the <nuxeo-documents> element
       templateUrl: 'template/nuxeo/nuxeo-documents.html',
-      controller: ['$scope', function($scope) {
-
+      controller: ['$scope', function ($scope) {
         $scope.documents = {pageIndex: 0};
-
       }]
     };
   }]);
@@ -152,7 +150,7 @@ angular.module('ngNuxeoUI')
       replace: true, // replaces the <nuxeo-picture> element
       templateUrl: 'template/nuxeo/nuxeo-picture.html',
       link: function (scope, element, attrs) {
-        if(attrs.size === 'large') {
+        if (attrs.size === 'large') {
           scope.thumbnailURL = cst.nuxeo.baseURL + '/nxbigfile/default/' + scope.entry.uid + '/picture:views/2/content/Medium_Photos.jpg';
         }
       }

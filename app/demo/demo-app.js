@@ -4,22 +4,6 @@ angular.module('ngNuxeoDemoApp', [
   'ngNuxeoUI'
 ])
 
-/**
- * Override constants to connect to nuxeo
- */
-  .constant('nuxeoConstants', {
-    nuxeo: {
-      baseURL: 'http://demo.nuxeo.local/nuxeo',
-      apiPath: '/site/api/v1',
-      automationPath: '/site/api/v1/automation',
-      timeout: 5, // Timeout in seconds
-      user: {
-        userName: 'Administrator',
-        password: 'Administrator'
-      }
-    }
-  })
-
   .config(['$httpProvider', '$sceDelegateProvider', '$routeProvider', 'nuxeoConstants',
     function ($httpProvider, $sceDelegateProvider, $routeProvider, cst) {
 
@@ -36,5 +20,4 @@ angular.module('ngNuxeoDemoApp', [
           controller: 'DemoController'
         })
         .otherwise({redirectTo: '/demo'});
-
     }]);

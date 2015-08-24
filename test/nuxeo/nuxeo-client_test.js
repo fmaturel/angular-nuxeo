@@ -1,14 +1,15 @@
 describe('ngNuxeoClient module', function () {
   'use strict';
 
-  var httpBackend, nuxeo,
+  var httpBackend, nuxeo, nuxeoUser,
     dataUser, dataDirectory, dataDocuments;
 
   beforeEach(module('ngNuxeoClient', 'data/user.json', 'data/directory.json', 'data/documents.json'));
 
-  beforeEach(inject(function ($httpBackend, _nuxeo_, _dataUser_, _dataDirectory_, _dataDocuments_) {
+  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_, _dataDirectory_, _dataDocuments_) {
     httpBackend = $httpBackend;
     nuxeo = _nuxeo_;
+    nuxeoUser = _nuxeoUser_;
     dataUser = _dataUser_;
     dataDirectory = _dataDirectory_;
     dataDocuments = _dataDocuments_;
@@ -20,11 +21,15 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
 
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/directory/continent').respond(dataDirectory);
+
       nuxeo.continents.get(function (result) {
         expect(result).toBeDefined();
         expect(result.entries).toBeDefined();
         expect(result.entries).toEqual(dataDirectory.entries);
       });
+
+      nuxeoUser.login('Administrator', 'Administrator');
+
       httpBackend.flush();
     });
 
@@ -37,6 +42,7 @@ describe('ngNuxeoClient module', function () {
         'AND%20ecm:primaryType%20NOT%20IN%20(\'Favorites\')%20AND%20ecm:mixinType%20NOT%20IN%20(\'Folderish\',\'HiddenInNavigation\')%20' +
         'AND%20((ecm:path%20STARTSWITH%20\'%2F\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'')
         .respond(dataDocuments);
+
       new nuxeo.Query()
         .inPath('/')
         .get(function (result) {
@@ -44,6 +50,9 @@ describe('ngNuxeoClient module', function () {
           expect(result.entries).toBeDefined();
           expect(result.entries.length).toEqual(2);
         });
+
+      nuxeoUser.login('Administrator', 'Administrator');
+
       httpBackend.flush();
     }));
 
@@ -56,6 +65,7 @@ describe('ngNuxeoClient module', function () {
         'AND%20ecm:primaryType%20NOT%20IN%20(\'Favorites\')%20AND%20ecm:mixinType%20NOT%20IN%20(\'Folderish\',\'HiddenInNavigation\')%20' +
         'AND%20((ecm:path%20STARTSWITH%20\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'')
         .respond(dataDocuments);
+
       new nuxeo.Query()
         .inUserWorkspace()
         .get(function (result) {
@@ -63,6 +73,9 @@ describe('ngNuxeoClient module', function () {
           expect(result.entries).toBeDefined();
           expect(result.entries.length).toEqual(2);
         });
+
+      nuxeoUser.login('Administrator', 'Administrator');
+
       httpBackend.flush();
     }));
   });

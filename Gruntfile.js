@@ -119,12 +119,12 @@
           }
         },
         dist: {
-         options: {
-           open: {
-             target: 'http://demo.nuxeo.local/demo'
-           },
-           base: '<%= yeoman.dist %>'
-         }
+          options: {
+            open: {
+              target: 'http://demo.nuxeo.local/demo'
+            },
+            base: '<%= yeoman.dist %>'
+          }
         }
       },
 
@@ -198,7 +198,7 @@
       karma: {
         unit: {
           configFile: 'test/karma.conf.js',
-          singleRun: true
+          //singleRun: true
         }
       }
     });

@@ -9,10 +9,10 @@ angular.module('ngNuxeoQueryPart')
         return function (options) {
 
           this.withCoverage = function (coverage) {
-            if (coverage  && coverage.properties) {
-              if(coverage.directoryName === 'continent') {
+            if (coverage && coverage.properties) {
+              if (coverage.directoryName === 'continent') {
                 options.continentId = coverage.properties.id;
-              } else if(coverage.directoryName === 'country') {
+              } else if (coverage.directoryName === 'country') {
                 options.country = coverage.properties;
               }
             }

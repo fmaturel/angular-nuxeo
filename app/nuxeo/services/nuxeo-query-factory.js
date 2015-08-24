@@ -1,15 +1,15 @@
 angular.module('ngNuxeoClient')
 
-  .factory('NuxeoQueryFactory', ['$injector',
-    function ($injector) {
+  .factory('NuxeoQueryFactory', ['$injector', 'Query', 'nuxeoUserPromise', '$log',
+    function ($injector, Query, nuxeoUserPromise, $log) {
 
       var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
-      return function (NuxeoQueryClient, queryPartFactoryName, nuxeoUser, $log) {
+      return function (queryPartFactoryName) {
 
         var NuxeoQuery = function () {
 
-          var options = {}, partBuilders = [];
+          var options = {}, parts = [], isUserDependent = false;
 
           // Enrich with query providers
           angular.forEach(queryPartFactoryName, function (factoryName) {
@@ -21,26 +21,31 @@ angular.module('ngNuxeoClient')
               angular.extend(options, part.defaultOptions);
             }
             if (angular.isFunction(part.getPart)) {
-              partBuilders.push({order: part.order || 0, getPart: part.getPart});
+              parts.push({order: part.order || 0, getPart: part.getPart});
             }
           }, this);
 
           // Sort services by defined order
-          partBuilders = _.sortBy(partBuilders, 'order').map(function (o) {
+          parts = _.sortBy(parts, 'order').map(function (o) {
             return o.getPart;
           });
 
           //********************************** PUBLIC METHODS
           this.get = function (successCallback, errorCallback) {
-            function doGet() {
+            var doGet = function () {
               var query = baseQuery;
-              angular.forEach(partBuilders, function (builder) {
-                query += builder(options);
+              angular.forEach(parts, function (getPart) {
+                query += getPart();
               });
               $log.debug('Nuxeo query built by NuxeoQuery Service: ' + query);
-              return NuxeoQueryClient.get({query: query}, successCallback, errorCallback);
+              return new Query(query, true).$get(successCallback, errorCallback);
+            };
+
+            if(options.isUserDependent) {
+              nuxeoUserPromise.then(doGet);
+            } else {
+              doGet();
             }
-            return nuxeoUser.$resolved ? doGet() : nuxeoUser.onResolved(doGet);
           };
         };
 

@@ -9,7 +9,7 @@ angular.module('ngNuxeoQueryPart')
         return '(ecm:path STARTSWITH \'' + val + '\')';
       }
 
-      this.$get = ['nuxeoUser', function (nuxeoUser) {
+      this.$get = ['nuxeoUserPromise', function (nuxeoUserPromise) {
         return function (options) {
 
           function addPath(path, negate) {
@@ -37,7 +37,8 @@ angular.module('ngNuxeoQueryPart')
            * @returns {*}
            */
           this.inUserWorkspace = function () {
-            nuxeoUser.onResolved(function (user) {
+            options.isUserDependent = true;
+            nuxeoUserPromise.then(function (user) {
               addPath('/default-domain/UserWorkspaces/' + user.pathId);
             });
             return this;

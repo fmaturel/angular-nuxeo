@@ -3,8 +3,8 @@ angular.module('ngNuxeoClient')
   .service('NuxeoDirectory', ['$resource', 'nuxeoUrl',
     function ($resource, url) {
 
-      var request = function (path) {
-        return $resource(url.request + '/directory/' + path);
+      var request = function (object) {
+        return $resource(url.request, {object: object});
       };
 
       this.continents = request('continent');
