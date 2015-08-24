@@ -9,7 +9,7 @@ angular.module('ngNuxeoClient')
 
         var NuxeoQuery = function () {
 
-          var options = {}, parts = [], isUserDependent = false;
+          var options = {}, parts = [];
 
           // Enrich with query providers
           angular.forEach(queryPartFactoryName, function (factoryName) {
