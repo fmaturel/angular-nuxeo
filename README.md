@@ -1,7 +1,7 @@
 # angular-nuxeo
 An angular JS client for the nuxeo platform
 
-[![Build Status](https://secure.travis-ci.org/fmaturel/angular-timelinejs3.svg)](http:/travis-ci.org/fmaturel/angular-timelinejs3)
+[![Build Status](https://secure.travis-ci.org/fmaturel/angular-nuxeo.svg)](http:/travis-ci.org/fmaturel/angular-nuxeo)
 
 ## Demo
 
