@@ -235,12 +235,15 @@
     });
 
     grunt.registerTask('test', [
+      'html2js',
+      'concat',
       'connect:test',
       'karma'
     ]);
 
     grunt.registerTask('build', [
       'clean:dist',
+      'html2js',
       'concat',
       'ngAnnotate',
       'copy:dist'
