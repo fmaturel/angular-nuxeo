@@ -18,7 +18,6 @@ angular.module('ngNuxeoQuery', [
 ])
 
   .constant('nuxeoConstants', {
-    path: '/nuxeo',
     nuxeo: {
       baseURL: 'http://demo.nuxeo.local/nuxeo',
       apiPath: '/site/api/v1',
