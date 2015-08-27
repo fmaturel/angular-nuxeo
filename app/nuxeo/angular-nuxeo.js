@@ -19,7 +19,7 @@ angular.module('ngNuxeoQuery', [
     nuxeo: {
       baseURL: 'http://demo.nuxeo.local/nuxeo',
       apiPath: '/site/api/v1',
-      automationPath: '/api/v1/site/automation',
+      automationPath: '/site/automation',
       timeout: 5 // Timeout in seconds
     }
   })

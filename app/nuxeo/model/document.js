@@ -44,52 +44,54 @@ angular.module('ngNuxeoClient')
 
         this.upload = function (file, successCallback, errorCallback) {
 
-          var nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          var self = this, nuxeoUserPromise = $injector.get('nuxeoUserPromise');
 
           // First create a document
-          executeHttp({
-            url: url.automate + '/Document.Create',
-            headers: {
-              'X-NXVoidOperation': 'false'
-            },
-            data: {
-              input: 'doc:/default-domain/UserWorkspaces/' + nuxeoUserPromise.pathId,
-              params: this,
-              context: {}
-            }
-          }, function (response) {
-            if (!response || !response.data || !response.data.uid) {
-              errorCallback();
-            }
-
+          nuxeoUserPromise.then(function(user) {
             executeHttp({
-              url: url.automate + '/Blob.AttachOnDocument',
+              url: url.automate + '/Document.Create',
               headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-NXVoidOperation': 'true'
+                'X-NXVoidOperation': 'false'
               },
               data: {
-                params: {
-                  document: response.data.uid,
-                  save: 'true',
-                  xpath: 'file:content'
-                }
-              },
-              transformRequest: function (data) {
-                var formData = new FormData();
-                // need to convert our json object to a string version of json otherwise
-                // the browser will do a 'toString()' on the object which will result
-                // in the value '[Object object]' on the server.
-                formData.append('request', new Blob([angular.toJson(data)], {
-                  filename: 'request',
-                  type: 'application/json+nxrequest'
-                }));
-                //now add all of the assigned files
-                formData.append('file', file);
-                return formData;
+                input: 'doc:/default-domain/UserWorkspaces/' + user.pathId,
+                params: self,
+                context: {}
               }
-            }, successCallback, errorCallback);
-          }, errorCallback);
+            }, function (response) {
+              if (!response || !response.data || !response.data.uid) {
+                errorCallback();
+              }
+
+              executeHttp({
+                url: url.automate + '/Blob.AttachOnDocument',
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  'X-NXVoidOperation': 'true'
+                },
+                data: {
+                  params: {
+                    document: response.data.uid,
+                    save: 'true',
+                    xpath: 'file:content'
+                  }
+                },
+                transformRequest: function (data) {
+                  var formData = new FormData();
+                  // need to convert our json object to a string version of json otherwise
+                  // the browser will do a 'toString()' on the object which will result
+                  // in the value '[Object object]' on the server.
+                  formData.append('request', new Blob([angular.toJson(data)], {
+                    filename: 'request',
+                    type: 'application/json+nxrequest'
+                  }));
+                  //now add all of the assigned files
+                  formData.append('file', file);
+                  return formData;
+                }
+              }, successCallback, errorCallback);
+            }, errorCallback);
+          });
 
           // Then upload the file
           //$http({

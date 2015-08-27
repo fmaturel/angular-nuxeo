@@ -13,6 +13,6 @@ angular.module('ngNuxeoClient')
 
       this.natures = request('nature');
 
-      this.subjects = request('subject');
+      this.subjects = request('l10nsubjects');
 
     }]);

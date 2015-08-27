@@ -60,7 +60,7 @@ angular.module('ngNuxeoDemoApp')
           r.onloadend = function () {
             var file = new nuxeo.Document({
               type: 'Picture',
-              name: 'Test',
+              name: f.name,
               properties: {
                 'dc:title': f.name
               }
