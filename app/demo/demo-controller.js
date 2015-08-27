@@ -44,17 +44,6 @@ angular.module('ngNuxeoDemoApp')
           });
           $scope.search.mediaTypes = angular.copy($scope.search.mediaTypes);
         },
-        reduceContinent: function () {
-          if ($scope.search.advanced.selectedCountry) {
-            $scope.search.advanced.continents = _.filter($scope.search.masters.continents, {properties: {'id': $scope.search.advanced.selectedCountry.properties.parent}});
-            $scope.search.advanced.selectedContinent = $scope.search.advanced.continents[0];
-          }
-        },
-        reduceCountry: function () {
-          if ($scope.search.advanced.selectedContinent) {
-            $scope.search.advanced.countries = _.filter($scope.search.masters.countries, {properties: {'parent': $scope.search.advanced.selectedContinent.properties.id}});
-          }
-        },
         upload: function () {
           var f = document.getElementById('file').files[0], r = new FileReader();
           r.onloadend = function () {
@@ -127,28 +116,6 @@ angular.module('ngNuxeoDemoApp')
         'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
         'search.advanced.selectedNature', 'search.advanced.selectedSubject'
       ], uiChange, true);
-
-      nuxeo.continents.get(function (data) {
-        $log.debug(data);
-        $scope.search.masters.continents = data.entries;
-        $scope.search.advanced.continents = angular.copy(data.entries);
-      });
-
-      nuxeo.countries.get(function (data) {
-        $log.debug(data);
-        $scope.search.masters.countries = data.entries;
-        $scope.search.advanced.countries = angular.copy(data.entries);
-      });
-
-      nuxeo.natures.get(function (data) {
-        $log.debug(data);
-        $scope.search.advanced.natures = data.entries;
-      });
-
-      nuxeo.subjects.get(function (data) {
-        $log.debug(data);
-        $scope.search.advanced.subjects = data.entries;
-      });
 
       nuxeo.tags.get(function (data) {
         $log.debug(data);

@@ -4,7 +4,7 @@ angular.module('ngNuxeoUI')
     return {
       restrict: 'E',
       replace: true, // replaces the <nuxeo-note> element
-      templateUrl: 'template/nuxeo/nuxeo-note.html',
+      templateUrl: 'nuxeo-ui/views/nuxeo-note.html',
       controller: ['$scope', function ($scope) {
         var ctx = $scope.entry.contextParameters;
         if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
@@ -16,10 +16,3 @@ angular.module('ngNuxeoUI')
       }]
     };
   }]);
-
-angular.module('template/nuxeo/nuxeo-note.html', []).run(['$templateCache', function ($templateCache) {
-  $templateCache.put('template/nuxeo/nuxeo-note.html',
-    '<div ng-if="entry.type === \'Note\'">' +
-    '  <img alt="note" ng-src="/images/notes.png">' +
-    '</div>');
-}]);

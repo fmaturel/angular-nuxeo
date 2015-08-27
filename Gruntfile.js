@@ -37,8 +37,14 @@
           files: ['bower.json'],
           tasks: ['wiredep']
         },
+        html: {
+          files: [
+            '<%= yeoman.app %>/**/views/*.html'
+          ],
+          tasks: ['newer:html2js']
+        },
         js: {
-          files: ['<%= yeoman.app %>/*/{,*/}*.js'],
+          files: ['<%= yeoman.app %>/**/*.js'],
           tasks: ['newer:concat', 'newer:jshint:all'],
           options: {
             livereload: '<%= connect.options.livereload %>'
@@ -194,6 +200,18 @@
         }
       },
 
+      html2js: {
+        options: {
+          base: '<%= yeoman.app %>',
+          module: 'ngNuxeoUITemplates',
+          quoteChar: '\''
+        },
+        templates: {
+          src: ['<%= yeoman.app %>/nuxeo-ui/views/**/*.html'],
+          dest: '<%= yeoman.app %>/nuxeo-ui/js/views/templates.js'
+        }
+      },
+
       // Test settings
       karma: {
         unit: {
@@ -209,6 +227,7 @@
       }
 
       grunt.task.run([
+        'html2js',
         'concat',
         'connect:livereload',
         'watch'
