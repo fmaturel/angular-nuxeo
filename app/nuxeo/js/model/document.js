@@ -21,9 +21,9 @@ angular.module('ngNuxeoClient')
         });
       }
 
-      var Document = function (fileEntry) {
+      var Document = function (document) {
 
-        angular.extend(this, fileEntry);
+        angular.extend(this, document);
 
         this.$get = function (successCallback, errorCallback) {
           executeHttp({
@@ -92,29 +92,29 @@ angular.module('ngNuxeoClient')
               }, successCallback, errorCallback);
             }, errorCallback);
           });
+        };
 
-          // Then upload the file
-          //$http({
-          //  method: 'POST',
-          //  url: url.file.upload,
-          //  headers: {
-          //    'X-NXVoidOperation': 'true',
-          //    'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          //  }
-          //}).then(function (response) {
-          //  // this callback will be called asynchronously
-          //  // when the response is available
-          //}, function (response) {
-          //  // called asynchronously if an error occurs
-          //  // or server returns response with an error status.
-          //});
+        this.publish = function (successCallback, errorCallback) {
+          executeHttp({
+            url: url.automate + '/Document.PublishToSection',
+            headers: {
+              'X-NXVoidOperation': 'false'
+            },
+            data: {
+              input: this.uid,
+              params: {
+                target: "6cb8f2d5-8149-4c15-a0cd-bc276c7c9a99",
+                override: "true"
+              }
+            },
+          }, successCallback, errorCallback);
         };
 
         this.delete = function (successCallback, errorCallback) {
           executeHttp({
             url: url.automate + '/Document.Delete',
             data: {
-              input: 'doc:' + this.uid
+              input: this.uid
             }
           }, successCallback, errorCallback);
         };

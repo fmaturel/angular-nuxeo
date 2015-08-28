@@ -1,9 +1,11 @@
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['Document', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
-    function (Document, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
+  .service('nuxeo', ['Document', 'Section', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
+    function (Document, Section, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
 
       this.Document = Document;
+
+      this.Section = Section;
 
       this.Query = NuxeoQuery;
 

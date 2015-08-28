@@ -13,10 +13,13 @@
   </a>
 
   <div class="action">
-    <a href="{{entry.srcURL || 'javascript:void(0)'}}">
+    <a title="Dowload" href="{{entry.srcURL || 'javascript:void(0)'}}">
       <span class="glyphicon glyphicon-download-alt"></span>
     </a>
-    <a href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="fn.delete($index)">
+    <a title="Publish" href="javascript:void(0)" ng-click="entry.publish(angular.noop, onError)">
+      <span class="glyphicon glyphicon-cloud-upload"></span>
+    </a>
+    <a title="Delete" href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="entry.delete(uiChange, onError)">
       <span class="glyphicon glyphicon-trash"></span>
     </a>
   </div>

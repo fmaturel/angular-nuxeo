@@ -59,12 +59,6 @@ angular.module('ngNuxeoDemoApp')
             });
           };
           r.readAsBinaryString(f);
-        },
-        delete: function (index) {
-          var file = $scope.documents.entries[index];
-          file.delete(uiChange, function () {
-            window.alert('An error occurred deleting document');
-          });
         }
       };
 
@@ -109,6 +103,10 @@ angular.module('ngNuxeoDemoApp')
           });
         });
       };
+
+      var onError = function (operationName) {
+        $log.error('An error occurred on document operation [' + operationName + ']');
+      }
 
       $scope.$watchGroup([
         'search.path', 'search.terms', 'search.mediaTypes', 'documents.pageIndex',
