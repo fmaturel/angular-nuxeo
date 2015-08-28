@@ -94,10 +94,10 @@
       // The actual grunt server settings
       connect: {
         options: {
-          port: 9031,
+          port: 9020,
           // Change this to '0.0.0.0' to access the server from outside.
           hostname: 'localhost',
-          livereload: 35031
+          livereload: 35020
         },
         livereload: {
           options: {
@@ -114,7 +114,7 @@
         },
         test: {
           options: {
-            port: 9131,
+            port: 9121,
             middleware: function (connect) {
               return [
                 connect.static('test'),
