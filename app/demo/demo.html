@@ -21,7 +21,32 @@
       </form>
     </div>
   </div>
-  <div class="panel panel-default">
+
+  <div class="panel panel-default" ng-controller="ApiDemoController">
+    <div class="panel-heading">
+      <span class="panel-title">API testing</span>
+    </div>
+
+    <div class="panel-body">
+      <form class="form-inline">
+        <div class="form-group">
+          <label>
+            Select type of document:
+            <select ng-options="type.name for type in model.types" ng-model="model.selectedType">
+              <!-- items -->
+            </select>
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="path">Document Path: {{model.selectedType.prototype.defaultPath}}/</label>
+          <input id="path" type="text" class="form-control" ng-model="model.path">
+        </div>
+        <button type="submit" class="btn btn-default" ng-click="operations.create()">Create</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel panel-default" ng-controller="GalleryDemoController">
     <div class="panel-heading">
       <span class="panel-title">Search api demo</span>
     </div>
@@ -108,7 +133,7 @@
       </form>
 
       <!-- ########################################################################## RESULTS -->
-      <nuxeo-documents><!-- Search results --></nuxeo-documents>
+      <nuxeo-documents publish-to="'/default-domain/sections/test'" on-success="uiChange" on-error="logError"><!-- Search results --></nuxeo-documents>
 
       <div class="clearfix"></div>
 

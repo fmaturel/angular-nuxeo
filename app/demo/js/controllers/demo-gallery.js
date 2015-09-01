@@ -1,10 +1,7 @@
 angular.module('ngNuxeoDemoApp')
 
-  .controller('DemoController', ['$scope', 'nuxeo', 'nuxeoUser', '$log',
-    function ($scope, nuxeo, nuxeoUser, $log) {
-
-      // ######################################################################### USER SCOPE OBJECT
-      $scope.user = nuxeoUser;
+  .controller('GalleryDemoController', ['$scope', 'nuxeo', '$log',
+    function ($scope, nuxeo, $log) {
 
       // ######################################################################### SEARCH SCOPE OBJECT
       $scope.search = {
@@ -54,7 +51,7 @@ angular.module('ngNuxeoDemoApp')
                 'dc:title': f.name
               }
             });
-            file.upload(f, uiChange, function () {
+            file.upload(f, $scope.uiChange, function () {
               window.alert('An error occurred uploading document');
             });
           };
@@ -63,7 +60,7 @@ angular.module('ngNuxeoDemoApp')
       };
 
       // ######################################################################### SEARCH WATCHER
-      var uiChange = function () {
+      $scope.uiChange = function () {
         var query = new nuxeo.Query()
 
           // Defaults override if needed
@@ -104,16 +101,16 @@ angular.module('ngNuxeoDemoApp')
         });
       };
 
-      var onError = function (operationName) {
-        $log.error('An error occurred on document operation [' + operationName + ']');
-      }
+      $scope.logError = function (response) {
+        $log.error('An error occurred on document operation [' + (response.config && response.config.url) + ']');
+      };
 
       $scope.$watchGroup([
         'search.path', 'search.terms', 'search.mediaTypes', 'documents.pageIndex',
         'search.advanced.myMediaOnly',
         'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
         'search.advanced.selectedNature', 'search.advanced.selectedSubject'
-      ], uiChange, true);
+      ], $scope.uiChange, true);
 
       nuxeo.tags.get(function (data) {
         $log.debug(data);

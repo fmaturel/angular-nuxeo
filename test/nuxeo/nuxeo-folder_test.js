@@ -1,26 +1,38 @@
 describe('ngNuxeoClient module', function () {
   'use strict';
 
-  var httpBackend, nuxeo, nuxeoUser,
-    dataUser, dataDirectory, dataDocuments;
+  var httpBackend, nuxeo, nuxeoUser, dataUser;
 
-  beforeEach(module('ngNuxeoClient', 'data/user.json', 'data/directory.json', 'data/documents.json'));
+  beforeEach(module('ngNuxeoClient', 'data/user.json'));
 
-  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_, _dataDirectory_, _dataDocuments_) {
+  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_) {
     httpBackend = $httpBackend;
     nuxeo = _nuxeo_;
     nuxeoUser = _nuxeoUser_;
     dataUser = _dataUser_;
   }));
 
+  describe('nuxeoFolder object', function () {
+
+    it('is valid when instantiated', function () {
+      var folder = new nuxeo.Folder();
+
+      expect(typeof folder === 'object').toBe(true);
+      expect(folder instanceof nuxeo.Folder).toBe(true);
+      expect(folder.constructor === nuxeo.Folder).toBe(true);
+
+      expect(folder.upload).toBeUndefined();
+    });
+  });
+
   describe('nuxeo service', function () {
 
     it('should create a Section when requested', function () {
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
 
-      httpBackend.whenPOST('http://demo.nuxeo.local/nuxeo/site/automation/Document.Create').respond(dataUser);
+      httpBackend.whenPOST('http://demo.nuxeo.local/nuxeo/site/automation/Document.Create').respond('{}');
 
-      nuxeo.Section.create('webbanner', '/default-domain/sections', function (result) {
+      nuxeo.Folder.create({name: 'newFolder'}, '/default-domain/workspaces', function (result) {
         expect(result).toBeDefined();
         expect(result.status).toEqual(200);
       });
@@ -28,6 +40,32 @@ describe('ngNuxeoClient module', function () {
       nuxeoUser.login('Administrator', 'Administrator');
 
       httpBackend.flush();
+    });
+  });
+
+  describe('nuxeo.Section object', function () {
+
+    it('is valid when instantiated', function () {
+      var section = new nuxeo.Section();
+
+      expect(typeof section === 'object').toBe(true);
+      expect(section instanceof nuxeo.Section).toBe(true);
+      expect(section.constructor === nuxeo.Section).toBe(true);
+
+      expect(section.upload).toBeUndefined();
+    });
+  });
+
+  describe('nuxeo.Workspace object', function () {
+
+    it('is valid when instantiated', function () {
+      var workspace = new nuxeo.Workspace();
+
+      expect(typeof workspace === 'object').toBe(true);
+      expect(workspace instanceof nuxeo.Workspace).toBe(true);
+      expect(workspace.constructor === nuxeo.Workspace).toBe(true);
+
+      expect(workspace.upload).toBeUndefined();
     });
   });
 });

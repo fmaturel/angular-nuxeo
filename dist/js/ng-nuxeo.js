@@ -33,33 +33,42 @@ angular.module('ngNuxeoQuery', [
   }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['$http', '$injector', 'nuxeoUrl', 'nuxeoConstants',
-    function ($http, $injector, url, cst) {
+  .factory('Document', ['$injector', 'nuxeoUrl', 'nuxeoAutomate',
+    function ($injector, url, nuxeoAutomate) {
 
-      function executeHttp(o, successCallback, errorCallback) {
-        $http(angular.extend({
-          method: 'POST',
-          headers: {
-            'X-NXVoidOperation': 'true',
-            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          }
-        }, o)).then(function (response) {
-          if (angular.isFunction(successCallback)) {
-            successCallback(response);
-          }
-        }, function (response) {
-          if (angular.isFunction(errorCallback)) {
-            errorCallback(response);
-          }
-        });
-      }
-
-      var Document = function (document) {
+      function Document(document) {
 
         angular.extend(this, document);
 
-        this.$get = function (successCallback, errorCallback) {
-          executeHttp({
+        /**
+         * Create a Nuxeo Document
+         * @param inPath
+         * @param successCallback
+         * @param errorCallback
+         * @returns a Promise
+         */
+        this.create = function (inPath, successCallback, errorCallback) {
+          return nuxeoAutomate(this, {
+            url: url.automate + '/Document.Create',
+            headers: {
+              'X-NXVoidOperation': 'false'
+            },
+            data: {
+              input: inPath,
+              params: this,
+              context: {}
+            }
+          }, successCallback, errorCallback);
+        };
+
+        /**
+         * Download Nuxeo Document content
+         * @param successCallback
+         * @param errorCallback
+         * @returns {*}
+         */
+        this.download = function (successCallback, errorCallback) {
+          return nuxeoAutomate(this, {
             url: url.file.download,
             headers: {
               'X-NXVoidOperation': 'false'
@@ -75,28 +84,25 @@ angular.module('ngNuxeoClient')
           }, successCallback, errorCallback);
         };
 
+        /**
+         * Upload a file to Nuxeo Document
+         * @param file
+         * @param successCallback
+         * @param errorCallback
+         */
         this.upload = function (file, successCallback, errorCallback) {
 
-          var self = this, nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          var that = this, nuxeoUserPromise = $injector.get('nuxeoUserPromise');
 
-          // First create a document
-          nuxeoUserPromise.then(function(user) {
-            executeHttp({
-              url: url.automate + '/Document.Create',
-              headers: {
-                'X-NXVoidOperation': 'false'
-              },
-              data: {
-                input: 'doc:/default-domain/UserWorkspaces/' + user.pathId,
-                params: self,
-                context: {}
-              }
-            }, function (response) {
+          nuxeoUserPromise.then(function (user) {
+
+            // First create a document
+            that.create('doc:/default-domain/UserWorkspaces/' + user.pathId, function (response) {
               if (!response || !response.data || !response.data.uid) {
                 errorCallback();
               }
 
-              executeHttp({
+              nuxeoAutomate(this, {
                 url: url.automate + '/Blob.AttachOnDocument',
                 headers: {
                   'Content-Type': 'multipart/form-data',
@@ -127,87 +133,71 @@ angular.module('ngNuxeoClient')
           });
         };
 
-        this.publish = function (successCallback, errorCallback) {
-          executeHttp({
+        /**
+         * Publish a Nuxeo Document
+         * @param params
+         * @param successCallback
+         * @param errorCallback
+         */
+        this.publish = function (params, successCallback, errorCallback) {
+          nuxeoAutomate(this, {
             url: url.automate + '/Document.PublishToSection',
             headers: {
               'X-NXVoidOperation': 'false'
             },
             data: {
               input: this.uid,
-              params: {
-                target: "6cb8f2d5-8149-4c15-a0cd-bc276c7c9a99",
-                override: "true"
-              }
-            },
+              params: angular.extend({
+                override: 'true'
+              }, params)
+            }
           }, successCallback, errorCallback);
         };
 
+        /**
+         * Delete a Nuxeo Document
+         * @param successCallback
+         * @param errorCallback
+         */
         this.delete = function (successCallback, errorCallback) {
-          executeHttp({
+          nuxeoAutomate(this, {
             url: url.automate + '/Document.Delete',
             data: {
               input: this.uid
             }
           }, successCallback, errorCallback);
         };
+      }
+
+      // Inherit
+      Document.prototype = {};
+      Document.prototype.constructor = Document;
+
+      Document.create = function (params, inPath, successCallback, errorCallback) {
+        return new this.prototype.constructor(params).create(inPath, successCallback, errorCallback);
       };
 
       return Document;
     }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Folder', ['Document', '$http', '$injector', 'nuxeoUrl', 'nuxeoConstants',
-    function (Document, $http, $injector, url, cst) {
+  .factory('Folder', ['Document',
+    function (Document) {
 
-      function executeHttp(o, successCallback, errorCallback) {
-        $http(angular.extend({
-          method: 'POST',
-          headers: {
-            'X-NXVoidOperation': 'true',
-            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          }
-        }, o)).then(function (response) {
-          if (angular.isFunction(successCallback)) {
-            successCallback(response);
-          }
-        }, function (response) {
-          if (angular.isFunction(errorCallback)) {
-            errorCallback(response);
-          }
-        });
+      function Folder(folder) {
+
+        // Extend object
+        angular.extend(this, folder ? angular.extend(folder, {type: 'Folder'}) : {type: 'Folder'});
       }
 
-      var Folder = function (folder) {
+      // Inherit
+      Folder.prototype = new Document();
+      delete Folder.prototype.upload;
+      Folder.prototype.constructor = Folder;
+      Folder.prototype.defaultPath = '/default-domain/workspaces';
 
-        this.type = 'Folder';
-
-        Document.call(this);
-
-        // La classe fille surcharge la classe parente
-        Folder.prototype = Object.create(Document.prototype);
-        Folder.prototype.constructor = Folder;
-
-        this.create = function (inPath, successCallback, errorCallback) {
-          executeHttp({
-            url: url.automate + '/Document.Create',
-            headers: {
-             'X-NXVoidOperation': 'false'
-            },
-            data: {
-             input: inPath,
-             params: this,
-             context: {}
-            }
-          }, successCallback, errorCallback);
-        };
-
-        delete this.upload;
-      };
-
-      Folder.create = function (name, inPath, successCallback, errorCallback) {
-        return new Folder({name: name}).create(inPath, successCallback, errorCallback);
-      };
+      // Static methods
+      angular.extend(Folder, Document);
 
       return Folder;
     }]);
@@ -256,6 +246,8 @@ angular.module('ngNuxeoClient')
                 document.srcURL = fileContent.data;
               }
 
+              document.isPublishable = (entry.facets.indexOf('Immutable') === -1);
+
               nuxeoUserPromise.then(function (user) {
                 document.isDeletable = entry.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
               });
@@ -279,17 +271,18 @@ angular.module('ngNuxeoClient')
   .factory('Section', ['Folder',
     function (Folder) {
 
-      var Section = function (folder) {
+      function Section(folder) {
+        // Extend object
+        var base = {path : Section.defaultPath, type: 'Section'};
+        angular.extend(this, folder ? angular.extend(folder, base) : base);
+      }
 
-        this.type = 'Section';
+      // Inherit
+      Section.prototype = new Folder();
+      Section.prototype.constructor = Section;
+      Section.prototype.defaultPath = '/default-domain/sections';
 
-        Folder.call(this);
-
-        // La classe fille surcharge la classe parente
-        Section.prototype = Object.create(Folder.prototype);
-        Section.prototype.constructor = Section;
-      };
-
+      // Static methods
       angular.extend(Section, Folder);
 
       return Section;
@@ -312,6 +305,27 @@ angular.module('ngNuxeoClient')
       });
 
       return User;
+    }]);
+angular.module('ngNuxeoClient')
+
+  .factory('Workspace', ['Folder',
+    function (Folder) {
+
+      function Workspace(folder) {
+        // Extend object
+        var base = {path : Workspace.defaultPath, type: 'Workspace'};
+        angular.extend(this, folder ? angular.extend(folder, base) : base);
+      }
+
+      // Inherit
+      Workspace.prototype = new Folder();
+      Workspace.prototype.constructor = Workspace;
+      Workspace.prototype.defaultPath = '/default-domain/workspaces';
+
+      // Static methods
+      angular.extend(Workspace, Folder);
+
+      return Workspace;
     }]);
 angular.module('ngNuxeoSecurity')
 
@@ -416,6 +430,38 @@ angular.module('ngNuxeoSecurity')
   .service('nuxeoUserPromise', ['nuxeoUser',
     function (nuxeoUser) {
       return nuxeoUser.promise;
+    }]);
+angular.module('ngNuxeoClient')
+
+  .service('nuxeoAutomate', ['$http', '$q', 'nuxeoConstants',
+    function ($http, $q, cst) {
+
+      return function (object, requestSpec, successCallback, errorCallback) {
+        return $http(angular.extend({
+          method: 'POST',
+          headers: {
+            'X-NXVoidOperation': 'true',
+            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
+          }
+        }, requestSpec)).then(function (response) {
+          // Extends root object with properties coming from nuxeo
+          angular.extend(object, response.data);
+
+          // Run the successCallback if available
+          if (successCallback && angular.isFunction(successCallback)) {
+            return successCallback(response);
+          }
+          // Don't forget to pass the object to other "then" methods
+          return object;
+        }, function (response) {
+          // Run the errorCallback if available
+          if (errorCallback && angular.isFunction(errorCallback)) {
+            return errorCallback(response);
+          }
+          // Don't forget to pass the response to other "error" methods
+          return $q.reject(response);
+        });
+      };
     }]);
 angular.module('ngNuxeoClient')
 
@@ -1018,12 +1064,16 @@ angular.module('ngNuxeoQuery')
     }]);
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['Document', 'Section', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
-    function (Document, Section, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
+  .service('nuxeo', ['Document', 'Folder', 'Section', 'Workspace', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
+    function (Document, Folder, Section, Workspace, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
 
       this.Document = Document;
 
+      this.Folder = Folder;
+
       this.Section = Section;
+
+      this.Workspace = Workspace;
 
       this.Query = NuxeoQuery;
 

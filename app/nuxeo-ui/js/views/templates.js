@@ -30,10 +30,10 @@ angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', 
     '    <a title="Dowload" href="{{entry.srcURL || \'javascript:void(0)\'}}">\n' +
     '      <span class="glyphicon glyphicon-download-alt"></span>\n' +
     '    </a>\n' +
-    '    <a title="Publish" href="javascript:void(0)" ng-click="entry.publish(angular.noop, onError)">\n' +
+    '    <a title="Publish" href="javascript:void(0)" ng-show="entry.isPublishable" ng-click="entry.publish({target: publishTo()}, onSuccess, onError)">\n' +
     '      <span class="glyphicon glyphicon-cloud-upload"></span>\n' +
     '    </a>\n' +
-    '    <a title="Delete" href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="entry.delete(uiChange, onError)">\n' +
+    '    <a title="Delete" href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)">\n' +
     '      <span class="glyphicon glyphicon-trash"></span>\n' +
     '    </a>\n' +
     '  </div>\n' +

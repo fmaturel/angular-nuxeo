@@ -3,17 +3,18 @@ angular.module('ngNuxeoClient')
   .factory('Section', ['Folder',
     function (Folder) {
 
-      var Section = function (folder) {
+      function Section(folder) {
+        // Extend object
+        var base = {path : Section.defaultPath, type: 'Section'};
+        angular.extend(this, folder ? angular.extend(folder, base) : base);
+      }
 
-        this.type = 'Section';
+      // Inherit
+      Section.prototype = new Folder();
+      Section.prototype.constructor = Section;
+      Section.prototype.defaultPath = '/default-domain/sections';
 
-        Folder.call(this);
-
-        // La classe fille surcharge la classe parente
-        Section.prototype = Object.create(Folder.prototype);
-        Section.prototype.constructor = Section;
-      };
-
+      // Static methods
       angular.extend(Section, Folder);
 
       return Section;

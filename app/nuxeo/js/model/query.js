@@ -43,6 +43,8 @@ angular.module('ngNuxeoClient')
                 document.srcURL = fileContent.data;
               }
 
+              document.isPublishable = (entry.facets.indexOf('Immutable') === -1);
+
               nuxeoUserPromise.then(function (user) {
                 document.isDeletable = entry.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
               });
