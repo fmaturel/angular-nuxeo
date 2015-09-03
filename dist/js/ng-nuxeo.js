@@ -75,10 +75,10 @@ angular.module('ngNuxeoClient')
     }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['Automation', 'nuxeoUrl', 'nuxeoUser', 'Query',
-    function (Automation, url, user, Query) {
+  .factory('Document', ['Automation', 'nuxeoUtils', 'nuxeoUser', 'nuxeoUrl', 'Query',
+    function (Automation, utils, user, url, Query) {
 
-      function Document(document) {
+      var Document = utils.inherit(function Document(document) {
 
         angular.extend(this, document || {});
 
@@ -117,7 +117,27 @@ angular.module('ngNuxeoClient')
               params: this,
               context: {}
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
+        };
+
+        /**
+         * Update a Nuxeo Document
+         * @param successCallback
+         * @param errorCallback
+         * @returns a Promise
+         */
+        this.update = function (successCallback, errorCallback) {
+          return this.automate({
+            url: url.automate + '/Document.Update',
+            headers: {
+              'X-NXVoidOperation': 'false'
+            },
+            data: {
+              input: this.path,
+              params: {properties : 'dc:title=' + this.title},
+              context: {}
+            }
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -147,7 +167,7 @@ angular.module('ngNuxeoClient')
                 })
               };
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -214,7 +234,7 @@ angular.module('ngNuxeoClient')
                 override: 'true'
               }, params)
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -230,11 +250,7 @@ angular.module('ngNuxeoClient')
             }
           }, successCallback, errorCallback);
         };
-      }
-
-      // Inherit
-      Document.prototype = new Automation();
-      Document.prototype.constructor = Document;
+      }, Automation);
 
       Document.create = function (params, inPath, successCallback, errorCallback) {
         return new this.prototype.constructor(params).create(inPath, successCallback, errorCallback);
@@ -248,23 +264,18 @@ angular.module('ngNuxeoClient')
     }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Folder', ['Document',
-    function (Document) {
+  .factory('Folder', ['Document', 'nuxeoUtils',
+    function (Document, utils) {
 
-      function Folder(folder) {
-
-        // Extend object
-        angular.extend(this, folder ? angular.extend(folder, {type: 'Folder'}) : {type: 'Folder'});
-      }
+      var Folder = utils.inherit(function Folder(folder) {
+        angular.extend(this, angular.extend({path: Folder.prototype.defaultPath, type: 'Folder'}, folder));
+      }, Document);
 
       // Inherit
-      Folder.prototype = new Document();
-      delete Folder.prototype.upload;
-      Folder.prototype.constructor = Folder;
       Folder.prototype.defaultPath = '/default-domain/workspaces';
 
-      // Static methods
-      angular.extend(Folder, Document);
+      // Remove useless methods
+      delete Folder.prototype.upload;
 
       return Folder;
     }]);
@@ -344,7 +355,9 @@ angular.module('ngNuxeoQueryPart')
          */
         Query.prototype.$get = function (successCallback, errorCallback) {
 
-          var that = this, nuxeoUser = $injector.get('nuxeoUser');
+          var that = this,
+            nuxeo = $injector.get('nuxeo'),
+            nuxeoUser = $injector.get('nuxeoUser');
 
           nuxeoUser.promise.then(function (user) {
 
@@ -359,14 +372,15 @@ angular.module('ngNuxeoQueryPart')
             // Log query
             $log.debug('Resulting query: ' + query);
 
-            // Retrieve document constructor type
-            var DocumentConstructor = that.DocumentConstructor;
-
             // Fetch query in nuxeo and transform result into Document Type
             return Resource.prototype.$get({query: query}, function (data) {
 
               data.entries = data.entries.map(function (entry) {
-                return new DocumentConstructor(entry, user);
+                if (nuxeo.hasOwnProperty(entry.type)) {
+                  return new nuxeo[entry.type](entry);
+                } else {
+                  return new nuxeo.Document(entry);
+                }
               });
               return data;
             }, errorCallback).then(successCallback);
@@ -378,43 +392,26 @@ angular.module('ngNuxeoQueryPart')
   }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Section', ['Folder',
-    function (Folder) {
+  .factory('Section', ['Folder', 'nuxeoUtils',
+    function (Folder, utils) {
 
-      function Section(folder) {
-        // Extend object
-        var base = {path : Section.defaultPath, type: 'Section'};
-        angular.extend(this, folder ? angular.extend(folder, base) : base);
-      }
+      var Section = utils.inherit(function Section(section) {
+        angular.extend(this, angular.extend({path: Section.prototype.defaultPath, type: 'Section'}, section));
+      }, Folder);
 
       // Inherit
-      Section.prototype = new Folder();
-      Section.prototype.constructor = Section;
       Section.prototype.defaultPath = '/default-domain/sections';
-
-      // Static methods
-      angular.extend(Section, Folder);
 
       return Section;
     }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Workspace', ['Folder',
-    function (Folder) {
+  .factory('Workspace', ['Folder', 'nuxeoUtils',
+    function (Folder, utils) {
 
-      function Workspace(folder) {
-        // Extend object
-        var base = {path : Workspace.defaultPath, type: 'Workspace'};
-        angular.extend(this, folder ? angular.extend(folder, base) : base);
-      }
-
-      // Inherit
-      Workspace.prototype = new Folder();
-      Workspace.prototype.constructor = Workspace;
-      Workspace.prototype.defaultPath = '/default-domain/workspaces';
-
-      // Static methods
-      angular.extend(Workspace, Folder);
+      var Workspace = utils.inherit(function Workspace(workspace) {
+        angular.extend(this, angular.extend({path: Workspace.prototype.defaultPath, type: 'Workspace'}, workspace));
+      }, Folder);
 
       return Workspace;
     }]);
@@ -803,6 +800,38 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
+  .provider('NuxeoQueryParent', ['QueryProvider',
+    function (QueryProvider) {
+
+      QueryProvider.addQueryPartProvider('NuxeoQueryParent');
+
+      this.$get = [function () {
+        return function (options) {
+
+          /**
+           * Documents must have parents that have one of the targeted parent id
+           * @param parentIds
+           * @returns {*}
+           */
+          this.withParentIn = function (parentIds) {
+            options.parentIds = parentIds;
+            return this;
+          };
+
+          this.getPart = function () {
+            if (angular.isArray(options.parentIds)) {
+              return options.parentIds.length ? ' AND ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
+            } else if (angular.isString(options.parentIds) && options.parentIds.length) {
+              return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
+            }
+            return '';
+          };
+        };
+      }];
+
+    }]);
+angular.module('ngNuxeoQueryPart')
+
   .provider('NuxeoQueryPath', ['QueryProvider',
     function (QueryProvider) {
 
@@ -832,6 +861,15 @@ angular.module('ngNuxeoQueryPart')
            */
           this.inPath = function (path) {
             addPath(path);
+            return this;
+          };
+
+          /**
+           * Documents have to be placed in default type path
+           * @returns {*}
+           */
+          this.inDefaultPath = function () {
+            addPath(this.DocumentConstructor.prototype.defaultPath);
             return this;
           };
 
@@ -1054,26 +1092,33 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
-    function (Document, Folder, Section, Workspace, NuxeoDirectory, NuxeoTag) {
+  .service('nuxeo', ['$injector', 'Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
+    function ($injector, Document, Folder, Section, Workspace, NuxeoDirectory, NuxeoTag) {
 
-      this.Document = Document;
+      /**
+       * All basic nuxeo services are registered here
+       */
+      angular.extend(this, {
+        Document: Document,
+        Folder: Folder,
+        Section: Section,
+        Workspace: Workspace,
+        continents: NuxeoDirectory.continents,
+        countries: NuxeoDirectory.countries,
+        natures: NuxeoDirectory.natures,
+        subjects: NuxeoDirectory.subjects,
+        tags: NuxeoTag
+      });
 
-      this.Folder = Folder;
-
-      this.Section = Section;
-
-      this.Workspace = Workspace;
-
-      this.continents = NuxeoDirectory.continents;
-
-      this.countries = NuxeoDirectory.countries;
-
-      this.natures = NuxeoDirectory.natures;
-
-      this.subjects = NuxeoDirectory.subjects;
-
-      this.tags = NuxeoTag;
+      this.register = function (service) {
+        if (angular.isFunction(service)) {
+          if (service.name && !this.hasOwnProperty(service.name)) {
+            this[service.name] = $injector.get(service.name);
+          } else {
+            throw 'Nuxeo service registration failed for service [' + service + ']';
+          }
+        }
+      };
     }]);
 angular.module('ngNuxeoClient')
 
@@ -1087,6 +1132,32 @@ angular.module('ngNuxeoClient')
         return null; //new Query(tagQuery).$get(successCallback, errorCallback);
       };
     }]);
+angular.module('ngNuxeoClient')
+
+  .service('nuxeoUtils', [function () {
+
+    return {
+
+      /**
+       * Inherit
+       */
+      inherit: function inherit(NewType, ParentType) {
+
+        if (!angular.isFunction(NewType) || !angular.isFunction(ParentType)) {
+          throw 'New type and parent type in hierarchy should be Function';
+        }
+
+        // Inherit
+        NewType.prototype = new ParentType();
+        NewType.prototype.constructor = NewType;
+
+        // Static methods
+        angular.extend(NewType, ParentType);
+
+        return NewType;
+      }
+    };
+  }]);
 angular.module('ngNuxeoClient')
 
   .service('nuxeoUrl', ['nuxeoConstants',

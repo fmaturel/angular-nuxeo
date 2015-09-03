@@ -15,6 +15,8 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeo.Document object', function () {
 
     it('is valid when instantiated', function () {
+      expect(nuxeo.Document.name === 'Document').toBe(true);
+
       var doc = new nuxeo.Document();
 
       expect(typeof doc === 'object').toBe(true);

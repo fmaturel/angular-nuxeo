@@ -15,11 +15,15 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeoFolder object', function () {
 
     it('is valid when instantiated', function () {
+
+      expect(nuxeo.Folder.name === 'Folder').toBe(true);
+
       var folder = new nuxeo.Folder();
 
       expect(typeof folder === 'object').toBe(true);
       expect(folder instanceof nuxeo.Folder).toBe(true);
       expect(folder.constructor === nuxeo.Folder).toBe(true);
+      expect(folder.path === '/default-domain/workspaces').toBe(true);
 
       expect(folder.upload).toBeUndefined();
     });
@@ -51,6 +55,7 @@ describe('ngNuxeoClient module', function () {
       expect(typeof section === 'object').toBe(true);
       expect(section instanceof nuxeo.Section).toBe(true);
       expect(section.constructor === nuxeo.Section).toBe(true);
+      expect(section.path === '/default-domain/sections').toBe(true);
 
       expect(section.upload).toBeUndefined();
     });
@@ -64,6 +69,7 @@ describe('ngNuxeoClient module', function () {
       expect(typeof workspace === 'object').toBe(true);
       expect(workspace instanceof nuxeo.Workspace).toBe(true);
       expect(workspace.constructor === nuxeo.Workspace).toBe(true);
+      expect(workspace.path === '/default-domain/workspaces').toBe(true);
 
       expect(workspace.upload).toBeUndefined();
     });

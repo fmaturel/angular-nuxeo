@@ -250,8 +250,8 @@
     ]);
 
     grunt.registerTask('default', [
-      'newer:jshint',
       'test',
+      'newer:jshint',
       'build'
     ]);
   };

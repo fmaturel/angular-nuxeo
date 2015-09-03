@@ -1,21 +1,11 @@
 angular.module('ngNuxeoClient')
 
-  .factory('Workspace', ['Folder',
-    function (Folder) {
+  .factory('Workspace', ['Folder', 'nuxeoUtils',
+    function (Folder, utils) {
 
-      function Workspace(folder) {
-        // Extend object
-        var base = {path : Workspace.defaultPath, type: 'Workspace'};
-        angular.extend(this, folder ? angular.extend(folder, base) : base);
-      }
-
-      // Inherit
-      Workspace.prototype = new Folder();
-      Workspace.prototype.constructor = Workspace;
-      Workspace.prototype.defaultPath = '/default-domain/workspaces';
-
-      // Static methods
-      angular.extend(Workspace, Folder);
+      var Workspace = utils.inherit(function Workspace(workspace) {
+        angular.extend(this, angular.extend({path: Workspace.prototype.defaultPath, type: 'Workspace'}, workspace));
+      }, Folder);
 
       return Workspace;
     }]);

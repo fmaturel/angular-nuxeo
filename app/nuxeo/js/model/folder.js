@@ -1,22 +1,17 @@
 angular.module('ngNuxeoClient')
 
-  .factory('Folder', ['Document',
-    function (Document) {
+  .factory('Folder', ['Document', 'nuxeoUtils',
+    function (Document, utils) {
 
-      function Folder(folder) {
-
-        // Extend object
-        angular.extend(this, folder ? angular.extend(folder, {type: 'Folder'}) : {type: 'Folder'});
-      }
+      var Folder = utils.inherit(function Folder(folder) {
+        angular.extend(this, angular.extend({path: Folder.prototype.defaultPath, type: 'Folder'}, folder));
+      }, Document);
 
       // Inherit
-      Folder.prototype = new Document();
-      delete Folder.prototype.upload;
-      Folder.prototype.constructor = Folder;
       Folder.prototype.defaultPath = '/default-domain/workspaces';
 
-      // Static methods
-      angular.extend(Folder, Document);
+      // Remove useless methods
+      delete Folder.prototype.upload;
 
       return Folder;
     }]);

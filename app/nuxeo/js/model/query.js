@@ -74,7 +74,9 @@ angular.module('ngNuxeoQueryPart')
          */
         Query.prototype.$get = function (successCallback, errorCallback) {
 
-          var that = this, nuxeoUser = $injector.get('nuxeoUser');
+          var that = this,
+            nuxeo = $injector.get('nuxeo'),
+            nuxeoUser = $injector.get('nuxeoUser');
 
           nuxeoUser.promise.then(function (user) {
 
@@ -89,14 +91,15 @@ angular.module('ngNuxeoQueryPart')
             // Log query
             $log.debug('Resulting query: ' + query);
 
-            // Retrieve document constructor type
-            var DocumentConstructor = that.DocumentConstructor;
-
             // Fetch query in nuxeo and transform result into Document Type
             return Resource.prototype.$get({query: query}, function (data) {
 
               data.entries = data.entries.map(function (entry) {
-                return new DocumentConstructor(entry, user);
+                if (nuxeo.hasOwnProperty(entry.type)) {
+                  return new nuxeo[entry.type](entry);
+                } else {
+                  return new nuxeo.Document(entry);
+                }
               });
               return data;
             }, errorCallback).then(successCallback);

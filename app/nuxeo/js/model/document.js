@@ -1,9 +1,9 @@
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['Automation', 'nuxeoUrl', 'nuxeoUser', 'Query',
-    function (Automation, url, user, Query) {
+  .factory('Document', ['Automation', 'nuxeoUtils', 'nuxeoUser', 'nuxeoUrl', 'Query',
+    function (Automation, utils, user, url, Query) {
 
-      function Document(document) {
+      var Document = utils.inherit(function Document(document) {
 
         angular.extend(this, document || {});
 
@@ -42,7 +42,27 @@ angular.module('ngNuxeoClient')
               params: this,
               context: {}
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
+        };
+
+        /**
+         * Update a Nuxeo Document
+         * @param successCallback
+         * @param errorCallback
+         * @returns a Promise
+         */
+        this.update = function (successCallback, errorCallback) {
+          return this.automate({
+            url: url.automate + '/Document.Update',
+            headers: {
+              'X-NXVoidOperation': 'false'
+            },
+            data: {
+              input: this.path,
+              params: {properties : 'dc:title=' + this.title},
+              context: {}
+            }
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -72,7 +92,7 @@ angular.module('ngNuxeoClient')
                 })
               };
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -139,7 +159,7 @@ angular.module('ngNuxeoClient')
                 override: 'true'
               }, params)
             }
-          }, successCallback, errorCallback, this);
+          }, successCallback, errorCallback);
         };
 
         /**
@@ -155,11 +175,7 @@ angular.module('ngNuxeoClient')
             }
           }, successCallback, errorCallback);
         };
-      }
-
-      // Inherit
-      Document.prototype = new Automation();
-      Document.prototype.constructor = Document;
+      }, Automation);
 
       Document.create = function (params, inPath, successCallback, errorCallback) {
         return new this.prototype.constructor(params).create(inPath, successCallback, errorCallback);

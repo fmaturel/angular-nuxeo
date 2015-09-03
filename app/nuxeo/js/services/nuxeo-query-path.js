@@ -33,6 +33,15 @@ angular.module('ngNuxeoQueryPart')
           };
 
           /**
+           * Documents have to be placed in default type path
+           * @returns {*}
+           */
+          this.inDefaultPath = function () {
+            addPath(this.DocumentConstructor.prototype.defaultPath);
+            return this;
+          };
+
+          /**
            * Documents have to be placed in user's personal workspace
            * @returns {*}
            */

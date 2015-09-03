@@ -1,21 +1,14 @@
 angular.module('ngNuxeoClient')
 
-  .factory('Section', ['Folder',
-    function (Folder) {
+  .factory('Section', ['Folder', 'nuxeoUtils',
+    function (Folder, utils) {
 
-      function Section(folder) {
-        // Extend object
-        var base = {path : Section.defaultPath, type: 'Section'};
-        angular.extend(this, folder ? angular.extend(folder, base) : base);
-      }
+      var Section = utils.inherit(function Section(section) {
+        angular.extend(this, angular.extend({path: Section.prototype.defaultPath, type: 'Section'}, section));
+      }, Folder);
 
       // Inherit
-      Section.prototype = new Folder();
-      Section.prototype.constructor = Section;
       Section.prototype.defaultPath = '/default-domain/sections';
-
-      // Static methods
-      angular.extend(Section, Folder);
 
       return Section;
     }]);
