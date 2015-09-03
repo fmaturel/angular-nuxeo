@@ -42,26 +42,24 @@ angular.module('ngNuxeoDemoApp')
           $scope.search.mediaTypes = angular.copy($scope.search.mediaTypes);
         },
         upload: function () {
-          var f = document.getElementById('file').files[0], r = new FileReader();
-          r.onloadend = function () {
-            var file = new nuxeo.Document({
+          var file = document.getElementById('file').files[0], reader = new FileReader();
+          reader.onloadend = function () {
+            var document = new nuxeo.Document({
               type: 'Picture',
-              name: f.name,
-              properties: {
-                'dc:title': f.name
-              }
+              name: file.name,
+              properties: {'dc:title': file.name}
             });
-            file.upload(f, $scope.uiChange, function () {
+            document.upload(file, $scope.uiChange, function () {
               window.alert('An error occurred uploading document');
             });
           };
-          r.readAsBinaryString(f);
+          reader.readAsBinaryString(file);
         }
       };
 
       // ######################################################################### SEARCH WATCHER
       $scope.uiChange = function () {
-        var query = new nuxeo.Query()
+        var query = nuxeo.Document.query()
 
           // Defaults override if needed
           //.includeDeleted()
@@ -93,7 +91,7 @@ angular.module('ngNuxeoDemoApp')
         }
 
         // Finally get documents
-        query.get(function (data) {
+        query.$get(function (data) {
           $log.debug(data);
           $scope.documents = angular.extend(data, {
             pages: _.range(data.pageCount)
@@ -112,7 +110,7 @@ angular.module('ngNuxeoDemoApp')
         'search.advanced.selectedNature', 'search.advanced.selectedSubject'
       ], $scope.uiChange, true);
 
-      nuxeo.tags.get(function (data) {
+      nuxeo.tags.$get(function (data) {
         $log.debug(data);
         $scope.search.tags = data;
       });

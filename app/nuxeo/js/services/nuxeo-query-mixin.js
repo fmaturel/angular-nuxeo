@@ -1,9 +1,9 @@
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryMixin', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryMixin', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryMixin');
+      QueryProvider.addQueryPartProvider('NuxeoQueryMixin');
 
       this.$get = [function () {
         return function (options) {

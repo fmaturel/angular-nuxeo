@@ -33,12 +33,71 @@ angular.module('ngNuxeoQuery', [
   }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['$injector', 'nuxeoUrl', 'nuxeoAutomate',
-    function ($injector, url, nuxeoAutomate) {
+  .factory('Automation', ['$injector', '$http', '$q', 'nuxeoConstants',
+    function ($injector, $http, $q, cst) {
+
+      function Automation() {
+      }
+
+      // Inherit
+      Automation.prototype = {};
+      Automation.prototype.constructor = Automation;
+
+      Automation.prototype.automate = function (requestSpec, successCallback, errorCallback) {
+        var that = this;
+        return $http(angular.extend({
+          method: 'POST',
+          headers: {
+            'X-NXVoidOperation': 'true',
+            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
+          }
+        }, requestSpec)).then(function (response) {
+          // Extends root object with properties coming from nuxeo
+          angular.extend(that, response.data);
+
+          // Run the successCallback if available
+          if (successCallback && angular.isFunction(successCallback)) {
+            return successCallback(response);
+          }
+          // Don't forget to pass the object to other "then" methods
+          return that;
+        }, function (response) {
+          // Run the errorCallback if available
+          if (errorCallback && angular.isFunction(errorCallback)) {
+            return errorCallback(response);
+          }
+          // Don't forget to pass the response to other "error" methods
+          return $q.reject(response);
+        });
+      };
+
+      return Automation;
+    }]);
+angular.module('ngNuxeoClient')
+
+  .factory('Document', ['Automation', 'nuxeoUrl', 'nuxeoUser', 'Query',
+    function (Automation, url, user, Query) {
 
       function Document(document) {
 
-        angular.extend(this, document);
+        angular.extend(this, document || {});
+
+        // Put some shortcuts on nuxeo properties
+        var ctx = this.contextParameters;
+        if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
+          this.thumbnailURL = ctx.thumbnail.url;
+        }
+
+        var properties = this.properties;
+        if (properties) {
+          var fileContent = properties['file:content'];
+          if (fileContent && fileContent.data) {
+            this.srcURL = fileContent.data;
+          }
+        }
+
+        this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
+        this.isDeletable = this.path && this.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
 
         /**
          * Create a Nuxeo Document
@@ -48,7 +107,7 @@ angular.module('ngNuxeoClient')
          * @returns a Promise
          */
         this.create = function (inPath, successCallback, errorCallback) {
-          return nuxeoAutomate(this, {
+          return this.automate({
             url: url.automate + '/Document.Create',
             headers: {
               'X-NXVoidOperation': 'false'
@@ -58,17 +117,24 @@ angular.module('ngNuxeoClient')
               params: this,
               context: {}
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
+        };
+
+        /**
+         * Create a Nuxeo Document in User workspace
+         */
+        this.createInUserWorkspace = function (successCallback, errorCallback) {
+          return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
         };
 
         /**
          * Download Nuxeo Document content
          * @param successCallback
          * @param errorCallback
-         * @returns {*}
+         * @returns a Promise
          */
         this.download = function (successCallback, errorCallback) {
-          return nuxeoAutomate(this, {
+          return this.automate({
             url: url.file.download,
             headers: {
               'X-NXVoidOperation': 'false'
@@ -81,7 +147,7 @@ angular.module('ngNuxeoClient')
                 })
               };
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
         };
 
         /**
@@ -89,48 +155,44 @@ angular.module('ngNuxeoClient')
          * @param file
          * @param successCallback
          * @param errorCallback
+         *
          */
         this.upload = function (file, successCallback, errorCallback) {
 
-          var that = this, nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          // First create a document
+          return this.createInUserWorkspace(function (response) {
+            if (!response || !response.data || !response.data.uid) {
+              errorCallback();
+            }
 
-          nuxeoUserPromise.then(function (user) {
-
-            // First create a document
-            that.create('doc:/default-domain/UserWorkspaces/' + user.pathId, function (response) {
-              if (!response || !response.data || !response.data.uid) {
-                errorCallback();
-              }
-
-              nuxeoAutomate(this, {
-                url: url.automate + '/Blob.AttachOnDocument',
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  'X-NXVoidOperation': 'true'
-                },
-                data: {
-                  params: {
-                    document: response.data.uid,
-                    save: 'true',
-                    xpath: 'file:content'
-                  }
-                },
-                transformRequest: function (data) {
-                  var formData = new FormData();
-                  // need to convert our json object to a string version of json otherwise
-                  // the browser will do a 'toString()' on the object which will result
-                  // in the value '[Object object]' on the server.
-                  formData.append('request', new Blob([angular.toJson(data)], {
-                    filename: 'request',
-                    type: 'application/json+nxrequest'
-                  }));
-                  //now add all of the assigned files
-                  formData.append('file', file);
-                  return formData;
+            this.automate({
+              url: url.automate + '/Blob.AttachOnDocument',
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'X-NXVoidOperation': 'true'
+              },
+              data: {
+                params: {
+                  document: response.data.uid,
+                  save: 'true',
+                  xpath: 'file:content'
                 }
-              }, successCallback, errorCallback);
-            }, errorCallback);
-          });
+              },
+              transformRequest: function (data) {
+                var formData = new FormData();
+                // need to convert our json object to a string version of json otherwise
+                // the browser will do a 'toString()' on the object which will result
+                // in the value '[Object object]' on the server.
+                formData.append('request', new Blob([angular.toJson(data)], {
+                  filename: 'request',
+                  type: 'application/json+nxrequest'
+                }));
+                //now add all of the assigned files
+                formData.append('file', file);
+                return formData;
+              }
+            }, successCallback, errorCallback);
+          }, errorCallback);
         };
 
         /**
@@ -138,9 +200,10 @@ angular.module('ngNuxeoClient')
          * @param params
          * @param successCallback
          * @param errorCallback
+         * @returns a Promise
          */
         this.publish = function (params, successCallback, errorCallback) {
-          nuxeoAutomate(this, {
+          return this.automate({
             url: url.automate + '/Document.PublishToSection',
             headers: {
               'X-NXVoidOperation': 'false'
@@ -151,7 +214,7 @@ angular.module('ngNuxeoClient')
                 override: 'true'
               }, params)
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
         };
 
         /**
@@ -160,7 +223,7 @@ angular.module('ngNuxeoClient')
          * @param errorCallback
          */
         this.delete = function (successCallback, errorCallback) {
-          nuxeoAutomate(this, {
+          this.automate({
             url: url.automate + '/Document.Delete',
             data: {
               input: this.uid
@@ -170,11 +233,15 @@ angular.module('ngNuxeoClient')
       }
 
       // Inherit
-      Document.prototype = {};
+      Document.prototype = new Automation();
       Document.prototype.constructor = Document;
 
       Document.create = function (params, inPath, successCallback, errorCallback) {
         return new this.prototype.constructor(params).create(inPath, successCallback, errorCallback);
+      };
+
+      Document.query = function (params) {
+        return new Query(angular.extend({DocumentConstructor: this.prototype.constructor}, params));
       };
 
       return Document;
@@ -201,71 +268,114 @@ angular.module('ngNuxeoClient')
 
       return Folder;
     }]);
-angular.module('ngNuxeoClient')
+angular.module('ngNuxeoQueryPart')
 
-  .service('Query', ['$resource', 'nuxeoUrl', 'nuxeoConstants', 'Document', 'nuxeoUserPromise', '$log',
-    function ($resource, url, cst, Document, nuxeoUserPromise, $log) {
+  .provider('Query', [function () {
 
-      var getAction = {
-        method: 'GET',
-        headers: {
-          /**
-           * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
-           * Possible values: dublincore, file, *
-           */
-          'X-NXproperties': 'dublincore, file',
-          /**
-           * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
-           * Possible values: thumbnail, acls, preview, breadcrumb
-           */
-          'X-NXenrichers.document': 'thumbnail',
-          /**
-           * This header can be used when you want to control the transaction duration in seconds
-           */
-          'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-        },
+    var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
-        /**
-         * Transforms the response received from server
-         * @param data
-         * @returns {void|Object|*}
-         */
-        transformResponse: function (data) {
-          var result = angular.fromJson(data);
-          return angular.extend(result, {
-            entries: angular.isArray(result.entries) ? result.entries.map(function (entry) {
-              var document = new Document(entry);
+    var queryParts = [];
 
-              var ctx = entry.contextParameters;
-              if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
-                document.thumbnailURL = ctx.thumbnail.url;
-              }
+    this.addQueryPartProvider = function (queryPart) {
+      queryParts.push(queryPart);
+    };
 
-              var fileContent = entry.properties['file:content'];
-              if (fileContent && fileContent.data) {
-                document.srcURL = fileContent.data;
-              }
+    this.$get = ['$injector', '$resource', 'nuxeoUrl', 'nuxeoConstants', '$log',
+      function ($injector, $resource, url, cst, $log) {
 
-              document.isPublishable = (entry.facets.indexOf('Immutable') === -1);
+        function Query(query) {
+          var options = {};
 
-              nuxeoUserPromise.then(function (user) {
-                document.isDeletable = entry.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
-              });
+          this.parts = [];
 
-              $log.debug(document.title + ' = ' + document.uid);
-              return document;
-            }) : []
+          angular.extend(this, query);
+
+          // Enrich Query with query providers
+          angular.forEach(queryParts, function (queryPart) {
+            var Part = $injector.get(queryPart);
+            var part = new Part(options);
+
+            angular.extend(this, new Part(options));
+            if (angular.isObject(part.defaultOptions)) {
+              angular.extend(options, part.defaultOptions);
+            }
+            if (angular.isFunction(part.getPart)) {
+              this.parts.push({order: part.order || 0, getPart: part.getPart});
+            }
+          }, this);
+
+          // Sort services by defined order
+          this.parts = _.sortBy(this.parts, 'order').map(function (o) {
+            return o.getPart;
           });
         }
-      };
 
-      var Query = $resource(url.query, {query: '@query'}, {get: getAction});
+        // Inherit
+        var Resource = $resource(url.query, {query: '@query'}, {
+          get: {
+            method: 'GET',
+            headers: {
+              /**
+               * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
+               * Possible values: dublincore, file, *
+               */
+              'X-NXproperties': 'dublincore, file',
+              /**
+               * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
+               * Possible values: thumbnail, acls, preview, breadcrumb
+               */
+              'X-NXenrichers.document': 'thumbnail',
+              /**
+               * This header can be used when you want to control the transaction duration in seconds
+               */
+              'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
+            },
+            isUserDependent: true
+          }
+        });
 
-      return function (query, isUserDependent) {
-        getAction.isUserDependent = isUserDependent;
-        return new Query({query: query});
-      };
-    }]);
+        Query.prototype = new Resource();
+        Query.prototype.constructor = Query;
+
+        /**
+         * Fetch result of query on nuxeo
+         * @param successCallback
+         * @param errorCallback
+         */
+        Query.prototype.$get = function (successCallback, errorCallback) {
+
+          var that = this, nuxeoUser = $injector.get('nuxeoUser');
+
+          nuxeoUser.promise.then(function (user) {
+
+            $log.debug(user);
+
+            // Build query
+            var query = baseQuery;
+            angular.forEach(that.parts, function (getPart) {
+              query += getPart(user);
+            });
+
+            // Log query
+            $log.debug('Resulting query: ' + query);
+
+            // Retrieve document constructor type
+            var DocumentConstructor = that.DocumentConstructor;
+
+            // Fetch query in nuxeo and transform result into Document Type
+            return Resource.prototype.$get({query: query}, function (data) {
+
+              data.entries = data.entries.map(function (entry) {
+                return new DocumentConstructor(entry, user);
+              });
+              return data;
+            }, errorCallback).then(successCallback);
+          });
+        };
+
+        return Query;
+      }];
+  }]);
 angular.module('ngNuxeoClient')
 
   .factory('Section', ['Folder',
@@ -286,25 +396,6 @@ angular.module('ngNuxeoClient')
       angular.extend(Section, Folder);
 
       return Section;
-    }]);
-angular.module('ngNuxeoClient')
-
-  .factory('User', ['$resource', 'nuxeoUrl',
-    function ($resource, url) {
-
-      var User = $resource(url.user, {userName: '@userName'}, {
-        get: {
-          transformResponse: function (data, headersGetter, status) {
-            var result = angular.fromJson(data);
-            if (status === 200) {
-              result.pathId = result.id.replace(/[@\.]/g, '-');
-            }
-            return result;
-          }
-        }
-      });
-
-      return User;
     }]);
 angular.module('ngNuxeoClient')
 
@@ -341,13 +432,8 @@ angular.module('ngNuxeoSecurity')
 
         request: function (config) {
 
-          // DO NOT PROCESS NON API REQUEST
+          // DO NOT DEFER NON API REQUEST
           if (!config.url.startsWith(cst.nuxeo.baseURL)) {
-            return config;
-          }
-
-          // DO NOT PROCESS UNSECURED REQUEST
-          if (config.unsecured) {
             return config;
           }
 
@@ -371,23 +457,23 @@ angular.module('ngNuxeoSecurity')
       return {
         request: function (config) {
 
-          // DO NOT PROCESS NON API REQUEST
+          // DO NOT DEFER NON API REQUEST
           if (!config.url.startsWith(cst.nuxeo.baseURL)) {
             return config;
           }
 
-          // DO NOT PROCESS USER INDEPENDENT REQUEST
+          // DO NOT DEFER USER INDEPENDENT REQUEST
           if (!config.isUserDependent) {
             return config;
           }
 
           $log.debug('userAuthInterceptor: ' + config.method + ' - ' + config.url);
 
-          var nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          var nuxeoUser = $injector.get('nuxeoUser');
 
           // REQUESTS ARE DEFERED UNTIL USER IS RESOLVED
           var deferred = $q.defer();
-          nuxeoUserPromise.then(function () {
+          nuxeoUser.promise.then(function () {
             deferred.resolve(config);
           });
           return deferred.promise;
@@ -396,20 +482,27 @@ angular.module('ngNuxeoSecurity')
     }]);
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', 'User',
-    function ($q, $injector, User) {
+  .service('nuxeoUser', ['$q', '$injector', '$resource', 'nuxeoUrl',
+    function ($q, $injector, $resource, url) {
 
-      var nuxeoUser = $q.defer();
+      var User = $resource(url.user, {userName: '@userName'});
 
+      var defer = $q.defer();
+
+      var nuxeoUser = new User({promise: defer.promise});
+
+      /**
+       * Log the user in
+       * @param userName
+       * @param password
+       */
       nuxeoUser.login = function (userName, password) {
-        if(!userName && !(userName = this.userName)) {
+        if (!userName && !(userName = this.userName)) {
           throw 'a userName must be defined';
         }
 
-        var userResource = new User({userName: userName});
-
         if ($injector.has('basicAuthInterceptor')) {
-          if(!password && !(password = this.password)) {
+          if (!password && !(password = this.password)) {
             throw 'a password must be defined';
           }
 
@@ -417,51 +510,15 @@ angular.module('ngNuxeoSecurity')
           basicAuth.setUser({userName: userName, password: password});
         }
 
-        nuxeoUser.resolve(userResource.$get(function (user) {
-          angular.extend(userResource, user);
+        User.get({userName: userName}, function (user) {
+          user.pathId = user.id.replace(/[@\.]/g, '-');
+          defer.resolve(angular.extend(nuxeoUser, user));
         }, function () {
           throw 'Error while retrieving current user';
-        }));
+        });
       };
 
       return nuxeoUser;
-    }])
-
-  .service('nuxeoUserPromise', ['nuxeoUser',
-    function (nuxeoUser) {
-      return nuxeoUser.promise;
-    }]);
-angular.module('ngNuxeoClient')
-
-  .service('nuxeoAutomate', ['$http', '$q', 'nuxeoConstants',
-    function ($http, $q, cst) {
-
-      return function (object, requestSpec, successCallback, errorCallback) {
-        return $http(angular.extend({
-          method: 'POST',
-          headers: {
-            'X-NXVoidOperation': 'true',
-            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          }
-        }, requestSpec)).then(function (response) {
-          // Extends root object with properties coming from nuxeo
-          angular.extend(object, response.data);
-
-          // Run the successCallback if available
-          if (successCallback && angular.isFunction(successCallback)) {
-            return successCallback(response);
-          }
-          // Don't forget to pass the object to other "then" methods
-          return object;
-        }, function (response) {
-          // Run the errorCallback if available
-          if (errorCallback && angular.isFunction(errorCallback)) {
-            return errorCallback(response);
-          }
-          // Don't forget to pass the response to other "error" methods
-          return $q.reject(response);
-        });
-      };
     }]);
 angular.module('ngNuxeoClient')
 
@@ -483,10 +540,10 @@ angular.module('ngNuxeoClient')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryCoverage', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryCoverage', ['QueryProvider',
+    function (Query) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryCoverage');
+      Query.addQueryPartProvider('NuxeoQueryCoverage');
 
       this.$get = [function () {
         return function (options) {
@@ -518,10 +575,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryExpiration', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryExpiration', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
+      QueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
 
       this.$get = ['$filter', function ($filter) {
         return function (options) {
@@ -548,67 +605,12 @@ angular.module('ngNuxeoQueryPart')
       }];
 
     }]);
-angular.module('ngNuxeoClient')
-
-  .factory('NuxeoQueryFactory', ['$injector', 'Query', 'nuxeoUserPromise', '$log',
-    function ($injector, Query, nuxeoUserPromise, $log) {
-
-      var baseQuery = 'SELECT * FROM Document WHERE 1=1';
-
-      return function (queryPartFactoryName) {
-
-        var NuxeoQuery = function () {
-
-          var options = {}, parts = [];
-
-          // Enrich with query providers
-          angular.forEach(queryPartFactoryName, function (factoryName) {
-            var Part = $injector.get(factoryName);
-            var part = new Part(options);
-
-            angular.extend(this, new Part(options));
-            if (angular.isObject(part.defaultOptions)) {
-              angular.extend(options, part.defaultOptions);
-            }
-            if (angular.isFunction(part.getPart)) {
-              parts.push({order: part.order || 0, getPart: part.getPart});
-            }
-          }, this);
-
-          // Sort services by defined order
-          parts = _.sortBy(parts, 'order').map(function (o) {
-            return o.getPart;
-          });
-
-          //********************************** PUBLIC METHODS
-          this.get = function (successCallback, errorCallback) {
-            var doGet = function () {
-              var query = baseQuery;
-              angular.forEach(parts, function (getPart) {
-                query += getPart();
-              });
-              $log.debug('Nuxeo query built by NuxeoQuery Service: ' + query);
-              return new Query(query, true).$get(successCallback, errorCallback);
-            };
-
-            if(options.isUserDependent) {
-              nuxeoUserPromise.then(doGet);
-            } else {
-              doGet();
-            }
-          };
-        };
-
-        return NuxeoQuery;
-      };
-
-    }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryMedia', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryMedia', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryMedia');
+      QueryProvider.addQueryPartProvider('NuxeoQueryMedia');
 
       this.$get = [function () {
         return function (options) {
@@ -677,10 +679,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryMixin', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryMixin', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryMixin');
+      QueryProvider.addQueryPartProvider('NuxeoQueryMixin');
 
       this.$get = [function () {
         return function (options) {
@@ -745,10 +747,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryNature', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryNature', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryNature');
+      QueryProvider.addQueryPartProvider('NuxeoQueryNature');
 
       this.$get = [function () {
         return function (options) {
@@ -773,10 +775,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryPaginate', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryPaginate', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryPaginate');
+      QueryProvider.addQueryPartProvider('NuxeoQueryPaginate');
 
       this.$get = [function () {
         return function (options) {
@@ -801,16 +803,16 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryPath', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryPath', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryPath');
+      QueryProvider.addQueryPartProvider('NuxeoQueryPath');
 
       function pathQuery(val) {
         return '(ecm:path STARTSWITH \'' + val + '\')';
       }
 
-      this.$get = ['nuxeoUserPromise', function (nuxeoUserPromise) {
+      this.$get = [function () {
         return function (options) {
 
           function addPath(path, negate) {
@@ -838,10 +840,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {*}
            */
           this.inUserWorkspace = function () {
-            options.isUserDependent = true;
-            nuxeoUserPromise.then(function (user) {
-              addPath('/default-domain/UserWorkspaces/' + user.pathId);
-            });
+            options.isInUserWorkspace = true;
             return this;
           };
 
@@ -850,11 +849,22 @@ angular.module('ngNuxeoQueryPart')
            * @returns {*}
            */
           this.notInUserWorkspace = function () {
-            addPath('/default-domain/UserWorkspaces/', true);
+            options.notInUserWorkspace = true;
             return this;
           };
 
-          this.getPart = function () {
+          this.getPart = function (user) {
+
+            if (options.isInUserWorkspace) {
+              addPath('/default-domain/UserWorkspaces/' + user.pathId);
+              if (options.notInUserWorkspace) {
+                throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+              }
+            }
+            if (options.notInUserWorkspace) {
+              addPath('/default-domain/UserWorkspaces/', true);
+            }
+
             if (angular.isArray(options.paths)) {
               var terms = _(options.paths).reduce(function (result, path) {
                 if (path.value.length) {
@@ -874,10 +884,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQuerySorter', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQuerySorter', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQuerySorter');
+      QueryProvider.addQueryPartProvider('NuxeoQuerySorter');
 
       this.$get = [function () {
         return function (options) {
@@ -927,10 +937,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryState', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryState', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryState');
+      QueryProvider.addQueryPartProvider('NuxeoQueryState');
 
       this.$get = [function () {
         return function (options) {
@@ -959,10 +969,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQuerySubject', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQuerySubject', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQuerySubject');
+      QueryProvider.addQueryPartProvider('NuxeoQuerySubject');
 
       function map(subjectId) {
         return {
@@ -1007,10 +1017,10 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryTerm', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryTerm', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryTerm');
+      QueryProvider.addQueryPartProvider('NuxeoQueryTerm');
 
       function termsQuery(val) {
         return '(dc:title like \'%' + val + '%\')';
@@ -1042,30 +1052,10 @@ angular.module('ngNuxeoQueryPart')
       }];
 
     }]);
-angular.module('ngNuxeoQuery')
-
-/**
- * @see https://doc.nuxeo.com/display/NXDOC/Query+Endpoint
- * @see https://doc.nuxeo.com/display/NXDOC/NXQL
- */
-  .provider('NuxeoQuery', [
-    function () {
-
-      var queryParts = [];
-
-      this.addQueryPartProvider = function (queryPart) {
-        queryParts.push(queryPart);
-      };
-
-      this.$get = ['NuxeoQueryFactory', function (NuxeoQueryFactory) {
-        return new NuxeoQueryFactory(queryParts);
-      }];
-
-    }]);
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['Document', 'Folder', 'Section', 'Workspace', 'NuxeoQuery', 'NuxeoDirectory', 'NuxeoTag',
-    function (Document, Folder, Section, Workspace, NuxeoQuery, NuxeoDirectory, NuxeoTag) {
+  .service('nuxeo', ['Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
+    function (Document, Folder, Section, Workspace, NuxeoDirectory, NuxeoTag) {
 
       this.Document = Document;
 
@@ -1074,8 +1064,6 @@ angular.module('ngNuxeoClient')
       this.Section = Section;
 
       this.Workspace = Workspace;
-
-      this.Query = NuxeoQuery;
 
       this.continents = NuxeoDirectory.continents;
 
@@ -1090,12 +1078,13 @@ angular.module('ngNuxeoClient')
 angular.module('ngNuxeoClient')
 
   .service('NuxeoTag', ['Query',
-    function (Query) {
+    function () {
 
-      var tagQuery = 'SELECT * FROM Document WHERE ecm:primaryType = \'Tag\'';
+      //var tagQuery = 'SELECT * FROM Document WHERE ecm:primaryType = \'Tag\'';
 
-      this.get = function (searchChars, successCallback) {
-        return new Query(tagQuery).$get(successCallback);
+      this.$get = function () {
+        // TODO
+        return null; //new Query(tagQuery).$get(successCallback, errorCallback);
       };
     }]);
 angular.module('ngNuxeoClient')

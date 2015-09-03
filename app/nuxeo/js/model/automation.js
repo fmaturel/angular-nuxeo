@@ -1,9 +1,17 @@
 angular.module('ngNuxeoClient')
 
-  .service('nuxeoAutomate', ['$http', '$q', 'nuxeoConstants',
-    function ($http, $q, cst) {
+  .factory('Automation', ['$injector', '$http', '$q', 'nuxeoConstants',
+    function ($injector, $http, $q, cst) {
 
-      return function (object, requestSpec, successCallback, errorCallback) {
+      function Automation() {
+      }
+
+      // Inherit
+      Automation.prototype = {};
+      Automation.prototype.constructor = Automation;
+
+      Automation.prototype.automate = function (requestSpec, successCallback, errorCallback) {
+        var that = this;
         return $http(angular.extend({
           method: 'POST',
           headers: {
@@ -12,14 +20,14 @@ angular.module('ngNuxeoClient')
           }
         }, requestSpec)).then(function (response) {
           // Extends root object with properties coming from nuxeo
-          angular.extend(object, response.data);
+          angular.extend(that, response.data);
 
           // Run the successCallback if available
           if (successCallback && angular.isFunction(successCallback)) {
             return successCallback(response);
           }
           // Don't forget to pass the object to other "then" methods
-          return object;
+          return that;
         }, function (response) {
           // Run the errorCallback if available
           if (errorCallback && angular.isFunction(errorCallback)) {
@@ -29,4 +37,6 @@ angular.module('ngNuxeoClient')
           return $q.reject(response);
         });
       };
+
+      return Automation;
     }]);

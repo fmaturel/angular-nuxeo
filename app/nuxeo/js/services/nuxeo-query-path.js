@@ -1,15 +1,15 @@
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryPath', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryPath', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryPath');
+      QueryProvider.addQueryPartProvider('NuxeoQueryPath');
 
       function pathQuery(val) {
         return '(ecm:path STARTSWITH \'' + val + '\')';
       }
 
-      this.$get = ['nuxeoUserPromise', function (nuxeoUserPromise) {
+      this.$get = [function () {
         return function (options) {
 
           function addPath(path, negate) {
@@ -37,10 +37,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {*}
            */
           this.inUserWorkspace = function () {
-            options.isUserDependent = true;
-            nuxeoUserPromise.then(function (user) {
-              addPath('/default-domain/UserWorkspaces/' + user.pathId);
-            });
+            options.isInUserWorkspace = true;
             return this;
           };
 
@@ -49,11 +46,22 @@ angular.module('ngNuxeoQueryPart')
            * @returns {*}
            */
           this.notInUserWorkspace = function () {
-            addPath('/default-domain/UserWorkspaces/', true);
+            options.notInUserWorkspace = true;
             return this;
           };
 
-          this.getPart = function () {
+          this.getPart = function (user) {
+
+            if (options.isInUserWorkspace) {
+              addPath('/default-domain/UserWorkspaces/' + user.pathId);
+              if (options.notInUserWorkspace) {
+                throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+              }
+            }
+            if (options.notInUserWorkspace) {
+              addPath('/default-domain/UserWorkspaces/', true);
+            }
+
             if (angular.isArray(options.paths)) {
               var terms = _(options.paths).reduce(function (result, path) {
                 if (path.value.length) {

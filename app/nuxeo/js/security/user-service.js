@@ -1,19 +1,26 @@
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', 'User',
-    function ($q, $injector, User) {
+  .service('nuxeoUser', ['$q', '$injector', '$resource', 'nuxeoUrl',
+    function ($q, $injector, $resource, url) {
 
-      var nuxeoUser = $q.defer();
+      var User = $resource(url.user, {userName: '@userName'});
 
+      var defer = $q.defer();
+
+      var nuxeoUser = new User({promise: defer.promise});
+
+      /**
+       * Log the user in
+       * @param userName
+       * @param password
+       */
       nuxeoUser.login = function (userName, password) {
-        if(!userName && !(userName = this.userName)) {
+        if (!userName && !(userName = this.userName)) {
           throw 'a userName must be defined';
         }
 
-        var userResource = new User({userName: userName});
-
         if ($injector.has('basicAuthInterceptor')) {
-          if(!password && !(password = this.password)) {
+          if (!password && !(password = this.password)) {
             throw 'a password must be defined';
           }
 
@@ -21,17 +28,13 @@ angular.module('ngNuxeoSecurity')
           basicAuth.setUser({userName: userName, password: password});
         }
 
-        nuxeoUser.resolve(userResource.$get(function (user) {
-          angular.extend(userResource, user);
+        User.get({userName: userName}, function (user) {
+          user.pathId = user.id.replace(/[@\.]/g, '-');
+          defer.resolve(angular.extend(nuxeoUser, user));
         }, function () {
           throw 'Error while retrieving current user';
-        }));
+        });
       };
 
       return nuxeoUser;
-    }])
-
-  .service('nuxeoUserPromise', ['nuxeoUser',
-    function (nuxeoUser) {
-      return nuxeoUser.promise;
     }]);

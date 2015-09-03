@@ -1,9 +1,9 @@
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryExpiration', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryExpiration', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
+      QueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
 
       this.$get = ['$filter', function ($filter) {
         return function (options) {

@@ -5,23 +5,23 @@ angular.module('ngNuxeoSecurity')
       return {
         request: function (config) {
 
-          // DO NOT PROCESS NON API REQUEST
+          // DO NOT DEFER NON API REQUEST
           if (!config.url.startsWith(cst.nuxeo.baseURL)) {
             return config;
           }
 
-          // DO NOT PROCESS USER INDEPENDENT REQUEST
+          // DO NOT DEFER USER INDEPENDENT REQUEST
           if (!config.isUserDependent) {
             return config;
           }
 
           $log.debug('userAuthInterceptor: ' + config.method + ' - ' + config.url);
 
-          var nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          var nuxeoUser = $injector.get('nuxeoUser');
 
           // REQUESTS ARE DEFERED UNTIL USER IS RESOLVED
           var deferred = $q.defer();
-          nuxeoUserPromise.then(function () {
+          nuxeoUser.promise.then(function () {
             deferred.resolve(config);
           });
           return deferred.promise;

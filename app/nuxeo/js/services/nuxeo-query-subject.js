@@ -1,9 +1,9 @@
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQuerySubject', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQuerySubject', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQuerySubject');
+      QueryProvider.addQueryPartProvider('NuxeoQuerySubject');
 
       function map(subjectId) {
         return {

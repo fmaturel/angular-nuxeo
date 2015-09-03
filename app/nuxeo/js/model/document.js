@@ -1,11 +1,28 @@
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['$injector', 'nuxeoUrl', 'nuxeoAutomate',
-    function ($injector, url, nuxeoAutomate) {
+  .factory('Document', ['Automation', 'nuxeoUrl', 'nuxeoUser', 'Query',
+    function (Automation, url, user, Query) {
 
       function Document(document) {
 
-        angular.extend(this, document);
+        angular.extend(this, document || {});
+
+        // Put some shortcuts on nuxeo properties
+        var ctx = this.contextParameters;
+        if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
+          this.thumbnailURL = ctx.thumbnail.url;
+        }
+
+        var properties = this.properties;
+        if (properties) {
+          var fileContent = properties['file:content'];
+          if (fileContent && fileContent.data) {
+            this.srcURL = fileContent.data;
+          }
+        }
+
+        this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
+        this.isDeletable = this.path && this.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
 
         /**
          * Create a Nuxeo Document
@@ -15,7 +32,7 @@ angular.module('ngNuxeoClient')
          * @returns a Promise
          */
         this.create = function (inPath, successCallback, errorCallback) {
-          return nuxeoAutomate(this, {
+          return this.automate({
             url: url.automate + '/Document.Create',
             headers: {
               'X-NXVoidOperation': 'false'
@@ -25,17 +42,24 @@ angular.module('ngNuxeoClient')
               params: this,
               context: {}
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
+        };
+
+        /**
+         * Create a Nuxeo Document in User workspace
+         */
+        this.createInUserWorkspace = function (successCallback, errorCallback) {
+          return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
         };
 
         /**
          * Download Nuxeo Document content
          * @param successCallback
          * @param errorCallback
-         * @returns {*}
+         * @returns a Promise
          */
         this.download = function (successCallback, errorCallback) {
-          return nuxeoAutomate(this, {
+          return this.automate({
             url: url.file.download,
             headers: {
               'X-NXVoidOperation': 'false'
@@ -48,7 +72,7 @@ angular.module('ngNuxeoClient')
                 })
               };
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
         };
 
         /**
@@ -56,48 +80,44 @@ angular.module('ngNuxeoClient')
          * @param file
          * @param successCallback
          * @param errorCallback
+         *
          */
         this.upload = function (file, successCallback, errorCallback) {
 
-          var that = this, nuxeoUserPromise = $injector.get('nuxeoUserPromise');
+          // First create a document
+          return this.createInUserWorkspace(function (response) {
+            if (!response || !response.data || !response.data.uid) {
+              errorCallback();
+            }
 
-          nuxeoUserPromise.then(function (user) {
-
-            // First create a document
-            that.create('doc:/default-domain/UserWorkspaces/' + user.pathId, function (response) {
-              if (!response || !response.data || !response.data.uid) {
-                errorCallback();
-              }
-
-              nuxeoAutomate(this, {
-                url: url.automate + '/Blob.AttachOnDocument',
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  'X-NXVoidOperation': 'true'
-                },
-                data: {
-                  params: {
-                    document: response.data.uid,
-                    save: 'true',
-                    xpath: 'file:content'
-                  }
-                },
-                transformRequest: function (data) {
-                  var formData = new FormData();
-                  // need to convert our json object to a string version of json otherwise
-                  // the browser will do a 'toString()' on the object which will result
-                  // in the value '[Object object]' on the server.
-                  formData.append('request', new Blob([angular.toJson(data)], {
-                    filename: 'request',
-                    type: 'application/json+nxrequest'
-                  }));
-                  //now add all of the assigned files
-                  formData.append('file', file);
-                  return formData;
+            this.automate({
+              url: url.automate + '/Blob.AttachOnDocument',
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'X-NXVoidOperation': 'true'
+              },
+              data: {
+                params: {
+                  document: response.data.uid,
+                  save: 'true',
+                  xpath: 'file:content'
                 }
-              }, successCallback, errorCallback);
-            }, errorCallback);
-          });
+              },
+              transformRequest: function (data) {
+                var formData = new FormData();
+                // need to convert our json object to a string version of json otherwise
+                // the browser will do a 'toString()' on the object which will result
+                // in the value '[Object object]' on the server.
+                formData.append('request', new Blob([angular.toJson(data)], {
+                  filename: 'request',
+                  type: 'application/json+nxrequest'
+                }));
+                //now add all of the assigned files
+                formData.append('file', file);
+                return formData;
+              }
+            }, successCallback, errorCallback);
+          }, errorCallback);
         };
 
         /**
@@ -105,9 +125,10 @@ angular.module('ngNuxeoClient')
          * @param params
          * @param successCallback
          * @param errorCallback
+         * @returns a Promise
          */
         this.publish = function (params, successCallback, errorCallback) {
-          nuxeoAutomate(this, {
+          return this.automate({
             url: url.automate + '/Document.PublishToSection',
             headers: {
               'X-NXVoidOperation': 'false'
@@ -118,7 +139,7 @@ angular.module('ngNuxeoClient')
                 override: 'true'
               }, params)
             }
-          }, successCallback, errorCallback);
+          }, successCallback, errorCallback, this);
         };
 
         /**
@@ -127,7 +148,7 @@ angular.module('ngNuxeoClient')
          * @param errorCallback
          */
         this.delete = function (successCallback, errorCallback) {
-          nuxeoAutomate(this, {
+          this.automate({
             url: url.automate + '/Document.Delete',
             data: {
               input: this.uid
@@ -137,11 +158,15 @@ angular.module('ngNuxeoClient')
       }
 
       // Inherit
-      Document.prototype = {};
+      Document.prototype = new Automation();
       Document.prototype.constructor = Document;
 
       Document.create = function (params, inPath, successCallback, errorCallback) {
         return new this.prototype.constructor(params).create(inPath, successCallback, errorCallback);
+      };
+
+      Document.query = function (params) {
+        return new Query(angular.extend({DocumentConstructor: this.prototype.constructor}, params));
       };
 
       return Document;

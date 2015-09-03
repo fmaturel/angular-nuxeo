@@ -43,9 +43,9 @@ describe('ngNuxeoClient module', function () {
         'AND%20((ecm:path%20STARTSWITH%20\'%2F\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'')
         .respond(dataDocuments);
 
-      new nuxeo.Query()
+      nuxeo.Document.query()
         .inPath('/')
-        .get(function (result) {
+        .$get(function (result) {
           expect(result).toBeDefined();
           expect(result.entries).toBeDefined();
           expect(result.entries.length).toEqual(2);
@@ -59,16 +59,17 @@ describe('ngNuxeoClient module', function () {
     it('should query nuxeo server in user path when requested', inject(function ($filter) {
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
 
-      httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/query' +
+      var request = 'http://demo.nuxeo.local/nuxeo/site/api/v1/query' +
         '?query=SELECT%20*%20FROM%20Document%20WHERE%201=1%20AND%20(dc:expired%20IS%20NULL%20OR%20dc:expired%20%3E=%20DATE%20\'' +
         $filter('date')(new Date(), 'yyyy-MM-dd') + '\')%20' +
         'AND%20ecm:primaryType%20NOT%20IN%20(\'Favorites\')%20AND%20ecm:mixinType%20NOT%20IN%20(\'Folderish\',\'HiddenInNavigation\')%20' +
-        'AND%20((ecm:path%20STARTSWITH%20\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'')
-        .respond(dataDocuments);
+        'AND%20((ecm:path%20STARTSWITH%20\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'';
 
-      new nuxeo.Query()
+      httpBackend.whenGET(request).respond(dataDocuments);
+
+      nuxeo.Document.query()
         .inUserWorkspace()
-        .get(function (result) {
+        .$get(function (result) {
           expect(result).toBeDefined();
           expect(result.entries).toBeDefined();
           expect(result.entries.length).toEqual(2);

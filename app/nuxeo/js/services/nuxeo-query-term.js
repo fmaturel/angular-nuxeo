@@ -1,9 +1,9 @@
 angular.module('ngNuxeoQueryPart')
 
-  .provider('NuxeoQueryTerm', ['NuxeoQueryProvider',
-    function (NuxeoQueryProvider) {
+  .provider('NuxeoQueryTerm', ['QueryProvider',
+    function (QueryProvider) {
 
-      NuxeoQueryProvider.addQueryPartProvider('NuxeoQueryTerm');
+      QueryProvider.addQueryPartProvider('NuxeoQueryTerm');
 
       function termsQuery(val) {
         return '(dc:title like \'%' + val + '%\')';
