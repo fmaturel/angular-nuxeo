@@ -25,7 +25,8 @@ describe('ngNuxeoClient module', function () {
       expect(folder.constructor === nuxeo.Folder).toBe(true);
       expect(folder.path === '/default-domain/workspaces').toBe(true);
 
-      expect(folder.upload).toBeUndefined();
+      expect(folder.isDeletable).toBeUndefined();
+      expect(folder.isPublishable).toBeUndefined();
     });
   });
 
@@ -55,9 +56,7 @@ describe('ngNuxeoClient module', function () {
       expect(typeof section === 'object').toBe(true);
       expect(section instanceof nuxeo.Section).toBe(true);
       expect(section.constructor === nuxeo.Section).toBe(true);
-      expect(section.path === '/default-domain/sections').toBe(true);
-
-      expect(section.upload).toBeUndefined();
+      expect(section.path).toEqual('/default-domain/sections');
     });
   });
 
@@ -69,9 +68,7 @@ describe('ngNuxeoClient module', function () {
       expect(typeof workspace === 'object').toBe(true);
       expect(workspace instanceof nuxeo.Workspace).toBe(true);
       expect(workspace.constructor === nuxeo.Workspace).toBe(true);
-      expect(workspace.path === '/default-domain/workspaces').toBe(true);
-
-      expect(workspace.upload).toBeUndefined();
+      expect(workspace.path).toEqual('/default-domain/workspaces');
     });
   });
 });

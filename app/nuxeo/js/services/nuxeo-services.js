@@ -1,12 +1,13 @@
 angular.module('ngNuxeoClient')
 
-  .service('nuxeo', ['$injector', 'Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
-    function ($injector, Document, Folder, Section, Workspace, NuxeoDirectory, NuxeoTag) {
+  .service('nuxeo', ['$injector', 'Automation', 'Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
+    function ($injector, Automation, Document, Folder, Section, Workspace, NuxeoDirectory, NuxeoTag) {
 
       /**
        * All basic nuxeo services are registered here
        */
       angular.extend(this, {
+        Automation: Automation,
         Document: Document,
         Folder: Folder,
         Section: Section,

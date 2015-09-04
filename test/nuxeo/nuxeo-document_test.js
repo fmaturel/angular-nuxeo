@@ -1,20 +1,21 @@
 describe('ngNuxeoClient module', function () {
   'use strict';
 
-  var httpBackend, nuxeo, nuxeoUser, dataUser;
+  var httpBackend, nuxeo, nuxeoUser, dataDocuments, dataUser;
 
-  beforeEach(module('ngNuxeoClient', 'data/user.json'));
+  beforeEach(module('ngNuxeoClient', 'data/documents.json', 'data/user.json'));
 
-  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_) {
+  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataDocuments_, _dataUser_) {
     httpBackend = $httpBackend;
     nuxeo = _nuxeo_;
     nuxeoUser = _nuxeoUser_;
+    dataDocuments = _dataDocuments_;
     dataUser = _dataUser_;
   }));
 
   describe('nuxeo.Document object', function () {
 
-    it('is valid when instantiated', function () {
+    it('is valid when instantiated with no argument', function () {
       expect(nuxeo.Document.name === 'Document').toBe(true);
 
       var doc = new nuxeo.Document();
@@ -22,8 +23,22 @@ describe('ngNuxeoClient module', function () {
       expect(typeof doc === 'object').toBe(true);
       expect(doc instanceof nuxeo.Document).toBe(true);
       expect(doc.constructor === nuxeo.Document).toBe(true);
+      expect(nuxeo.Document.prototype instanceof nuxeo.Automation).toBe(true);
 
-      expect(doc.upload).toBeDefined();
+      expect(doc.isDeletable).toBeUndefined();
+      expect(doc.isPublishable).toBeUndefined();
+    });
+
+    it('is valid when instantiated argument', function () {
+      var doc = new nuxeo.Document(dataDocuments.entries[0]);
+
+      expect(typeof doc === 'object').toBe(true);
+      expect(doc instanceof nuxeo.Document).toBe(true);
+      expect(doc.constructor === nuxeo.Document).toBe(true);
+      expect(nuxeo.Document.prototype instanceof nuxeo.Automation).toBe(true);
+
+      expect(doc.isDeletable).toBeDefined();
+      expect(doc.isPublishable).toBeDefined();
     });
 
     it('has parameters passed in instantiation', function () {

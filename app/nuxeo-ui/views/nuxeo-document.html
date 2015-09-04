@@ -16,7 +16,7 @@
     <a title="Dowload" href="{{entry.srcURL || 'javascript:void(0)'}}">
       <span class="glyphicon glyphicon-download-alt"></span>
     </a>
-    <a title="Publish" href="javascript:void(0)" ng-show="entry.isPublishable" ng-click="entry.publish({target: publishTo()}, onSuccess, onError)">
+    <a title="Publish" href="javascript:void(0)" ng-show="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">
       <span class="glyphicon glyphicon-cloud-upload"></span>
     </a>
     <a title="Delete" href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)">

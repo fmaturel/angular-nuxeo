@@ -28,7 +28,7 @@ describe('ngNuxeoUI module', function () {
       var expectedPicture = $templateCache.get('expected/nuxeo-picture.html');
 
       // Compile a piece of HTML containing the directive
-      var element = $compile('<nuxeo-document></nuxeo-document>')($scope);
+      var element = $compile('<nuxeo-document entry="entry" publish-to="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>')($scope);
       // fire all the watches
       $scope.$digest();
 
@@ -43,7 +43,7 @@ describe('ngNuxeoUI module', function () {
       var expectedAudio = $templateCache.get('expected/nuxeo-audio.html');
 
       // Compile a piece of HTML containing the directive
-      var element = $compile('<nuxeo-document></nuxeo-document>')($scope);
+      var element = $compile('<nuxeo-document entry="entry" publish-to="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>')($scope);
       // fire all the watches
       $scope.$digest();
 

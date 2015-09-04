@@ -133,7 +133,7 @@
       </form>
 
       <!-- ########################################################################## RESULTS -->
-      <nuxeo-documents publish-to="'/default-domain/sections/test'" on-success="uiChange" on-error="logError"><!-- Search results --></nuxeo-documents>
+      <nuxeo-documents documents="documents" publish-to="'/default-domain/sections/test'" on-success="uiChange()" on-error="logError()"><!-- Search results --></nuxeo-documents>
 
       <div class="clearfix"></div>
 

@@ -4,8 +4,24 @@ angular.module('ngNuxeoUI')
 
     return {
       restrict: 'E',
-      require: '^nuxeoDocuments',
       replace: true, // replaces the <nuxeo-document> element
-      templateUrl: 'nuxeo-ui/views/nuxeo-document.html'
+      templateUrl: 'nuxeo-ui/views/nuxeo-document.html',
+      scope: {
+        entry: '=',
+        onSuccess: '&',
+        onError: '&'
+      },
+      link: function (scope, element, attr) {
+        if (attr.deletable === 'true') {
+          scope.entry.isDeletable = true;
+        }
+
+        var publishPath = attr.publishTo;
+        if (publishPath) {
+          if (angular.isString(publishPath)) {
+            scope.publishPath = publishPath;
+          }
+        }
+      }
     };
   }]);
