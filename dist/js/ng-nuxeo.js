@@ -75,8 +75,8 @@ angular.module('ngNuxeoClient')
     }]);
 angular.module('ngNuxeoClient')
 
-  .factory('Document', ['Automation', 'nuxeoUtils', 'nuxeoUser', 'nuxeoUrl', 'Query',
-    function (Automation, utils, user, url, Query) {
+  .factory('Document', ['Automation', 'nuxeoUtils', 'nuxeoUser', 'nuxeoUrl', 'Query', '$log',
+    function (Automation, utils, user, url, Query, $log) {
 
       var Document = utils.inherit(function Document(document) {
         // Default behaviour if no argument supplied
@@ -237,6 +237,9 @@ angular.module('ngNuxeoClient')
        * @returns a Promise
        */
       Document.prototype.publish = function (params, successCallback, errorCallback) {
+        if (!params.target) {
+          $log.error('Publication target must be defined');
+        }
         return this.automate({
           url: url.automate + '/Document.PublishToSection',
           headers: {
