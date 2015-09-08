@@ -5,12 +5,10 @@ angular.module('ngNuxeoClient')
 
       var Section = utils.inherit(function Section(section) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {path: Section.prototype.defaultPath, type: 'Section'});
+        section = angular.extend({path: Section.prototype.defaultPath, type: 'Section'}, section);
 
         // Call Parent function with argument
-        if(section) {
-          Folder.call(this, section);
-        }
+        Folder.call(this, section);
       }, Folder);
 
       // Inherit

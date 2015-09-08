@@ -25,8 +25,8 @@ describe('ngNuxeoClient module', function () {
       expect(folder.constructor === nuxeo.Folder).toBe(true);
       expect(folder.path === '/default-domain/workspaces').toBe(true);
 
-      expect(folder.isDeletable).toBeUndefined();
-      expect(folder.isPublishable).toBeUndefined();
+      expect(folder.isDeletable).toBeFalsy();
+      expect(folder.isPublishable).toBeFalsy();
     });
   });
 

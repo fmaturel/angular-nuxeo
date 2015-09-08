@@ -101,6 +101,13 @@ angular.module('ngNuxeoQueryPart')
                   return new nuxeo.Document(entry);
                 }
               });
+
+              // Add custom properties
+              angular.extend(data, {
+                pages: _.range(data.pageCount),
+                pageNumber: data.pageIndex + 1
+              });
+
               return data;
             }, errorCallback).then(successCallback);
           });

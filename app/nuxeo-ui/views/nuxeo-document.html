@@ -1,6 +1,6 @@
 <div class="thumbnail">
   <a href="javascript:void(0)">
-    <div class="media">
+    <div class="media" ng-class="entry.type | lowercase">
       <nuxeo-picture ng-if="entry.type === 'Picture'"></nuxeo-picture>
       <nuxeo-audio ng-if="entry.type === 'Audio'"></nuxeo-audio>
       <nuxeo-video ng-if="entry.type === 'Video'"></nuxeo-video>

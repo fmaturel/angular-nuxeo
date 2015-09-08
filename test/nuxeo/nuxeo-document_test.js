@@ -25,8 +25,8 @@ describe('ngNuxeoClient module', function () {
       expect(doc.constructor === nuxeo.Document).toBe(true);
       expect(nuxeo.Document.prototype instanceof nuxeo.Automation).toBe(true);
 
-      expect(doc.isDeletable).toBeUndefined();
-      expect(doc.isPublishable).toBeUndefined();
+      expect(doc.isDeletable).toBeFalsy();
+      expect(doc.isPublishable).toBeFalsy();
     });
 
     it('is valid when instantiated argument', function () {

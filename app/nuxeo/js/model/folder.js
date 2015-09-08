@@ -5,12 +5,10 @@ angular.module('ngNuxeoClient')
 
       var Folder = utils.inherit(function Folder(folder) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {type: 'Folder'});
+        folder = angular.extend({type: 'Folder'}, folder);
 
         // Call Parent function with argument
-        if (folder) {
-          Document.call(this, folder);
-        }
+        Document.call(this, folder);
       }, Document);
 
       return Folder;

@@ -14,7 +14,7 @@ angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', 
   $templateCache.put('nuxeo-ui/views/nuxeo-document.html',
     '<div class="thumbnail">\n' +
     '  <a href="javascript:void(0)">\n' +
-    '    <div class="media">\n' +
+    '    <div class="media" ng-class="entry.type | lowercase">\n' +
     '      <nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture>\n' +
     '      <nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio>\n' +
     '      <nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video>\n' +

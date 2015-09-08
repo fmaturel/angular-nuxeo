@@ -291,12 +291,10 @@ angular.module('ngNuxeoClient')
 
       var Folder = utils.inherit(function Folder(folder) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {type: 'Folder'});
+        folder = angular.extend({type: 'Folder'}, folder);
 
         // Call Parent function with argument
-        if (folder) {
-          Document.call(this, folder);
-        }
+        Document.call(this, folder);
       }, Document);
 
       return Folder;
@@ -404,6 +402,13 @@ angular.module('ngNuxeoQueryPart')
                   return new nuxeo.Document(entry);
                 }
               });
+
+              // Add custom properties
+              angular.extend(data, {
+                pages: _.range(data.pageCount),
+                pageNumber: data.pageIndex + 1
+              });
+
               return data;
             }, errorCallback).then(successCallback);
           });
@@ -419,12 +424,10 @@ angular.module('ngNuxeoClient')
 
       var Section = utils.inherit(function Section(section) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {path: Section.prototype.defaultPath, type: 'Section'});
+        section = angular.extend({path: Section.prototype.defaultPath, type: 'Section'}, section);
 
         // Call Parent function with argument
-        if(section) {
-          Folder.call(this, section);
-        }
+        Folder.call(this, section);
       }, Folder);
 
       // Inherit
