@@ -2,6 +2,10 @@ angular.module('ngNuxeoQueryPart')
 
   .provider('Query', [function () {
 
+    var sortByOrder = function (a, b) {
+      return a.order > b.order;
+    };
+
     var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
     var queryParts = [];
@@ -35,7 +39,7 @@ angular.module('ngNuxeoQueryPart')
           }, this);
 
           // Sort services by defined order
-          this.parts = _.sortBy(this.parts, 'order').map(function (o) {
+          this.parts = this.parts.sort(sortByOrder).map(function (o) {
             return o.getPart;
           });
         }
@@ -103,10 +107,14 @@ angular.module('ngNuxeoQueryPart')
               });
 
               // Add custom properties
+              /* jshint -W064 */
               angular.extend(data, {
-                pages: _.range(data.pageCount),
+                pages: Array.apply(null, Array(data.pageCount)).map(function (x, i) {
+                  return i;
+                }),
                 pageNumber: data.pageIndex + 1
               });
+              /* jshint +W034 */
 
               return data;
             }, errorCallback).then(successCallback);

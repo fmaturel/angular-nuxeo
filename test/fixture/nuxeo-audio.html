@@ -10,13 +10,13 @@
   <div class="caption"><span class="ng-binding">test.wav</span></div>
 </a>
 <div class="action">
-  <a title="Dowload" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
+  <a class="download" title="Download" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
     <span class="glyphicon glyphicon-download-alt"></span>
   </a>
-  <a title="Publish" href="javascript:void(0)" ng-show="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)" class="ng-hide">
+  <a class="publish ng-scope" title="Publish" href="javascript:void(0)" ng-if="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">
     <span class="glyphicon glyphicon-cloud-upload"></span>
   </a>
-  <a title="Delete" href="javascript:void(0)" ng-show="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)" class="ng-hide">
+  <a class="delete ng-scope" title="Delete" href="javascript:void(0)" ng-if="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)">
     <span class="glyphicon glyphicon-trash"></span>
   </a>
 </div>

@@ -55,6 +55,5 @@
     }
   },
   "srcURL": "http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg",
-  "thumbnailURL": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg",
-  "$$hashKey": "object:1"
+  "thumbnailURL": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg"
 }

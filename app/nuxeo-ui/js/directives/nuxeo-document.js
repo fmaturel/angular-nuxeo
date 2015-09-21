@@ -8,6 +8,8 @@ angular.module('ngNuxeoUI')
       templateUrl: 'nuxeo-ui/views/nuxeo-document.html',
       scope: {
         entry: '=',
+        deletable: '@',
+        publishTo: '@',
         onSuccess: '&',
         onError: '&'
       },

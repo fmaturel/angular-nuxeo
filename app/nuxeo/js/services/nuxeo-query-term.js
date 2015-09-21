@@ -19,11 +19,11 @@ angular.module('ngNuxeoQueryPart')
 
           this.getPart = function () {
             if (angular.isArray(options.terms)) {
-              var terms = _(options.terms).reduce(function (memo, val) {
+              var terms = options.terms.reduce(function (result, val) {
                 if (val.length) {
-                  memo += (memo.length ? ' OR ' : '' ) + termsQuery(val);
+                  result += (result.length ? ' OR ' : '' ) + termsQuery(val);
                 }
-                return memo;
+                return result;
               }, '');
               return terms.length ? ' AND (' + terms + ')' : '';
             } else if (angular.isString(options.terms) && options.terms.length) {

@@ -50,8 +50,8 @@ angular.module('ngNuxeoQueryPart')
 
             // Transform if Object => Array
             if (angular.isObject(incl)) {
-              incl = _(incl).reduce(function (result, val, key) {
-                if (val) {
+              incl = Object.keys(incl).reduce(function (result, key) {
+                if (incl[key]) {
                   result.push(key);
                 }
                 return result;

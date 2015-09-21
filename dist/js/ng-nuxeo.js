@@ -303,6 +303,10 @@ angular.module('ngNuxeoQueryPart')
 
   .provider('Query', [function () {
 
+    var sortByOrder = function (a, b) {
+      return a.order > b.order;
+    };
+
     var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
     var queryParts = [];
@@ -336,7 +340,7 @@ angular.module('ngNuxeoQueryPart')
           }, this);
 
           // Sort services by defined order
-          this.parts = _.sortBy(this.parts, 'order').map(function (o) {
+          this.parts = this.parts.sort(sortByOrder).map(function (o) {
             return o.getPart;
           });
         }
@@ -404,10 +408,14 @@ angular.module('ngNuxeoQueryPart')
               });
 
               // Add custom properties
+              /* jshint -W064 */
               angular.extend(data, {
-                pages: _.range(data.pageCount),
+                pages: Array.apply(null, Array(data.pageCount)).map(function (x, i) {
+                  return i;
+                }),
                 pageNumber: data.pageIndex + 1
               });
+              /* jshint +W034 */
 
               return data;
             }, errorCallback).then(successCallback);
@@ -691,8 +699,8 @@ angular.module('ngNuxeoQueryPart')
 
             // Transform if Object => Array
             if (angular.isObject(incl)) {
-              incl = _(incl).reduce(function (result, val, key) {
-                if (val) {
+              incl = Object.keys(incl).reduce(function (result, key) {
+                if (incl[key]) {
                   result.push(key);
                 }
                 return result;
@@ -759,8 +767,8 @@ angular.module('ngNuxeoQueryPart')
 
             // Transform if Object => Array
             if (angular.isObject(incl)) {
-              incl = _(incl).reduce(function (result, val, key) {
-                if (val) {
+              incl = Object.keys(incl).reduce(function (result, key) {
+                if (incl[key]) {
                   result.push(key);
                 }
                 return result;
@@ -941,7 +949,7 @@ angular.module('ngNuxeoQueryPart')
             }
 
             if (angular.isArray(options.paths)) {
-              var terms = _(options.paths).reduce(function (result, path) {
+              var terms = options.paths.reduce(function (result, path) {
                 if (path.value.length) {
                   result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
                 }
@@ -1111,11 +1119,11 @@ angular.module('ngNuxeoQueryPart')
 
           this.getPart = function () {
             if (angular.isArray(options.terms)) {
-              var terms = _(options.terms).reduce(function (memo, val) {
+              var terms = options.terms.reduce(function (result, val) {
                 if (val.length) {
-                  memo += (memo.length ? ' OR ' : '' ) + termsQuery(val);
+                  result += (result.length ? ' OR ' : '' ) + termsQuery(val);
                 }
-                return memo;
+                return result;
               }, '');
               return terms.length ? ' AND (' + terms + ')' : '';
             } else if (angular.isString(options.terms) && options.terms.length) {

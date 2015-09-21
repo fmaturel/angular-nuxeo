@@ -93,9 +93,7 @@ angular.module('ngNuxeoDemoApp')
         // Finally get documents
         query.$get(function (data) {
           $log.debug(data);
-          $scope.documents = angular.extend(data, {
-            pages: _.range(data.pageCount)
-          });
+          $scope.documents = angular.extend(data);
         });
       };
 

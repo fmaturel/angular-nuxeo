@@ -72,7 +72,7 @@ angular.module('ngNuxeoQueryPart')
             }
 
             if (angular.isArray(options.paths)) {
-              var terms = _(options.paths).reduce(function (result, path) {
+              var terms = options.paths.reduce(function (result, path) {
                 if (path.value.length) {
                   result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
                 }
