@@ -45,8 +45,8 @@ angular.module('ngNuxeoQueryPart')
            * Documents have to be placed in user's personal workspace
            * @returns {*}
            */
-          this.inUserWorkspace = function () {
-            options.isInUserWorkspace = true;
+          this.inUserWorkspace = function (subPath) {
+            options.userSubPath = subPath || true;
             return this;
           };
 
@@ -60,9 +60,12 @@ angular.module('ngNuxeoQueryPart')
           };
 
           this.getPart = function (user) {
-
-            if (options.isInUserWorkspace) {
-              addPath('/default-domain/UserWorkspaces/' + user.pathId);
+            if (options.userSubPath) {
+              var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
+              if(angular.isString(options.userSubPath)) {
+                userDirectory += '/' + options.userSubPath;
+              }
+              addPath(userDirectory);
               if (options.notInUserWorkspace) {
                 throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
               }
