@@ -19,13 +19,11 @@ angular.module('ngNuxeoClient')
         tags: NuxeoTag
       });
 
-      this.register = function (service) {
-        if (angular.isFunction(service)) {
-          if (service.name && !this.hasOwnProperty(service.name)) {
-            this[service.name] = $injector.get(service.name);
-          } else {
-            throw 'Nuxeo service registration failed for service [' + service + ']';
-          }
+      this.register = function (service, name) {
+        if (angular.isFunction(service) && name && !this.hasOwnProperty(name)) {
+          this[name] = $injector.get(name);
+        } else {
+          throw 'Nuxeo service registration failed for service [' + service + ']';
         }
       };
     }]);
