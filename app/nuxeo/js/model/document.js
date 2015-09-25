@@ -26,7 +26,7 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && this.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
+          var isInUserworspace = this.path && this.path.indexOf('/default-domain/UserWorkspaces/' + user.pathId) === 0;
 
           this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
           this.isMine = properties && properties['dc:creator'] && properties['dc:creator'] === user.id;

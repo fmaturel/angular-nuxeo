@@ -101,7 +101,7 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && this.path.startsWith('/default-domain/UserWorkspaces/' + user.pathId);
+          var isInUserworspace = this.path && this.path.indexOf('/default-domain/UserWorkspaces/' + user.pathId) === 0;
 
           this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
           this.isMine = properties && properties['dc:creator'] && properties['dc:creator'] === user.id;
@@ -475,7 +475,7 @@ angular.module('ngNuxeoSecurity')
         request: function (config) {
 
           // DO NOT DEFER NON API REQUEST
-          if (!config.url.startsWith(cst.nuxeo.baseURL)) {
+          if (config.url.indexOf(cst.nuxeo.baseURL) !== 0) {
             return config;
           }
 
@@ -500,7 +500,7 @@ angular.module('ngNuxeoSecurity')
         request: function (config) {
 
           // DO NOT DEFER NON API REQUEST
-          if (!config.url.startsWith(cst.nuxeo.baseURL)) {
+          if (config.url.indexOf(cst.nuxeo.baseURL) !== 0) {
             return config;
           }
 

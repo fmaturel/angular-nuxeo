@@ -13,7 +13,7 @@ angular.module('ngNuxeoSecurity')
         request: function (config) {
 
           // DO NOT DEFER NON API REQUEST
-          if (!config.url.startsWith(cst.nuxeo.baseURL)) {
+          if (config.url.indexOf(cst.nuxeo.baseURL) !== 0) {
             return config;
           }
 
