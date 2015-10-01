@@ -53,7 +53,7 @@ angular.module('ngNuxeoQueryPart')
                * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
                * Possible values: dublincore, file, *
                */
-              'X-NXproperties': 'dublincore, file',
+              'X-NXproperties': 'dublincore, file, webdisplay',
               /**
                * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
                * Possible values: thumbnail, acls, preview, breadcrumb
