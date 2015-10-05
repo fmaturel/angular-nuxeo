@@ -279,7 +279,9 @@ angular.module('ngNuxeoClient')
       };
 
       Document.query = function (params) {
-        return new Query(angular.extend({DocumentConstructor: this.prototype.constructor}, params));
+        return new Query(angular.extend({
+          DocumentConstructor: this.prototype.constructor,
+        }, params));
       };
 
       return Document;
@@ -303,10 +305,6 @@ angular.module('ngNuxeoQueryPart')
 
   .provider('Query', [function () {
 
-    var sortByOrder = function (a, b) {
-      return a.order - b.order;
-    };
-
     var baseQuery = 'SELECT * FROM Document WHERE 1=1';
 
     var queryParts = [];
@@ -321,9 +319,9 @@ angular.module('ngNuxeoQueryPart')
         function Query(query) {
           var options = {};
 
-          this.parts = [];
-
           angular.extend(this, query);
+
+          this.parts = [];
 
           // Enrich Query with query providers
           angular.forEach(queryParts, function (queryPart) {
@@ -340,9 +338,15 @@ angular.module('ngNuxeoQueryPart')
           }, this);
 
           // Sort services by defined order
-          this.parts = this.parts.sort(sortByOrder).map(function (o) {
+          this.parts = this.parts.sort(function (a, b) {
+            return a.order - b.order;
+          }).map(function (o) {
             return o.getPart;
           });
+
+          this.getHeaders = function() {
+            return this.DocumentConstructor.prototype.headers;
+          };
         }
 
         // Inherit
@@ -354,7 +358,9 @@ angular.module('ngNuxeoQueryPart')
                * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
                * Possible values: dublincore, file, *
                */
-              'X-NXproperties': 'dublincore, file, webdisplay',
+              'X-NXproperties': function() {
+                return 'dublincore, file';
+              },
               /**
                * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
                * Possible values: thumbnail, acls, preview, breadcrumb
