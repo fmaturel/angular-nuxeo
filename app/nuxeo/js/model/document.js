@@ -29,7 +29,9 @@ angular.module('ngNuxeoClient')
           var isInUserworspace = this.path && this.path.indexOf('/default-domain/UserWorkspaces/' + user.pathId) === 0;
 
           this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
+
           this.isMine = properties && properties['dc:creator'] && properties['dc:creator'] === user.id;
+
           this.isDeletable = this.isMine || isInUserworspace;
         }
       }, Automation);
@@ -194,6 +196,8 @@ angular.module('ngNuxeoClient')
       };
 
       Document.prototype.defaultPath = '/default-domain/workspaces';
+
+      Document.headers = {nxProperties: ['dublincore', 'file']};
 
       //**********************************************************
       // STATIC METHODS

@@ -8,8 +8,6 @@ angular.module('ngNuxeoQueryPart')
       this.$get = [function () {
         return function (options) {
 
-          this.order = 99;
-
           this.paginate = function (size, index) {
             options.size = size;
             options.index = index;
@@ -18,9 +16,9 @@ angular.module('ngNuxeoQueryPart')
 
           this.getPart = function () {
             if (angular.isDefined(options.size) && angular.isDefined(options.index)) {
-              return '&pageSize=' + options.size + '&currentPageIndex=' + options.index;
+              return {pageSize: options.size, currentPageIndex: options.index};
             }
-            return '';
+            return null;
           };
         };
       }];

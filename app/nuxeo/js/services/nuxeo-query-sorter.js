@@ -8,8 +8,6 @@ angular.module('ngNuxeoQueryPart')
       this.$get = [function () {
         return function (options) {
 
-          this.order = 100;
-
           this.sortBy = function (properties, orders) {
             if (angular.isArray(properties)) {
               options.sortBy = properties;
@@ -43,9 +41,9 @@ angular.module('ngNuxeoQueryPart')
 
           this.getPart = function () {
             if (angular.isDefined(options.sortBy)) {
-              return '&sortBy=' + options.sortBy.join(',') + '&sortOrder=' + options.sortOrder.join(',') + '';
+              return {sortBy: options.sortBy.join(','), sortOrder: options.sortOrder.join(',')};
             }
-            return '';
+            return null;
           };
         };
       }];

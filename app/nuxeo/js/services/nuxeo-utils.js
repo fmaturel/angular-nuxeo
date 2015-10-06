@@ -20,6 +20,9 @@ angular.module('ngNuxeoClient')
         // Static methods
         angular.extend(NewType, ParentType);
 
+        // Add a super static method
+        NewType.super = ParentType;
+
         return NewType;
       }
     };

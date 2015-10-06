@@ -37,10 +37,10 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
 
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/query' +
-        '?query=SELECT%20*%20FROM%20Document%20WHERE%201=1%20AND%20(dc:expired%20IS%20NULL%20OR%20dc:expired%20%3E=%20DATE%20\'' +
-        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')%20' +
-        'AND%20ecm:primaryType%20NOT%20IN%20(\'Favorites\')%20AND%20ecm:mixinType%20NOT%20IN%20(\'Folderish\',\'HiddenInNavigation\')%20' +
-        'AND%20((ecm:path%20STARTSWITH%20\'%2F\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'')
+        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
+        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
+        'AND+ecm:primaryType+NOT+IN+(\'Favorites\')+AND+ecm:mixinType+NOT+IN+(\'Folderish\',\'HiddenInNavigation\')+' +
+        'AND+((ecm:path+STARTSWITH+\'%2F\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'')
         .respond(dataDocuments);
 
       nuxeo.Document.query()
@@ -60,10 +60,10 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
 
       var request = 'http://demo.nuxeo.local/nuxeo/site/api/v1/query' +
-        '?query=SELECT%20*%20FROM%20Document%20WHERE%201=1%20AND%20(dc:expired%20IS%20NULL%20OR%20dc:expired%20%3E=%20DATE%20\'' +
-        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')%20' +
-        'AND%20ecm:primaryType%20NOT%20IN%20(\'Favorites\')%20AND%20ecm:mixinType%20NOT%20IN%20(\'Folderish\',\'HiddenInNavigation\')%20' +
-        'AND%20((ecm:path%20STARTSWITH%20\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))%20AND%20ecm:currentLifeCycleState%20%3C%3E%20\'deleted\'';
+        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
+        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
+        'AND+ecm:primaryType+NOT+IN+(\'Favorites\')+AND+ecm:mixinType+NOT+IN+(\'Folderish\',\'HiddenInNavigation\')+' +
+        'AND+((ecm:path+STARTSWITH+\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'';
 
       httpBackend.whenGET(request).respond(dataDocuments);
 

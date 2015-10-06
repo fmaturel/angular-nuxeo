@@ -10,7 +10,7 @@
   <div class="caption"><span class="ng-binding">test.wav</span></div>
 </a>
 <div class="action">
-  <a class="download" title="Download" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
+  <a class="download ng-scope" title="Download" ng-href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav" ng-if="entry.srcURL" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
     <span class="glyphicon glyphicon-download-alt"></span>
   </a>
   <a class="publish ng-scope" title="Publish" href="javascript:void(0)" ng-if="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">

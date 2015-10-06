@@ -10,70 +10,77 @@ angular.module('ngNuxeoQueryPart')
       queryParts.push(queryPart);
     };
 
-    this.$get = ['$injector', '$resource', 'nuxeoUrl', 'nuxeoConstants', '$log',
-      function ($injector, $resource, url, cst, $log) {
+    this.$get = ['$injector', 'queryService', '$log',
+      function ($injector, queryService, $log) {
 
+        /**
+         * Query constructor
+         * @param query
+         * @constructor
+         */
         function Query(query) {
-          var options = {};
-
           angular.extend(this, query);
-
-          this.parts = [];
-
-          // Enrich Query with query providers
-          angular.forEach(queryParts, function (queryPart) {
-            var Part = $injector.get(queryPart);
-            var part = new Part(options);
-
-            angular.extend(this, new Part(options));
-            if (angular.isObject(part.defaultOptions)) {
-              angular.extend(options, part.defaultOptions);
-            }
-            if (angular.isFunction(part.getPart)) {
-              this.parts.push({order: part.order || 0, getPart: part.getPart});
-            }
-          }, this);
-
-          // Sort services by defined order
-          this.parts = this.parts.sort(function (a, b) {
-            return a.order - b.order;
-          }).map(function (o) {
-            return o.getPart;
-          });
-
-          this.getHeaders = function() {
-            return this.DocumentConstructor.prototype.headers;
-          };
         }
 
-        // Inherit
-        var Resource = $resource(url.query, {query: '@query'}, {
-          get: {
-            method: 'GET',
-            headers: {
-              /**
-               * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
-               * Possible values: dublincore, file, *
-               */
-              'X-NXproperties': function(config) {
-                return 'dublincore, file';
-              },
-              /**
-               * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
-               * Possible values: thumbnail, acls, preview, breadcrumb
-               */
-              'X-NXenrichers.document': 'thumbnail',
-              /**
-               * This header can be used when you want to control the transaction duration in seconds
-               */
-              'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-            },
-            isUserDependent: true
-          }
-        });
+        /**
+         * Compose Query object
+         */
+        var options = {}, parts = [];
 
-        Query.prototype = new Resource();
-        Query.prototype.constructor = Query;
+        // Enrich Query with query providers
+        queryParts.forEach(function (queryPart) {
+          var Part = $injector.get(queryPart);
+          var part = new Part(options);
+
+          angular.extend(Query.prototype, part);
+          if (angular.isObject(part.defaultOptions)) {
+            angular.extend(options, part.defaultOptions);
+          }
+          if (angular.isFunction(part.getPart)) {
+            parts.push(part.getPart);
+          }
+        }, this);
+
+        /**
+         * Query parts
+         * @type {Array}
+         */
+        Query.prototype.parts = parts;
+
+        /**
+         * Get nuxeo query headers
+         * @param headerName
+         * @returns {Array}
+         */
+        Query.prototype.getHeaders = function (headerName) {
+
+          var result = [];
+
+          function getHeader(headers) {
+            var result = [];
+            if (headers && headers[headerName]) {
+              var header = headers[headerName];
+              if (angular.isArray(header)) {
+                result = result.concat(header);
+              } else if (angular.isString(header)) {
+                result.push(header);
+              }
+            }
+            return result;
+          }
+
+          if (this.headers) {
+            result = getHeader(this.headers);
+          } else {
+            var Constr = this.DocumentConstructor;
+            while (Constr) {
+              result = result.concat(getHeader(Constr.headers));
+              Constr = Constr.super;
+            }
+          }
+
+          return result;
+        };
 
         /**
          * Fetch result of query on nuxeo
@@ -91,17 +98,24 @@ angular.module('ngNuxeoQueryPart')
             $log.debug(user);
 
             // Build query
-            var query = baseQuery;
-            angular.forEach(that.parts, function (getPart) {
-              query += getPart(user);
+            that.nxql = {query: baseQuery};
+            that.parts.forEach(function (getPart) {
+              var result = getPart(user);
+              if (result) {
+                if (angular.isString(result)) {
+                  that.nxql.query += result;
+                } else if (angular.isObject(result)) {
+                  angular.extend(that.nxql, result);
+                }
+              }
             });
 
             // Log query
-            $log.debug('Resulting query: ' + query);
+            $log.debug('Resulting query: ' + that.nxql.query);
 
             // Fetch query in nuxeo and transform result into Document Type
-            return Resource.prototype.$get({query: query}, function (data) {
-
+            return queryService.query(that, function (response) {
+              var data = response.data;
               data.entries = data.entries.map(function (entry) {
                 if (nuxeo.hasOwnProperty(entry.type)) {
                   return new nuxeo[entry.type](entry);

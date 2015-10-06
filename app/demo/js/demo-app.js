@@ -11,7 +11,7 @@ angular.module('ngNuxeoDemoApp', [
       $httpProvider.interceptors.push('basicAuthInterceptor');
 
       /*- TRUST URL FROM THOSE SOURCE ----------------------------------------------------------------------------- */
-      $sceDelegateProvider.resourceUrlWhitelist(['self', cst.nuxeo.baseURL + '*']);
+      $sceDelegateProvider.resourceUrlWhitelist(['self', 'http://demo.nuxeo.com/**', cst.nuxeo.baseURL + '/**']);
 
       /*- DEMO ROUTES ----------------------------------------------------------------------------------------- */
       $routeProvider

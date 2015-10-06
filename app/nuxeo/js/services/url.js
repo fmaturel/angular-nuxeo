@@ -9,7 +9,7 @@ angular.module('ngNuxeoClient')
 
       this.request = apiBase + '/directory/:object';
 
-      this.query = apiBase + '/query?query=:query';
+      this.query = apiBase + '/query';
 
       this.user = apiBase + '/user/:userName';
     }]);
