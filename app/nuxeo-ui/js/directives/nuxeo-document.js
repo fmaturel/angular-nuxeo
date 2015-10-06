@@ -19,7 +19,7 @@ angular.module('ngNuxeoUI')
           if (attr.uid) {
             nuxeo.Document.query()
               // Basic search
-              .withParentIn([attr.uid])
+              .withParentIn(attr.uid)
               // Get data
               .$get(function (data) {
                 scope.entry = data.entries.length && data.entries[0];

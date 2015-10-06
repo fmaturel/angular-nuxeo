@@ -26,23 +26,28 @@ angular.module('ngNuxeoQueryPart')
       }
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target subject
+           * @param subject
+           * @returns {QueryPart}
+           */
           this.withSubject = function (subject) {
             if (subject && subject.properties) {
-              options.subjectId = subject.properties.id;
+              this.options.subjectId = subject.properties.id;
             }
             return this;
           };
-
-          this.getPart = function () {
-            var subjectId = options.subjectId;
-            if (angular.isString(subjectId)) {
-              return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          var subjectId = options.subjectId;
+          if (angular.isString(subjectId)) {
+            return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

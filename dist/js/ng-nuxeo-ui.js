@@ -77,8 +77,6 @@ angular.module('ngNuxeoUI')
         onError: '&'
       },
       controller: ['$scope', 'Section', function ($scope, Section) {
-        $scope.documents = {pageIndex: 0};
-
         $scope.publishPath = Section.prototype.defaultPath;
       }]
     };

@@ -26,6 +26,10 @@ angular.module('ngNuxeoDemoApp')
         upload: {}
       };
 
+      $scope.documents = {
+        pageIndex: 0
+      };
+
       // ######################################################################### SCOPE FUNCTIONS
       $scope.fn = {
         isActive: function (type) {
@@ -106,7 +110,10 @@ angular.module('ngNuxeoDemoApp')
         'search.advanced.myMediaOnly',
         'search.advanced.selectedContinent', 'search.advanced.selectedCountry',
         'search.advanced.selectedNature', 'search.advanced.selectedSubject'
-      ], $scope.uiChange, true);
+      ], function (newValue, oldValue) {
+        $log.debug(newValue, oldValue);
+        $scope.uiChange();
+      }, true);
 
       nuxeo.tags.$get(function (data) {
         $log.debug(data);

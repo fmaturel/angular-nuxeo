@@ -6,27 +6,34 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
 
       this.$get = ['$filter', function ($filter) {
-        return function (options) {
-
-          this.defaultOptions = {excludeExpired: true};
-
+        var QueryPart = function () {
+          /**
+           * Documents must not be expired
+           * @returns {QueryPart}
+           */
           this.excludeExpired = function () {
-            options.excludeExpired = true;
+            this.options.excludeExpired = true;
             return this;
           };
-
+          /**
+           * Documents can be expired
+           * @returns {QueryPart}
+           */
           this.includeExpired = function () {
-            options.excludeExpired = false;
+            this.options.excludeExpired = false;
             return this;
-          };
-
-          this.getPart = function () {
-            if (options.excludeExpired) {
-              return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
-            }
-            return '';
           };
         };
-      }];
 
+        QueryPart.defaultOptions = {excludeExpired: true};
+
+        QueryPart.getPart = function (options) {
+          if (options.excludeExpired) {
+            return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

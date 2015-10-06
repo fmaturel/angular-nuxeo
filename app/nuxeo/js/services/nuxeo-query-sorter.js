@@ -6,46 +6,52 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQuerySorter');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Document sorting
+           * @param properties, properties to be sorted
+           * @param orders, order type [ASC | DESC] for each property
+           * @returns {QueryPart}
+           */
           this.sortBy = function (properties, orders) {
             if (angular.isArray(properties)) {
-              options.sortBy = properties;
+              this.options.sortBy = properties;
               if (angular.isArray(orders) && orders.length) {
-                options.sortOrder = [orders];
+                this.options.sortOrder = [orders];
               } else {
-                options.sortOrder = [];
+                this.options.sortOrder = [];
                 properties.forEach(function () {
-                  options.sortOrder.push('ASC');
-                });
+                  this.options.sortOrder.push('ASC');
+                }, this);
               }
             } else if (angular.isObject(properties)) {
-              options.sortBy = [];
-              options.sortOrder = [];
+              this.options.sortBy = [];
+              this.options.sortOrder = [];
               Object.keys(properties).forEach(function (key) {
-                options.sortBy.push(key);
-                options.sortOrder.push(properties[key]);
-              });
+                this.options.sortBy.push(key);
+                this.options.sortOrder.push(properties[key]);
+              }, this);
             } else if (angular.isString(properties)) {
-              options.sortBy = [properties];
+              this.options.sortBy = [properties];
               if (angular.isString(orders) && orders.length) {
-                options.sortOrder = [orders];
+                this.options.sortOrder = [orders];
               } else {
-                options.sortOrder = ['ASC'];
+                this.options.sortOrder = ['ASC'];
               }
             } else {
               throw 'Should sort using an Array or String property';
             }
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isDefined(options.sortBy)) {
-              return {sortBy: options.sortBy.join(','), sortOrder: options.sortOrder.join(',')};
-            }
-            return null;
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          if (angular.isDefined(options.sortBy)) {
+            return {sortBy: options.sortBy.join(','), sortOrder: options.sortOrder.join(',')};
+          }
+          return null;
+        };
+
+        return QueryPart;
+      }];
     }]);

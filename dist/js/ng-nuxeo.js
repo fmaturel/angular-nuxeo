@@ -321,38 +321,32 @@ angular.module('ngNuxeoQueryPart')
       function ($injector, queryService, $log) {
 
         /**
+         * Compose Query object
+         */
+        var parts = [], defaultOptions = {};
+
+        // Enrich Query with query providers
+        queryParts.forEach(function (queryPart) {
+          var Part = $injector.get(queryPart);
+
+          angular.extend(Query.prototype, new Part());
+          if (angular.isObject(Part.defaultOptions)) {
+            angular.extend(defaultOptions, Part.defaultOptions);
+          }
+          if (angular.isFunction(Part.getPart)) {
+            parts.push(Part.getPart);
+          }
+        }, this);
+
+        /**
          * Query constructor
          * @param query
          * @constructor
          */
         function Query(query) {
+          this.options = angular.copy(defaultOptions);
           angular.extend(this, query);
         }
-
-        /**
-         * Compose Query object
-         */
-        var options = {}, parts = [];
-
-        // Enrich Query with query providers
-        queryParts.forEach(function (queryPart) {
-          var Part = $injector.get(queryPart);
-          var part = new Part(options);
-
-          angular.extend(Query.prototype, part);
-          if (angular.isObject(part.defaultOptions)) {
-            angular.extend(options, part.defaultOptions);
-          }
-          if (angular.isFunction(part.getPart)) {
-            parts.push(part.getPart);
-          }
-        }, this);
-
-        /**
-         * Query parts
-         * @type {Array}
-         */
-        Query.prototype.parts = parts;
 
         /**
          * Get nuxeo query headers
@@ -406,8 +400,8 @@ angular.module('ngNuxeoQueryPart')
 
             // Build query
             that.nxql = {query: baseQuery};
-            that.parts.forEach(function (getPart) {
-              var result = getPart(user);
+            parts.forEach(function (getPart) {
+              var result = getPart(that.options, user);
               if (result) {
                 if (angular.isString(result)) {
                   that.nxql.query += result;
@@ -577,7 +571,7 @@ angular.module('ngNuxeoSecurity')
         }
 
         User.get({userName: userName}, function (user) {
-          if(user && user.id) {
+          if (user && user.id) {
             user.pathId = user.id.replace(/[@\.]/g, '-');
           }
           defer.resolve(angular.extend(nuxeoUser, user));
@@ -614,32 +608,37 @@ angular.module('ngNuxeoQueryPart')
       Query.addQueryPartProvider('NuxeoQueryCoverage');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target coverage
+           * @param coverage
+           * @returns {QueryPart}
+           */
           this.withCoverage = function (coverage) {
             if (coverage && coverage.properties) {
               if (coverage.directoryName === 'continent') {
-                options.continentId = coverage.properties.id;
+                this.options.continentId = coverage.properties.id;
               } else if (coverage.directoryName === 'country') {
-                options.country = coverage.properties;
+                this.options.country = coverage.properties;
               }
             }
             return this;
           };
-
-          this.getPart = function () {
-            var continentId = options.continentId;
-            var country = options.country;
-            if (angular.isString(continentId)) {
-              return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
-            } else if (angular.isObject(country)) {
-              return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          var continentId = options.continentId;
+          var country = options.country;
+          if (angular.isString(continentId)) {
+            return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
+          } else if (angular.isObject(country)) {
+            return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -649,29 +648,36 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryExpiration');
 
       this.$get = ['$filter', function ($filter) {
-        return function (options) {
-
-          this.defaultOptions = {excludeExpired: true};
-
+        var QueryPart = function () {
+          /**
+           * Documents must not be expired
+           * @returns {QueryPart}
+           */
           this.excludeExpired = function () {
-            options.excludeExpired = true;
+            this.options.excludeExpired = true;
             return this;
           };
-
+          /**
+           * Documents can be expired
+           * @returns {QueryPart}
+           */
           this.includeExpired = function () {
-            options.excludeExpired = false;
+            this.options.excludeExpired = false;
             return this;
-          };
-
-          this.getPart = function () {
-            if (options.excludeExpired) {
-              return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
-            }
-            return '';
           };
         };
-      }];
 
+        QueryPart.defaultOptions = {excludeExpired: true};
+
+        QueryPart.getPart = function (options) {
+          if (options.excludeExpired) {
+            return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -681,67 +687,72 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryMedia');
 
       this.$get = [function () {
-        return function (options) {
-
-          this.defaultOptions = {
-            // Rather use mixin exlusion = 'Folderish' and 'HiddenInNavigation'
-            excludeMediaTypes: [
-              'Favorites'
-              //'Domain', 'Section', 'UserProfile', 'Workspace',
-              //'AdministrativeStatusContainer', 'AdministrativeStatus',
-              //'DocumentRoute', 'Favorites', 'RouteNode',
-              //'DocumentRouteModelsRoot', 'ManagementRoot', 'SectionRoot', 'TaskRoot', 'TemplateRoot', 'UserWorkspacesRoot', 'WorkspaceRoot'
-            ]
-          };
-
+        var QueryPart = function () {
           /**
            * Excludes some media type from search query
            * @param mediaTypes, Array of excluded mediaTypes
-           * @returns {*}
+           * @returns {QueryPart}
            */
           this.excludeMedia = function (mediaTypes) {
-            options.excludeMediaTypes = mediaTypes;
+            this.options.excludeMediaTypes = mediaTypes;
             return this;
           };
-
+          /**
+           * Includes some media type from search query
+           * @param mediaTypes
+           * @returns {QueryPart}
+           */
           this.withMedia = function (mediaTypes) {
-            options.mediaTypes = mediaTypes;
+            this.options.mediaTypes = mediaTypes;
             return this;
-          };
-
-          this.getPart = function () {
-            // Exclusion
-            var criterias = '';
-
-            var excl = options.excludeMediaTypes;
-            if (angular.isArray(excl) && excl.length) {
-              criterias += ' AND ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
-            } else if (angular.isString(excl) && excl.length) {
-              criterias += ' AND ecm:primaryType <> \'' + excl + '\'';
-            }
-
-            // Inclusion
-            var incl = options.mediaTypes;
-
-            // Transform if Object => Array
-            if (angular.isObject(incl)) {
-              incl = Object.keys(incl).reduce(function (result, key) {
-                if (incl[key]) {
-                  result.push(key);
-                }
-                return result;
-              }, []);
-            }
-
-            if (angular.isArray(incl) && incl.length) {
-              criterias += ' AND ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
-            } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
-              criterias += ' AND ecm:primaryType = \'' + options.mediaTypes + '\'';
-            }
-
-            return criterias;
           };
         };
+
+        QueryPart.defaultOptions = {
+          // Rather use mixin exlusion = 'Folderish' and 'HiddenInNavigation'
+          excludeMediaTypes: [
+            'Favorites'
+            //'Domain', 'Section', 'UserProfile', 'Workspace',
+            //'AdministrativeStatusContainer', 'AdministrativeStatus',
+            //'DocumentRoute', 'Favorites', 'RouteNode',
+            //'DocumentRouteModelsRoot', 'ManagementRoot', 'SectionRoot', 'TaskRoot', 'TemplateRoot', 'UserWorkspacesRoot', 'WorkspaceRoot'
+          ]
+        };
+
+        QueryPart.getPart = function (options) {
+          // Exclusion
+          var criterias = '';
+
+          var excl = options.excludeMediaTypes;
+          if (angular.isArray(excl) && excl.length) {
+            criterias += ' AND ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
+          } else if (angular.isString(excl) && excl.length) {
+            criterias += ' AND ecm:primaryType <> \'' + excl + '\'';
+          }
+
+          // Inclusion
+          var incl = options.mediaTypes;
+
+          // Transform if Object => Array
+          if (angular.isObject(incl)) {
+            incl = Object.keys(incl).reduce(function (result, key) {
+              if (incl[key]) {
+                result.push(key);
+              }
+              return result;
+            }, []);
+          }
+
+          if (angular.isArray(incl) && incl.length) {
+            criterias += ' AND ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
+          } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
+            criterias += ' AND ecm:primaryType = \'' + options.mediaTypes + '\'';
+          }
+
+          return criterias;
+        };
+
+        return QueryPart;
       }];
 
     }]);
@@ -753,63 +764,68 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryMixin');
 
       this.$get = [function () {
-        return function (options) {
-
-          this.defaultOptions = {
-            excludeMixinTypes: [
-              'Folderish',
-              'HiddenInNavigation'
-            ]
-          };
-
+        var QueryPart = function () {
           /**
            * Excludes some document facets from search query
            * @param mixin, Array of excluded mixin
            * @returns {*}
            */
           this.excludeMixin = function (mixin) {
-            options.excludeMixinTypes = mixin;
+            this.options.excludeMixinTypes = mixin;
             return this;
           };
-
+          /**
+           * Includes some document facets from search query
+           * @param mixin, Array of excluded mixin
+           * @returns {QueryPart}
+           */
           this.withMixin = function (mixin) {
-            options.mixin = mixin;
+            this.options.mixin = mixin;
             return this;
-          };
-
-          this.getPart = function () {
-            // Exclusion
-            var criterias = '';
-
-            var excl = options.excludeMixinTypes;
-            if (angular.isArray(excl) && excl.length) {
-              criterias += ' AND ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
-            } else if (angular.isString(excl) && excl.length) {
-              criterias += ' AND ecm:mixinType <> \'' + excl + '\'';
-            }
-
-            // Inclusion
-            var incl = options.mixin;
-
-            // Transform if Object => Array
-            if (angular.isObject(incl)) {
-              incl = Object.keys(incl).reduce(function (result, key) {
-                if (incl[key]) {
-                  result.push(key);
-                }
-                return result;
-              }, []);
-            }
-
-            if (angular.isArray(incl) && incl.length) {
-              criterias += ' AND ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
-            } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
-              criterias += ' AND ecm:mixinType = \'' + options.mediaTypes + '\'';
-            }
-
-            return criterias;
           };
         };
+
+        QueryPart.defaultOptions = {
+          excludeMixinTypes: [
+            'Folderish',
+            'HiddenInNavigation'
+          ]
+        };
+
+        QueryPart.getPart = function (options) {
+          // Exclusion
+          var criterias = '';
+
+          var excl = options.excludeMixinTypes;
+          if (angular.isArray(excl) && excl.length) {
+            criterias += ' AND ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
+          } else if (angular.isString(excl) && excl.length) {
+            criterias += ' AND ecm:mixinType <> \'' + excl + '\'';
+          }
+
+          // Inclusion
+          var incl = options.mixin;
+
+          // Transform if Object => Array
+          if (angular.isObject(incl)) {
+            incl = Object.keys(incl).reduce(function (result, key) {
+              if (incl[key]) {
+                result.push(key);
+              }
+              return result;
+            }, []);
+          }
+
+          if (angular.isArray(incl) && incl.length) {
+            criterias += ' AND ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
+          } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
+            criterias += ' AND ecm:mixinType = \'' + options.mediaTypes + '\'';
+          }
+
+          return criterias;
+        };
+
+        return QueryPart;
       }];
 
     }]);
@@ -821,23 +837,29 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryNature');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target nature
+           * @param nature
+           * @returns {QueryPart}
+           */
           this.withNature = function (nature) {
             if (nature && nature.properties) {
-              options.natureId = nature.properties.id;
+              this.options.natureId = nature.properties.id;
             }
             return this;
           };
-
-          this.getPart = function () {
-            var natureId = options.natureId;
-            if (angular.isString(natureId)) {
-              return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
-            }
-            return '';
-          };
         };
+
+        QueryPart.getPart = function (options) {
+          var natureId = options.natureId;
+          if (angular.isString(natureId)) {
+            return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
+          }
+          return '';
+        };
+
+        return QueryPart;
       }];
 
     }]);
@@ -849,21 +871,28 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryPaginate');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Document pagination
+           * @param size, page size
+           * @param index, page index
+           * @returns {QueryPart}
+           */
           this.paginate = function (size, index) {
-            options.size = size;
-            options.index = index;
+            this.options.size = size;
+            this.options.index = index;
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isDefined(options.size) && angular.isDefined(options.index)) {
-              return {pageSize: options.size, currentPageIndex: options.index};
-            }
-            return null;
-          };
         };
+
+        QueryPart.getPart = function (options) {
+          if (angular.isDefined(options.size) && angular.isDefined(options.index)) {
+            return {pageSize: options.size, currentPageIndex: options.index};
+          }
+          return null;
+        };
+
+        return QueryPart;
       }];
 
     }]);
@@ -875,27 +904,28 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryParent');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
           /**
            * Documents must have parents that have one of the targeted parent id
            * @param parentIds
-           * @returns {*}
+           * @returns {QueryPart}
            */
           this.withParentIn = function (parentIds) {
-            options.parentIds = parentIds;
+            this.options.parentIds = parentIds;
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isArray(options.parentIds)) {
-              return options.parentIds.length ? ' AND ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
-            } else if (angular.isString(options.parentIds) && options.parentIds.length) {
-              return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
-            }
-            return '';
-          };
         };
+
+        QueryPart.getPart = function (options) {
+          if (angular.isArray(options.parentIds)) {
+            return options.parentIds.length ? ' AND ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
+          } else if (angular.isString(options.parentIds) && options.parentIds.length) {
+            return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
       }];
 
     }]);
@@ -906,125 +936,89 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryPath');
 
-      function pathQuery(val) {
-        return '(ecm:path STARTSWITH \'' + val + '\')';
-      }
-
       this.$get = [function () {
-        return function (options) {
 
-          function addPath(path, negate) {
-            if (!angular.isString(path)) {
-              throw 'Path should be a String';
-            }
-            if (angular.isUndefined(options.paths)) {
-              options.paths = [];
-            }
-            options.paths.push({value: path, negate: negate});
+        function pathQuery(val) {
+          return '(ecm:path STARTSWITH \'' + val + '\')';
+        }
+
+        function addPath(options, path, negate) {
+          if (!angular.isString(path)) {
+            throw 'Path should be a String';
           }
+          if (angular.isUndefined(options.paths)) {
+            options.paths = [];
+          }
+          options.paths.push({value: path, negate: negate});
+        }
 
+        var QueryPart = function () {
           /**
            * Documents have to be placed in target path
            * @param path
            * @returns {*}
            */
           this.inPath = function (path) {
-            addPath(path);
+            addPath(this.options, path);
             return this;
           };
-
           /**
            * Documents have to be placed in default type path
            * @returns {*}
            */
           this.inDefaultPath = function () {
-            addPath(this.DocumentConstructor.prototype.defaultPath);
+            addPath(this.options, this.DocumentConstructor.prototype.defaultPath);
             return this;
           };
-
           /**
            * Documents have to be placed in user's personal workspace
            * @returns {*}
            */
           this.inUserWorkspace = function (subPath) {
-            options.userSubPath = subPath || true;
+            this.options.userSubPath = subPath || true;
             return this;
           };
-
           /**
            * Documents are not in any user's personal workspace
            * @returns {*}
            */
           this.notInUserWorkspace = function () {
-            options.notInUserWorkspace = true;
+            this.options.notInUserWorkspace = true;
             return this;
           };
-
-          this.getPart = function (user) {
-            if (options.userSubPath) {
-              var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
-              if(angular.isString(options.userSubPath)) {
-                userDirectory += '/' + options.userSubPath;
-              }
-              addPath(userDirectory);
-              if (options.notInUserWorkspace) {
-                throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
-              }
-            }
-            if (options.notInUserWorkspace) {
-              addPath('/default-domain/UserWorkspaces/', true);
-            }
-
-            if (angular.isArray(options.paths)) {
-              var terms = options.paths.reduce(function (result, path) {
-                if (path.value.length) {
-                  result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
-                }
-                return result;
-              }, '');
-              return terms.length ? ' AND (' + terms + ')' : '';
-            } else if (angular.isString(options.paths) && options.paths.length) {
-              return ' AND ' + pathQuery(options.paths);
-            }
-            return '';
-          };
         };
+
+        QueryPart.getPart = function (options, user) {
+          if (options.userSubPath) {
+            var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
+            if (angular.isString(options.userSubPath)) {
+              userDirectory += '/' + options.userSubPath;
+            }
+            addPath(options, userDirectory);
+            if (options.notInUserWorkspace) {
+              throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+            }
+          }
+          if (options.notInUserWorkspace) {
+            addPath(options, '/default-domain/UserWorkspaces/', true);
+          }
+
+          if (angular.isArray(options.paths)) {
+            var terms = options.paths.reduce(function (result, path) {
+              if (path.value.length) {
+                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
+              }
+              return result;
+            }, '');
+            return terms.length ? ' AND (' + terms + ')' : '';
+          } else if (angular.isString(options.paths) && options.paths.length) {
+            return ' AND ' + pathQuery(options.paths);
+          }
+          return '';
+        };
+
+        return QueryPart;
       }];
-
-    }]);
-angular.module('ngNuxeoQueryPart')
-
-  .service('queryService', ['$http', 'nuxeoUrl', 'nuxeoConstants',
-    function ($http, url, cst) {
-
-      var getConfig = function(query) {
-       return {
-         params: query.nxql,
-         headers: {
-           /**
-            * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
-            * Possible values: dublincore, file, picture, *,...
-            */
-           'X-NXproperties': function() {
-             return query.getHeaders('nxProperties').join(',');
-           },
-           /**
-            * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
-            * Possible values: thumbnail, acls, preview, breadcrumb
-            */
-           'X-NXenrichers.document': 'thumbnail',
-           /**
-            * This header can be used when you want to control the transaction duration in seconds
-            */
-           'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-         },
-         isUserDependent: true
-       };
-      };
-
-      this.query = function(query, successCallback, errorCallback) {
-        return $http.get(url.query, getConfig(query)).then(successCallback, errorCallback);
-      };
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -1034,48 +1028,54 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQuerySorter');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Document sorting
+           * @param properties, properties to be sorted
+           * @param orders, order type [ASC | DESC] for each property
+           * @returns {QueryPart}
+           */
           this.sortBy = function (properties, orders) {
             if (angular.isArray(properties)) {
-              options.sortBy = properties;
+              this.options.sortBy = properties;
               if (angular.isArray(orders) && orders.length) {
-                options.sortOrder = [orders];
+                this.options.sortOrder = [orders];
               } else {
-                options.sortOrder = [];
+                this.options.sortOrder = [];
                 properties.forEach(function () {
-                  options.sortOrder.push('ASC');
-                });
+                  this.options.sortOrder.push('ASC');
+                }, this);
               }
             } else if (angular.isObject(properties)) {
-              options.sortBy = [];
-              options.sortOrder = [];
+              this.options.sortBy = [];
+              this.options.sortOrder = [];
               Object.keys(properties).forEach(function (key) {
-                options.sortBy.push(key);
-                options.sortOrder.push(properties[key]);
-              });
+                this.options.sortBy.push(key);
+                this.options.sortOrder.push(properties[key]);
+              }, this);
             } else if (angular.isString(properties)) {
-              options.sortBy = [properties];
+              this.options.sortBy = [properties];
               if (angular.isString(orders) && orders.length) {
-                options.sortOrder = [orders];
+                this.options.sortOrder = [orders];
               } else {
-                options.sortOrder = ['ASC'];
+                this.options.sortOrder = ['ASC'];
               }
             } else {
               throw 'Should sort using an Array or String property';
             }
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isDefined(options.sortBy)) {
-              return {sortBy: options.sortBy.join(','), sortOrder: options.sortOrder.join(',')};
-            }
-            return null;
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          if (angular.isDefined(options.sortBy)) {
+            return {sortBy: options.sortBy.join(','), sortOrder: options.sortOrder.join(',')};
+          }
+          return null;
+        };
+
+        return QueryPart;
+      }];
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -1085,29 +1085,36 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryState');
 
       this.$get = [function () {
-        return function (options) {
-
-          this.defaultOptions = {excludeDeleted: true};
-
+        var QueryPart = function () {
+          /**
+           * Documents must not be deleted
+           * @returns {QueryPart}
+           */
           this.excludeDeleted = function () {
-            options.excludeDeleted = true;
+            this.options.excludeDeleted = true;
             return this;
           };
-
+          /**
+           * Documents can be deleted
+           * @returns {QueryPart}
+           */
           this.includeDeleted = function () {
-            options.excludeDeleted = false;
+            this.options.excludeDeleted = false;
             return this;
-          };
-
-          this.getPart = function () {
-            if (options.excludeDeleted) {
-              return ' AND ecm:currentLifeCycleState <> \'deleted\'';
-            }
-            return '';
           };
         };
-      }];
 
+        QueryPart.defaultOptions = {excludeDeleted: true};
+
+        QueryPart.getPart = function (options) {
+          if (options.excludeDeleted) {
+            return ' AND ecm:currentLifeCycleState <> \'deleted\'';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -1137,25 +1144,30 @@ angular.module('ngNuxeoQueryPart')
       }
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target subject
+           * @param subject
+           * @returns {QueryPart}
+           */
           this.withSubject = function (subject) {
             if (subject && subject.properties) {
-              options.subjectId = subject.properties.id;
+              this.options.subjectId = subject.properties.id;
             }
             return this;
           };
-
-          this.getPart = function () {
-            var subjectId = options.subjectId;
-            if (angular.isString(subjectId)) {
-              return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          var subjectId = options.subjectId;
+          if (angular.isString(subjectId)) {
+            return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);
 angular.module('ngNuxeoQueryPart')
 
@@ -1164,35 +1176,75 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryTerm');
 
-      function termsQuery(val) {
-        return '(dc:title like \'%' + val + '%\')';
-      }
-
       this.$get = [function () {
-        return function (options) {
 
+        function termsQuery(val) {
+          return '(dc:title like \'%' + val + '%\')';
+        }
+
+        var QueryPart = function () {
+          /**
+           * Documents must have target terms
+           * @param terms
+           * @returns {QueryPart}
+           */
           this.withTerms = function (terms) {
-            options.terms = terms;
+            this.options.terms = terms;
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isArray(options.terms)) {
-              var terms = options.terms.reduce(function (result, val) {
-                if (val.length) {
-                  result += (result.length ? ' OR ' : '' ) + termsQuery(val);
-                }
-                return result;
-              }, '');
-              return terms.length ? ' AND (' + terms + ')' : '';
-            } else if (angular.isString(options.terms) && options.terms.length) {
-              return ' AND ' + termsQuery(options.terms);
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          if (angular.isArray(options.terms)) {
+            var terms = options.terms.reduce(function (result, val) {
+              if (val.length) {
+                result += (result.length ? ' OR ' : '' ) + termsQuery(val);
+              }
+              return result;
+            }, '');
+            return terms.length ? ' AND (' + terms + ')' : '';
+          } else if (angular.isString(options.terms) && options.terms.length) {
+            return ' AND ' + termsQuery(options.terms);
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
+    }]);
+angular.module('ngNuxeoQueryPart')
+
+  .service('queryService', ['$http', 'nuxeoUrl', 'nuxeoConstants',
+    function ($http, url, cst) {
+
+      var getConfig = function (query) {
+        return {
+          params: query.nxql,
+          headers: {
+            /**
+             * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
+             * Possible values: dublincore, file, picture, *,...
+             */
+            'X-NXproperties': function () {
+              return query.getHeaders('nxProperties').join(',');
+            },
+            /**
+             * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
+             * Possible values: thumbnail, acls, preview, breadcrumb
+             */
+            'X-NXenrichers.document': 'thumbnail',
+            /**
+             * This header can be used when you want to control the transaction duration in seconds
+             */
+            'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
+          },
+          isUserDependent: true
+        };
+      };
+
+      this.query = function (query, successCallback, errorCallback) {
+        return $http.get(url.query, getConfig(query)).then(successCallback, errorCallback);
+      };
     }]);
 angular.module('ngNuxeoClient')
 

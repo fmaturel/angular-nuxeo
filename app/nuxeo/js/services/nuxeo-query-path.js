@@ -5,89 +5,87 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryPath');
 
-      function pathQuery(val) {
-        return '(ecm:path STARTSWITH \'' + val + '\')';
-      }
-
       this.$get = [function () {
-        return function (options) {
 
-          function addPath(path, negate) {
-            if (!angular.isString(path)) {
-              throw 'Path should be a String';
-            }
-            if (angular.isUndefined(options.paths)) {
-              options.paths = [];
-            }
-            options.paths.push({value: path, negate: negate});
+        function pathQuery(val) {
+          return '(ecm:path STARTSWITH \'' + val + '\')';
+        }
+
+        function addPath(options, path, negate) {
+          if (!angular.isString(path)) {
+            throw 'Path should be a String';
           }
+          if (angular.isUndefined(options.paths)) {
+            options.paths = [];
+          }
+          options.paths.push({value: path, negate: negate});
+        }
 
+        var QueryPart = function () {
           /**
            * Documents have to be placed in target path
            * @param path
            * @returns {*}
            */
           this.inPath = function (path) {
-            addPath(path);
+            addPath(this.options, path);
             return this;
           };
-
           /**
            * Documents have to be placed in default type path
            * @returns {*}
            */
           this.inDefaultPath = function () {
-            addPath(this.DocumentConstructor.prototype.defaultPath);
+            addPath(this.options, this.DocumentConstructor.prototype.defaultPath);
             return this;
           };
-
           /**
            * Documents have to be placed in user's personal workspace
            * @returns {*}
            */
           this.inUserWorkspace = function (subPath) {
-            options.userSubPath = subPath || true;
+            this.options.userSubPath = subPath || true;
             return this;
           };
-
           /**
            * Documents are not in any user's personal workspace
            * @returns {*}
            */
           this.notInUserWorkspace = function () {
-            options.notInUserWorkspace = true;
+            this.options.notInUserWorkspace = true;
             return this;
           };
-
-          this.getPart = function (user) {
-            if (options.userSubPath) {
-              var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
-              if(angular.isString(options.userSubPath)) {
-                userDirectory += '/' + options.userSubPath;
-              }
-              addPath(userDirectory);
-              if (options.notInUserWorkspace) {
-                throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
-              }
-            }
-            if (options.notInUserWorkspace) {
-              addPath('/default-domain/UserWorkspaces/', true);
-            }
-
-            if (angular.isArray(options.paths)) {
-              var terms = options.paths.reduce(function (result, path) {
-                if (path.value.length) {
-                  result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
-                }
-                return result;
-              }, '');
-              return terms.length ? ' AND (' + terms + ')' : '';
-            } else if (angular.isString(options.paths) && options.paths.length) {
-              return ' AND ' + pathQuery(options.paths);
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options, user) {
+          if (options.userSubPath) {
+            var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
+            if (angular.isString(options.userSubPath)) {
+              userDirectory += '/' + options.userSubPath;
+            }
+            addPath(options, userDirectory);
+            if (options.notInUserWorkspace) {
+              throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+            }
+          }
+          if (options.notInUserWorkspace) {
+            addPath(options, '/default-domain/UserWorkspaces/', true);
+          }
+
+          if (angular.isArray(options.paths)) {
+            var terms = options.paths.reduce(function (result, path) {
+              if (path.value.length) {
+                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
+              }
+              return result;
+            }, '');
+            return terms.length ? ' AND (' + terms + ')' : '';
+          } else if (angular.isString(options.paths) && options.paths.length) {
+            return ' AND ' + pathQuery(options.paths);
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

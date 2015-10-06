@@ -6,27 +6,34 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryState');
 
       this.$get = [function () {
-        return function (options) {
-
-          this.defaultOptions = {excludeDeleted: true};
-
+        var QueryPart = function () {
+          /**
+           * Documents must not be deleted
+           * @returns {QueryPart}
+           */
           this.excludeDeleted = function () {
-            options.excludeDeleted = true;
+            this.options.excludeDeleted = true;
             return this;
           };
-
+          /**
+           * Documents can be deleted
+           * @returns {QueryPart}
+           */
           this.includeDeleted = function () {
-            options.excludeDeleted = false;
+            this.options.excludeDeleted = false;
             return this;
-          };
-
-          this.getPart = function () {
-            if (options.excludeDeleted) {
-              return ' AND ecm:currentLifeCycleState <> \'deleted\'';
-            }
-            return '';
           };
         };
-      }];
 
+        QueryPart.defaultOptions = {excludeDeleted: true};
+
+        QueryPart.getPart = function (options) {
+          if (options.excludeDeleted) {
+            return ' AND ecm:currentLifeCycleState <> \'deleted\'';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

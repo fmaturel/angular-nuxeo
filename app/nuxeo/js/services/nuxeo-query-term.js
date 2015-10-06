@@ -5,33 +5,39 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryTerm');
 
-      function termsQuery(val) {
-        return '(dc:title like \'%' + val + '%\')';
-      }
-
       this.$get = [function () {
-        return function (options) {
 
+        function termsQuery(val) {
+          return '(dc:title like \'%' + val + '%\')';
+        }
+
+        var QueryPart = function () {
+          /**
+           * Documents must have target terms
+           * @param terms
+           * @returns {QueryPart}
+           */
           this.withTerms = function (terms) {
-            options.terms = terms;
+            this.options.terms = terms;
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isArray(options.terms)) {
-              var terms = options.terms.reduce(function (result, val) {
-                if (val.length) {
-                  result += (result.length ? ' OR ' : '' ) + termsQuery(val);
-                }
-                return result;
-              }, '');
-              return terms.length ? ' AND (' + terms + ')' : '';
-            } else if (angular.isString(options.terms) && options.terms.length) {
-              return ' AND ' + termsQuery(options.terms);
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          if (angular.isArray(options.terms)) {
+            var terms = options.terms.reduce(function (result, val) {
+              if (val.length) {
+                result += (result.length ? ' OR ' : '' ) + termsQuery(val);
+              }
+              return result;
+            }, '');
+            return terms.length ? ' AND (' + terms + ')' : '';
+          } else if (angular.isString(options.terms) && options.terms.length) {
+            return ' AND ' + termsQuery(options.terms);
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

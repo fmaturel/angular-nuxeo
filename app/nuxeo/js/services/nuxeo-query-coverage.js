@@ -6,30 +6,35 @@ angular.module('ngNuxeoQueryPart')
       Query.addQueryPartProvider('NuxeoQueryCoverage');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target coverage
+           * @param coverage
+           * @returns {QueryPart}
+           */
           this.withCoverage = function (coverage) {
             if (coverage && coverage.properties) {
               if (coverage.directoryName === 'continent') {
-                options.continentId = coverage.properties.id;
+                this.options.continentId = coverage.properties.id;
               } else if (coverage.directoryName === 'country') {
-                options.country = coverage.properties;
+                this.options.country = coverage.properties;
               }
             }
             return this;
           };
-
-          this.getPart = function () {
-            var continentId = options.continentId;
-            var country = options.country;
-            if (angular.isString(continentId)) {
-              return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
-            } else if (angular.isObject(country)) {
-              return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
-            }
-            return '';
-          };
         };
-      }];
 
+        QueryPart.getPart = function (options) {
+          var continentId = options.continentId;
+          var country = options.country;
+          if (angular.isString(continentId)) {
+            return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
+          } else if (angular.isObject(country)) {
+            return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
     }]);

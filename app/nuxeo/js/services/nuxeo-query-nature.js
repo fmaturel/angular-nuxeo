@@ -6,23 +6,29 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryNature');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Documents must have target nature
+           * @param nature
+           * @returns {QueryPart}
+           */
           this.withNature = function (nature) {
             if (nature && nature.properties) {
-              options.natureId = nature.properties.id;
+              this.options.natureId = nature.properties.id;
             }
             return this;
           };
-
-          this.getPart = function () {
-            var natureId = options.natureId;
-            if (angular.isString(natureId)) {
-              return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
-            }
-            return '';
-          };
         };
+
+        QueryPart.getPart = function (options) {
+          var natureId = options.natureId;
+          if (angular.isString(natureId)) {
+            return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
+          }
+          return '';
+        };
+
+        return QueryPart;
       }];
 
     }]);

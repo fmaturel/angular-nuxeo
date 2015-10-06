@@ -14,38 +14,32 @@ angular.module('ngNuxeoQueryPart')
       function ($injector, queryService, $log) {
 
         /**
+         * Compose Query object
+         */
+        var parts = [], defaultOptions = {};
+
+        // Enrich Query with query providers
+        queryParts.forEach(function (queryPart) {
+          var Part = $injector.get(queryPart);
+
+          angular.extend(Query.prototype, new Part());
+          if (angular.isObject(Part.defaultOptions)) {
+            angular.extend(defaultOptions, Part.defaultOptions);
+          }
+          if (angular.isFunction(Part.getPart)) {
+            parts.push(Part.getPart);
+          }
+        }, this);
+
+        /**
          * Query constructor
          * @param query
          * @constructor
          */
         function Query(query) {
+          this.options = angular.copy(defaultOptions);
           angular.extend(this, query);
         }
-
-        /**
-         * Compose Query object
-         */
-        var options = {}, parts = [];
-
-        // Enrich Query with query providers
-        queryParts.forEach(function (queryPart) {
-          var Part = $injector.get(queryPart);
-          var part = new Part(options);
-
-          angular.extend(Query.prototype, part);
-          if (angular.isObject(part.defaultOptions)) {
-            angular.extend(options, part.defaultOptions);
-          }
-          if (angular.isFunction(part.getPart)) {
-            parts.push(part.getPart);
-          }
-        }, this);
-
-        /**
-         * Query parts
-         * @type {Array}
-         */
-        Query.prototype.parts = parts;
 
         /**
          * Get nuxeo query headers
@@ -99,8 +93,8 @@ angular.module('ngNuxeoQueryPart')
 
             // Build query
             that.nxql = {query: baseQuery};
-            that.parts.forEach(function (getPart) {
-              var result = getPart(user);
+            parts.forEach(function (getPart) {
+              var result = getPart(that.options, user);
               if (result) {
                 if (angular.isString(result)) {
                   that.nxql.query += result;

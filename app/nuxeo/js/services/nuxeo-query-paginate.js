@@ -6,21 +6,28 @@ angular.module('ngNuxeoQueryPart')
       QueryProvider.addQueryPartProvider('NuxeoQueryPaginate');
 
       this.$get = [function () {
-        return function (options) {
-
+        var QueryPart = function () {
+          /**
+           * Document pagination
+           * @param size, page size
+           * @param index, page index
+           * @returns {QueryPart}
+           */
           this.paginate = function (size, index) {
-            options.size = size;
-            options.index = index;
+            this.options.size = size;
+            this.options.index = index;
             return this;
           };
-
-          this.getPart = function () {
-            if (angular.isDefined(options.size) && angular.isDefined(options.index)) {
-              return {pageSize: options.size, currentPageIndex: options.index};
-            }
-            return null;
-          };
         };
+
+        QueryPart.getPart = function (options) {
+          if (angular.isDefined(options.size) && angular.isDefined(options.index)) {
+            return {pageSize: options.size, currentPageIndex: options.index};
+          }
+          return null;
+        };
+
+        return QueryPart;
       }];
 
     }]);
