@@ -2,7 +2,7 @@ angular.module('ngNuxeoUI')
 
   .directive('nuxeoSelect', ['nuxeo', function (nuxeo) {
     return {
-      restrict: 'E',
+      restrict: 'EA',
       replace: true, // replaces the <nuxeo-select> element
       templateUrl: 'nuxeo-ui/views/nuxeo-select.html',
       scope: {
