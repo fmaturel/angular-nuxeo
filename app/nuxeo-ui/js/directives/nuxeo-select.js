@@ -1,6 +1,7 @@
 angular.module('ngNuxeoUI')
 
   .directive('nuxeoSelect', ['nuxeo', function (nuxeo) {
+
     return {
       restrict: 'EA',
       replace: true, // replaces the <nuxeo-select> element
@@ -10,10 +11,10 @@ angular.module('ngNuxeoUI')
         property: '@',
         model: '='
       },
-      link: function postLink(scope) {
-        nuxeo[scope.directory].get(function (data) {
-          scope.items = data.entries;
+      controller: ['$scope', function ($scope) {
+        nuxeo[$scope.directory].get(function (data) {
+          $scope.items = data.entries;
         });
-      }
+      }]
     };
   }]);

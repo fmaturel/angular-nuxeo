@@ -116,6 +116,7 @@ angular.module('ngNuxeoUI')
 angular.module('ngNuxeoUI')
 
   .directive('nuxeoSelect', ['nuxeo', function (nuxeo) {
+
     return {
       restrict: 'EA',
       replace: true, // replaces the <nuxeo-select> element
@@ -125,11 +126,11 @@ angular.module('ngNuxeoUI')
         property: '@',
         model: '='
       },
-      link: function postLink(scope) {
-        nuxeo[scope.directory].get(function (data) {
-          scope.items = data.entries;
+      controller: ['$scope', function ($scope) {
+        nuxeo[$scope.directory].get(function (data) {
+          $scope.items = data.entries;
         });
-      }
+      }]
     };
   }]);
 angular.module('ngNuxeoUI')
@@ -214,7 +215,7 @@ angular.module('nuxeo-ui/views/nuxeo-picture.html', []).run(['$templateCache', f
 
 angular.module('nuxeo-ui/views/nuxeo-select.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-select.html',
-    '<select ng-options="item.properties.{{property || \'label\'}} for item in items" ng-model="model">\n' +
+    '<select ng-options="item.properties.{{property || \'id\'}} for item in items" ng-model="model">\n' +
     '  <!-- items -->\n' +
     '</select>');
 }]);
