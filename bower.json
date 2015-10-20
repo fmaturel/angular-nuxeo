@@ -1,7 +1,7 @@
 {
   "name": "angular-nuxeo",
   "appPath": "app",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A nuxeo angular client",
   "homepage": "https://github.com/fmaturel/angular-nuxeo",
   "license": "MIT",
