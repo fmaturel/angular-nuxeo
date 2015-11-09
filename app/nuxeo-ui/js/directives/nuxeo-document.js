@@ -31,6 +31,8 @@ angular.module('ngNuxeoUI')
 
         if (attr.deletable === 'true') {
           scope.entry.isDeletable = true;
+        } else if (attr.deletable === 'false'){
+          scope.entry.isDeletable = false;
         }
 
         var publishPath = attr.publishTo;

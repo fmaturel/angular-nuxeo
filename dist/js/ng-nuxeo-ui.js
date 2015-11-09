@@ -52,6 +52,8 @@ angular.module('ngNuxeoUI')
 
         if (attr.deletable === 'true') {
           scope.entry.isDeletable = true;
+        } else if (attr.deletable === 'false'){
+          scope.entry.isDeletable = false;
         }
 
         var publishPath = attr.publishTo;
@@ -170,7 +172,10 @@ angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', 
     '    </div>\n' +
     '  </a>\n' +
     '\n' +
+    '  <div class="dimensions">{{entry.dimensions}}</div>\n' +
+    '\n' +
     '  <div class="action">\n' +
+    '\n' +
     '    <a class="download" title="Download" ng-href="{{entry.srcURL}}" ng-if="entry.srcURL">\n' +
     '      <span class="glyphicon glyphicon-download-alt"></span>\n' +
     '    </a>\n' +
