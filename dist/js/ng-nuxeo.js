@@ -572,7 +572,7 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function (user) {
           if (user && user.id) {
-            user.pathId = user.id.replace(/[@\.]/g, '-');
+            user.pathId = user.id.replace(/[@\.]/g, '-').substring(0, 30);
           }
           defer.resolve(angular.extend(nuxeoUser, user));
         }, function () {
