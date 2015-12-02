@@ -21,7 +21,7 @@ An angular JS client for the nuxeo platform
 
 ```
 
-- Add Apache VHost or Nginx to proxy your nuxeo server request to API and local requests to http://localhost:9031:
+- Add Apache VHost or Nginx to proxy your nuxeo server request to API and local requests to http://localhost:9020:
 ```
 <VirtualHost *:80>
         ServerName localhost
@@ -31,8 +31,8 @@ An angular JS client for the nuxeo platform
         ProxyPass /nuxeo http://demo.nuxeo.com/nuxeo
         ProxyPassReverse /nuxeo http://demo.nuxeo.com/nuxeo
 
-        ProxyPass / http://localhost:9031/
-        ProxyPassReverse / http://localhost:9031/
+        ProxyPass / http://localhost:9020/
+        ProxyPassReverse / http://localhost:9020/
 
         ErrorLog ${APACHE_LOG_DIR}/error.log
 

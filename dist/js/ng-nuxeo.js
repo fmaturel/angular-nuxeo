@@ -166,12 +166,13 @@ angular.module('ngNuxeoClient')
       Document.prototype.upload = function (file, successCallback, errorCallback) {
 
         // First create a document
+        var self = this;
         return this.createInUserWorkspace(function (response) {
           if (!response || !response.data || !response.data.uid) {
             errorCallback();
           }
 
-          this.automate({
+          self.automate({
             url: url.automate + '/Blob.AttachOnDocument',
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -290,6 +291,7 @@ angular.module('ngNuxeoClient')
 
       return Document;
     }]);
+
 angular.module('ngNuxeoClient')
 
   .factory('Folder', ['Document', 'nuxeoUtils',
