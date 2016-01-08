@@ -8,8 +8,7 @@ angular.module('ngNuxeoUI')
       templateUrl: 'nuxeo-ui/views/nuxeo-select.html',
       scope: {
         directory: '@',
-        property: '@',
-        model: '='
+        property: '@'
       },
       controller: ['$scope', function ($scope) {
         nuxeo[$scope.directory].get(function (data) {

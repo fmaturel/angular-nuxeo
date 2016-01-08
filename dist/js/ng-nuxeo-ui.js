@@ -125,8 +125,7 @@ angular.module('ngNuxeoUI')
       templateUrl: 'nuxeo-ui/views/nuxeo-select.html',
       scope: {
         directory: '@',
-        property: '@',
-        model: '='
+        property: '@'
       },
       controller: ['$scope', function ($scope) {
         nuxeo[$scope.directory].get(function (data) {
@@ -216,7 +215,7 @@ angular.module('nuxeo-ui/views/nuxeo-picture.html', []).run(['$templateCache', f
 
 angular.module('nuxeo-ui/views/nuxeo-select.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-select.html',
-    '<select ng-options="item.properties.{{property || \'id\'}} for item in items" ng-model="model">\n' +
+    '<select title="{{directory}}" ng-options="item.properties.{{property || \'id\'}} for item in items">\n' +
     '  <!-- items -->\n' +
     '</select>');
 }]);
