@@ -35,7 +35,7 @@ angular.module('ngNuxeoUI')
           scope.entry.isDeletable = false;
         }
 
-        var publishPath = attr.publishTo;
+        var publishPath = attr.publishPath;
         if (publishPath) {
           if (angular.isString(publishPath)) {
             scope.publishPath = publishPath;

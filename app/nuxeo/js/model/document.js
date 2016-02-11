@@ -119,8 +119,14 @@ angular.module('ngNuxeoClient')
                 filename: 'request',
                 type: 'application/json+nxrequest'
               }));
-              //now add all of the assigned files
-              formData.append('file', file);
+              // now add all of the assigned files
+              try {
+                // Should work in latests versions of chrome and firefox
+                formData.append('file', file, file.name || 'descriptor.json');
+              } catch (e) {
+                // Else use the plain old standard method
+                formData.append('file', file);
+              }
               return formData;
             }
           }, successCallback, errorCallback);

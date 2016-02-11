@@ -56,7 +56,7 @@ angular.module('ngNuxeoUI')
           scope.entry.isDeletable = false;
         }
 
-        var publishPath = attr.publishTo;
+        var publishPath = attr.publishPath;
         if (publishPath) {
           if (angular.isString(publishPath)) {
             scope.publishPath = publishPath;
@@ -188,7 +188,7 @@ angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache',
   $templateCache.put('nuxeo-ui/views/nuxeo-documents.html',
     '<ul class="nuxeo-docs">\n' +
     '  <li ng-repeat="entry in documents.entries">\n' +
-    '    <nuxeo-document entry="entry" publish-to="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>\n' +
+    '    <nuxeo-document entry="entry" publish-path="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>\n' +
     '  </li>\n' +
     '</ul>');
 }]);

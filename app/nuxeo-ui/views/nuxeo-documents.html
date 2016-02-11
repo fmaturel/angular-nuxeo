@@ -1,5 +1,5 @@
 <ul class="nuxeo-docs">
   <li ng-repeat="entry in documents.entries">
-    <nuxeo-document entry="entry" publish-to="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>
+    <nuxeo-document entry="entry" publish-path="{{publishPath}}" on-success="onSuccess()" on-error="onError()"></nuxeo-document>
   </li>
 </ul>
