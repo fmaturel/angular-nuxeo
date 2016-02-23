@@ -33,7 +33,7 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeo service', function () {
 
     it('should create a Section when requested', function () {
-      httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/site/api/v1/user/Administrator').respond(dataUser);
+      httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
       httpBackend.whenPOST('http://demo.nuxeo.local/nuxeo/site/automation/Document.Create').respond('{}');
 
