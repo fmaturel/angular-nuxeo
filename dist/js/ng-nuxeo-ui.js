@@ -124,12 +124,12 @@ angular.module('ngNuxeoUI')
       replace: true, // replaces the <nuxeo-select> element
       templateUrl: 'nuxeo-ui/views/nuxeo-select.html',
       scope: {
-        directory: '@',
-        property: '@'
+        directory: '@'
       },
       controller: ['$scope', function ($scope) {
         nuxeo[$scope.directory].get(function (data) {
-          $scope.items = data.entries;
+          $scope.options = [{properties: {id: '-- all --', noFilter: true}}];
+          $scope.options = $scope.options.concat(data.entries);
         });
       }]
     };
@@ -215,8 +215,9 @@ angular.module('nuxeo-ui/views/nuxeo-picture.html', []).run(['$templateCache', f
 
 angular.module('nuxeo-ui/views/nuxeo-select.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-select.html',
-    '<select title="{{directory}}" ng-options="item.properties.{{property || \'id\'}} for item in items">\n' +
-    '  <!-- items -->\n' +
+    '<select title="{{directory}}"\n' +
+    '        ng-options="option as option.properties.id for option in options | orderBy:\'properties.id\'">\n' +
+    '  <!-- options -->\n' +
     '</select>');
 }]);
 

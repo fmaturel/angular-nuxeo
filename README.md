@@ -21,24 +21,30 @@ An angular JS client for the nuxeo platform
 
 ```
 
-- Add Apache VHost or Nginx to proxy your nuxeo server request to API and local requests to http://localhost:9020:
+- Add Apache VHost or Nginx to proxy your nuxeo server request to nuxeo demo API:
 ```
 <VirtualHost *:80>
-        ServerName localhost
-        ServerAlias demo.nuxeo.local
+        ServerName demo.nuxeo.local
         ServerAdmin webmaster@localhost
+
+        RequestHeader append nuxeo-virtual-host "http://demo.nuxeo.local/"
 
         ProxyPass /nuxeo http://demo.nuxeo.com/nuxeo
         ProxyPassReverse /nuxeo http://demo.nuxeo.com/nuxeo
 
-        ProxyPass / http://localhost:9020/
-        ProxyPassReverse / http://localhost:9020/
+        # force apache to return 200
+        RewriteEngine On
+        RewriteCond %{REQUEST_METHOD} OPTIONS
+        RewriteRule .* / [R=200,L]
+
+        SetEnvIf Origin "^(https?://.*\.*(localhost)(?::\d{1,5})?)$" CORS_ALLOW_ORIGIN=$0
+        Header unset Access-Control-Allow-Origin
+        Header always set Access-Control-Allow-Origin "%{CORS_ALLOW_ORIGIN}e" env=CORS_ALLOW_ORIGIN
+        Header always set Access-Control-Allow-Credentials "true"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "Accept, Content-type, Authorization, Nuxeo-Transaction-Timeout, X-NXproperties, X-NXVoidOperation, X-NXenrichers.document"
 
         ErrorLog ${APACHE_LOG_DIR}/error.log
-
-        # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.
-        LogLevel warn
-
         CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```

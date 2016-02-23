@@ -20,7 +20,7 @@ angular.module('ngNuxeoQuery', [
   .constant('nuxeoConstants', {
     nuxeo: {
       baseURL: 'http://demo.nuxeo.local/nuxeo',
-      apiPath: '/site/api/v1',
+      apiPath: '/api/v1',
       automationPath: '/site/automation',
       timeout: 5 // Timeout in seconds
     }
@@ -623,7 +623,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {QueryPart}
            */
           this.withCoverage = function (coverage) {
-            if (coverage && coverage.properties) {
+            if (coverage && coverage.properties && !coverage.properties.noFilter) {
               if (coverage.directoryName === 'continent') {
                 this.options.continentId = coverage.properties.id;
               } else if (coverage.directoryName === 'country') {
@@ -852,7 +852,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {QueryPart}
            */
           this.withNature = function (nature) {
-            if (nature && nature.properties) {
+            if (nature && nature.properties && !nature.properties.noFilter) {
               this.options.natureId = nature.properties.id;
             }
             return this;
@@ -1159,7 +1159,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {QueryPart}
            */
           this.withSubject = function (subject) {
-            if (subject && subject.properties) {
+            if (subject && subject.properties && !subject.properties.noFilter) {
               this.options.subjectId = subject.properties.id;
             }
             return this;

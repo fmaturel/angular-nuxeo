@@ -33,7 +33,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {QueryPart}
            */
           this.withSubject = function (subject) {
-            if (subject && subject.properties) {
+            if (subject && subject.properties && !subject.properties.noFilter) {
               this.options.subjectId = subject.properties.id;
             }
             return this;

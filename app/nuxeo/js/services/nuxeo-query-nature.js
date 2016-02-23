@@ -13,7 +13,7 @@ angular.module('ngNuxeoQueryPart')
            * @returns {QueryPart}
            */
           this.withNature = function (nature) {
-            if (nature && nature.properties) {
+            if (nature && nature.properties && !nature.properties.noFilter) {
               this.options.natureId = nature.properties.id;
             }
             return this;

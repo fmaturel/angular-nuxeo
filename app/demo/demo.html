@@ -99,19 +99,19 @@
 
           <div class="form-group col-xs-12">
             <label for="continent" class="col-xs-4 text-right">Continent</label>
-            <input nuxeo-select id="continent" class="col-xs-4 text-left" directory="continents" ng-model="search.advanced.selectedContinent" ng-change="fn.reduceCountry()">
+            <nuxeo-select id="continent" class="col-xs-4 text-left" directory="continents" ng-model="search.advanced.selectedContinent" ng-change="fn.reduceCountry()"></nuxeo-select>
           </div>
           <div class="form-group col-xs-12">
             <label for="country" class="col-xs-4 text-right">Country</label>
-            <input nuxeo-select id="country" class="col-xs-4 text-left" directory="countries" ng-model="search.advanced.selectedCountry" ng-change="fn.reduceContinent()">
+            <nuxeo-select id="country" class="col-xs-4 text-left" directory="countries" ng-model="search.advanced.selectedCountry" ng-change="fn.reduceContinent()"></nuxeo-select>
           </div>
           <div class="form-group col-xs-12">
             <label for="nature" class="col-xs-4 text-right">Natures</label>
-            <input nuxeo-select id="nature" class="col-xs-4 text-left" directory="natures" ng-model="search.advanced.selectedNature">
+            <nuxeo-select id="nature" class="col-xs-4 text-left" directory="natures" ng-model="search.advanced.selectedNature"></nuxeo-select>
           </div>
           <div class="form-group col-xs-12">
             <label for="subject" class="col-xs-4 text-right">Subjects</label>
-            <input nuxeo-select id="subject" class="col-xs-4 text-left" directory="subjects" property="id" ng-model="search.advanced.selectedSubject">
+            <nuxeo-select id="subject" class="col-xs-4 text-left" directory="subjects" ng-model="search.advanced.selectedSubject"></nuxeo-select>
           </div>
         </div>
       </form>

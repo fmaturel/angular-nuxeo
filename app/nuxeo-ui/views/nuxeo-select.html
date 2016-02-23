@@ -1,3 +1,4 @@
-<select title="{{directory}}" ng-options="item.properties.{{property || 'id'}} for item in items">
-  <!-- items -->
+<select title="{{directory}}"
+        ng-options="option as option.properties.id for option in options | orderBy:'properties.id'">
+  <!-- options -->
 </select>

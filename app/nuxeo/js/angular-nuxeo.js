@@ -17,7 +17,7 @@ angular.module('ngNuxeoQuery', [
   .constant('nuxeoConstants', {
     nuxeo: {
       baseURL: 'http://demo.nuxeo.local/nuxeo',
-      apiPath: '/site/api/v1',
+      apiPath: '/api/v1',
       automationPath: '/site/automation',
       timeout: 5 // Timeout in seconds
     }

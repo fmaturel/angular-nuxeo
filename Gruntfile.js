@@ -102,7 +102,7 @@
         livereload: {
           options: {
             open: {
-              target: 'http://demo.nuxeo.local/demo'
+              target: 'http://localhost:9020/demo'
             },
             middleware: function (connect) {
               return [
