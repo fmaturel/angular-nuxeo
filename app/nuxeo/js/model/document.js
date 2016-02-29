@@ -121,7 +121,7 @@ angular.module('ngNuxeoClient')
               }));
               // now add all of the assigned files
               try {
-                // Should work in latests versions of chrome and firefox
+                // Should work in latest versions of chrome and firefox
                 formData.append('file', file, file.name || 'descriptor.json');
               } catch (e) {
                 // Else use the plain old standard method
@@ -129,7 +129,9 @@ angular.module('ngNuxeoClient')
               }
               return formData;
             }
-          }, successCallback, errorCallback);
+          }, function() {
+            successCallback(response.data);
+          }, errorCallback);
         }, errorCallback);
       };
 
