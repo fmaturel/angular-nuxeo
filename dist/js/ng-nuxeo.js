@@ -165,13 +165,10 @@ angular.module('ngNuxeoClient')
        */
       Document.prototype.upload = function (file, successCallback, errorCallback) {
 
-        // First create a document
         var self = this;
-        return this.createInUserWorkspace(function (response) {
-          if (!response || !response.data || !response.data.uid) {
-            errorCallback();
-          }
 
+        // First create a document
+        var upload = function (entry) {
           self.automate({
             url: url.automate + '/Blob.AttachOnDocument',
             headers: {
@@ -180,7 +177,7 @@ angular.module('ngNuxeoClient')
             },
             data: {
               params: {
-                document: response.data.uid,
+                document: entry.uid,
                 save: 'true',
                 xpath: 'file:content'
               }
@@ -204,10 +201,24 @@ angular.module('ngNuxeoClient')
               }
               return formData;
             }
-          }, function() {
-            successCallback(response.data);
+          }, function () {
+            successCallback(entry);
           }, errorCallback);
-        }, errorCallback);
+        };
+
+        // If document exists with a valid uid, no need to create one
+        if (this.uid) {
+          upload(this);
+        } else {
+          // Else creates the document in user workspace before uploading
+          return this.createInUserWorkspace(function (response) {
+            if (response && response.data && response.data.uid) {
+              upload(response.data);
+            } else {
+              errorCallback(response);
+            }
+          }, errorCallback);
+        }
       };
 
       /**
