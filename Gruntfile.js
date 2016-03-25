@@ -204,7 +204,17 @@
         options: {
           base: '<%= yeoman.app %>',
           module: 'ngNuxeoUITemplates',
-          quoteChar: '\''
+          quoteChar: '\'',
+          htmlmin: {
+            collapseBooleanAttributes: true,
+            collapseWhitespace: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+            removeEmptyAttributes: true,
+            removeRedundantAttributes: true,
+            removeScriptTypeAttributes: true,
+            removeStyleLinkTypeAttributes: true
+          }
         },
         templates: {
           src: ['<%= yeoman.app %>/nuxeo-ui/views/**/*.html'],
