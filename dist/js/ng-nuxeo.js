@@ -984,9 +984,9 @@ angular.module('ngNuxeoQueryPart')
             return this;
           };
           /**
-           * Documents have to be placed in target domain
-           * @param domainName
-           * @param subPath
+           * Documents have to be placed in target domain workspace
+           * @param domainName domain name
+           * @param subPath a subPath where searching documents
            * @returns {*}
            */
           this.inDomainWorkspace = function (domainName, subPath) {
