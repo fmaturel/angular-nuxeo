@@ -150,7 +150,7 @@
           options: {
             jshintrc: '.jshintrc'
           },
-          src: ['test/**/{,*/}*.js']
+          src: ['test/**/{,*/}*.js', '!test/helper.js']
         }
       },
 
