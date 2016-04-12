@@ -1,7 +1,7 @@
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', '$resource', 'nuxeoUrl',
-    function ($q, $injector, $resource, url) {
+  .service('nuxeoUser', ['$q', '$injector', '$resource', 'nuxeoUrl', 'nuxeoUtils',
+    function ($q, $injector, $resource, url, utils) {
 
       var User = $resource(url.user, {userName: '@userName'});
 
@@ -30,7 +30,7 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function (user) {
           if (user && user.id) {
-            user.pathId = user.id.replace(/[@\.]/g, '-').substring(0, 30);
+            user.pathId = utils.generateId(user.id, '-', false, 30);
           }
           defer.resolve(angular.extend(nuxeoUser, user));
         }, function () {
