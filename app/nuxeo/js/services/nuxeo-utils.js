@@ -121,7 +121,7 @@ angular.module('ngNuxeoClient')
           id += wordsList[0];
           for (var i = 1; i < wordsList.length; i++) {
             var newWord = wordsList[i];
-            if (id + newWord.length > maxChars) {
+            if (id.length + newWord.length > maxChars) {
               break;
             } else {
               id += wordSeparator + newWord;
