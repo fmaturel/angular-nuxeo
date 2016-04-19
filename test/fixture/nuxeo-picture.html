@@ -1,6 +1,9 @@
 <a href="javascript:void(0)">
   <div class="media picture" ng-class="entry.type | lowercase">
-    <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" ng-if="entry.type === 'Picture'" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg"></div>
+    <nuxeo-picture ng-if="entry.type === 'Picture'" class="ng-scope">
+      <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg">
+    </nuxeo-picture>
+  </div>
   <div class="caption">
     <span class="ng-binding">test.jpg</span>
   </div>

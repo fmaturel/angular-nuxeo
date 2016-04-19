@@ -5,7 +5,7 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryMixin');
 
-      this.$get = [function () {
+      this.$get = ['nuxeoUtils', function (utils) {
         var QueryPart = function () {
           /**
            * Excludes some document facets from search query
@@ -45,23 +45,12 @@ angular.module('ngNuxeoQueryPart')
             criterias += ' AND ecm:mixinType <> \'' + excl + '\'';
           }
 
-          // Inclusion
-          var incl = options.mixin;
-
-          // Transform if Object => Array
-          if (angular.isObject(incl)) {
-            incl = Object.keys(incl).reduce(function (result, key) {
-              if (incl[key]) {
-                result.push(key);
-              }
-              return result;
-            }, []);
-          }
-
+          // Inclusion : Transform if Object => Array
+          var incl = utils.objToArray(options.mixin);
           if (angular.isArray(incl) && incl.length) {
             criterias += ' AND ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
-          } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
-            criterias += ' AND ecm:mixinType = \'' + options.mediaTypes + '\'';
+          } else if (angular.isString(incl) && incl.length) {
+            criterias += ' AND ecm:mixinType = \'' + incl + '\'';
           }
 
           return criterias;

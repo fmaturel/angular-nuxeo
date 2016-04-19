@@ -3,7 +3,6 @@ angular.module('ngNuxeoUI')
   .directive('nuxeoPicture', ['nuxeoConstants', function (cst) {
     return {
       restrict: 'E',
-      replace: true, // replaces the <nuxeo-picture> element
       templateUrl: 'nuxeo-ui/views/nuxeo-picture.html',
       link: function (scope, element, attrs) {
         if (attrs.display === 'large') {

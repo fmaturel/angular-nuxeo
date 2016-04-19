@@ -5,7 +5,7 @@ angular.module('ngNuxeoQueryPart')
 
       QueryProvider.addQueryPartProvider('NuxeoQueryMedia');
 
-      this.$get = [function () {
+      this.$get = ['nuxeoUtils', function (utils) {
         var QueryPart = function () {
           /**
            * Excludes some media type from search query
@@ -28,7 +28,7 @@ angular.module('ngNuxeoQueryPart')
         };
 
         QueryPart.defaultOptions = {
-          // Rather use mixin exlusion = 'Folderish' and 'HiddenInNavigation'
+          // Rather use mixin exclusion = 'Folderish' and 'HiddenInNavigation'
           excludeMediaTypes: [
             'Favorites'
             //'Domain', 'Section', 'UserProfile', 'Workspace',
@@ -50,22 +50,11 @@ angular.module('ngNuxeoQueryPart')
           }
 
           // Inclusion
-          var incl = options.mediaTypes;
-
-          // Transform if Object => Array
-          if (angular.isObject(incl)) {
-            incl = Object.keys(incl).reduce(function (result, key) {
-              if (incl[key]) {
-                result.push(key);
-              }
-              return result;
-            }, []);
-          }
-
+          var incl = utils.objToArray(options.mediaTypes);
           if (angular.isArray(incl) && incl.length) {
             criterias += ' AND ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
-          } else if (angular.isString(options.mediaTypes) && options.mediaTypes.length) {
-            criterias += ' AND ecm:primaryType = \'' + options.mediaTypes + '\'';
+          } else if (angular.isString(incl) && incl.length) {
+            criterias += ' AND ecm:primaryType = \'' + incl + '\'';
           }
 
           return criterias;

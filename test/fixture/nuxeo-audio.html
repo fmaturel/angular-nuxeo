@@ -1,11 +1,11 @@
 <a href="javascript:void(0)">
   <div class="media audio" ng-class="entry.type | lowercase">
-    <div ng-if="entry.type === 'Audio'" class="ng-scope">
+    <nuxeo-audio ng-if="entry.type === 'Audio'" class="ng-scope">
       <img alt="audio" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png">
       <audio controls="" preload="none">
         <source ng-src="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav" src="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav">
       </audio>
-    </div>
+    </nuxeo-audio>
   </div>
   <div class="caption"><span class="ng-binding">test.wav</span></div>
 </a>
