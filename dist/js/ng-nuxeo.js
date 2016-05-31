@@ -304,7 +304,7 @@ angular.module('ngNuxeoClient')
 
       Document.query = function (params) {
         return new Query(angular.extend({
-          DocumentConstructor: this.prototype.constructor,
+          DocumentConstructor: this.prototype.constructor
         }, params));
       };
 

@@ -1,6 +1,6 @@
 {
   "name": "angular-nuxeo",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An angular JS client for the nuxeo platform",
   "repository": "https://github.com/fmaturel/angular-nuxeo",
   "license": "MIT",
