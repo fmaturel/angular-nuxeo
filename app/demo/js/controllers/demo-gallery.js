@@ -12,7 +12,7 @@ angular.module('ngNuxeoDemoApp')
         terms: '',
 
         advanced: {
-          myMediaOnly: false,
+          myMediaOnly: true,
           continents: {},
           selectedContinent: null,
           countries: {},
@@ -55,42 +55,53 @@ angular.module('ngNuxeoDemoApp')
 
       // ######################################################################### SEARCH WATCHER
       $scope.uiChange = function () {
-        var query = nuxeo.Document.query()
+
+        nuxeo.Document.query().setExactPathMode(true).inUserWorkspace().$get(function(documents) {
+          var userWorkspaceId = documents.entries[0].uid;
+          console.info(userWorkspaceId);
+
+          var query = nuxeo.Document.query()
+
+          // All document paths should exactly match requested
+          //.setExactPathMode(true)
 
           // Defaults override if needed
           //.includeDeleted()
-          .includeExpired()
+            .includeExpired()
 
-          // Basic search
-          .withTerms($scope.search.terms.split(' '))
-          .withMedia(angular.extend($scope.search.mediaTypes, {'Folder': true}))
+            // Basic search
+            .withTerms($scope.search.terms.split(' '))
+            .withMedia(angular.extend($scope.search.mediaTypes, {'Folder': true}))
 
-          // Directory search
-          .withCoverage($scope.search.advanced.selectedCountry || $scope.search.advanced.selectedContinent)
-          .withNature($scope.search.advanced.selectedNature)
-          .withSubject($scope.search.advanced.selectedSubject)
+            // Directory search
+            .withCoverage($scope.search.advanced.selectedCountry || $scope.search.advanced.selectedContinent)
+            .withNature($scope.search.advanced.selectedNature)
+            .withSubject($scope.search.advanced.selectedSubject)
 
-          // Pagination
-          .paginate(12, $scope.documents.pageIndex)
+            // Pagination
+            .paginate(12, $scope.documents.pageIndex)
 
-          // Ordering
-          //.sortBy('dc:title')
-          //.sortBy('dc:title', 'DESC')
-          //.sortBy(['dc:title', 'dc:description', 'dc:modified': 'DESC'])
-          .sortBy({'dc:modified': 'DESC', 'dc:title': 'ASC'});
+            // Ordering
+            //.sortBy('dc:title')
+            //.sortBy('dc:title', 'DESC')
+            //.sortBy(['dc:title', 'dc:description', 'dc:modified': 'DESC'])
+            .sortBy({'dc:modified': 'DESC', 'dc:title': 'ASC'});
 
-        // If my media is selected
-        if (!$scope.search.advanced.myMediaOnly) {
-          query.inPath('/');
-        } else {
-          query.inUserWorkspace();
-        }
+          // If my media is selected
+          if (!$scope.search.advanced.myMediaOnly) {
+            query.inPath('/');
+          } else {
+            query.withParentIn(userWorkspaceId);
+          }
 
-        // Finally get documents
-        query.$get(function (data) {
-          $log.debug(data);
-          $scope.documents = data;
+          // Finally get documents
+          query.$get(function (data) {
+            $log.debug(data);
+            $scope.documents = data;
+          });
         });
+
+
       };
 
       $scope.logError = function () {

@@ -24,7 +24,6 @@ angular.module('ngNuxeoUI')
 
     return {
       restrict: 'E',
-      replace: true, // replaces the <nuxeo-document> element
       templateUrl: 'nuxeo-ui/views/nuxeo-document.html',
       scope: {
         entry: '=',
@@ -66,7 +65,7 @@ angular.module('ngNuxeoUI')
   }]);
 angular.module('ngNuxeoUI')
 
-  .directive('nuxeoDocuments', [function () {
+  .directive('nuxeoDocuments', ['nuxeo', function (nuxeo) {
     return {
       restrict: 'E',
       replace: true, // replaces the <nuxeo-documents> element
@@ -79,7 +78,114 @@ angular.module('ngNuxeoUI')
       },
       controller: ['$scope', 'Section', function ($scope, Section) {
         $scope.publishPath = Section.prototype.defaultPath;
-      }]
+
+        this.dropped = function (dragUid, dropUid) {
+          var index = nuxeo.index($scope.documents.entries);
+
+          var draggedEntry = index[dragUid];
+          var targetEntry = index[dropUid];
+
+          console.log('The entry dragged', draggedEntry);
+          console.log('The entry dropped', targetEntry);
+
+          draggedEntry.fold(targetEntry, function onSuccess() {
+            console.info('Files folded successfully !');
+            $scope.onSuccess();
+          }, function onError() {
+            console.error('Error encountered during file folding');
+            $scope.onError();
+          });
+        };
+      }], controllerAs: 'docsCtrl'
+    };
+  }]);
+angular.module('ngNuxeoUI')
+
+  .directive('nuxeoDraggable', [function () {
+    return {
+      restrict: 'A',
+      link: function (scope, el, attrs) {
+        angular.element(el).attr('draggable', 'true');
+
+        var entry = scope.$eval(attrs.nuxeoDraggable);
+        if (entry) {
+          var uid = entry.uid;
+
+          el.bind('dragstart', function (e) {
+            e.dataTransfer.setData('text', uid);
+            scope.$emit('nuxeoDragStart');
+          });
+
+          el.bind('dragend', function () {
+            scope.$emit('nuxeoDragEnd');
+          });
+        }
+      }
+    };
+  }])
+
+  .directive('nuxeoDropTarget', ['$rootScope', function ($rootScope) {
+
+    return {
+      restrict: 'A',
+      link: function (scope, el, attrs) {
+
+        var counter = 0;
+        var entry = scope.$eval(attrs.nuxeoDropTarget);
+
+        if (!entry) {
+          return;
+        }
+
+        var uid = entry.uid;
+
+        el.bind('dragover', function (e) {
+          if (e.preventDefault) {
+            e.preventDefault(); // Necessary. Allows us to drop.
+          }
+          if (e.stopPropagation) {
+            e.stopPropagation(); // Necessary. Allows us to drop.
+          }
+
+          e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+          return false;
+        });
+
+        el.bind('dragenter', function (e) {
+          e.preventDefault(); // needed for IE
+          counter++;
+          el.addClass('nuxeo-over');
+        });
+
+        el.bind('dragleave', function (e) {
+          counter--;
+          if (counter === 0) {
+            el.removeClass('nuxeo-over');
+          }
+        });
+
+        el.bind('drop', function (e) {
+          if (e.preventDefault) {
+            e.preventDefault(); // Necessary. Allows us to drop.
+          }
+
+          if (e.stopPropagation) {
+            e.stopPropagation(); // Necessary. Allows us to drop.
+          }
+          var data = e.dataTransfer.getData('text');
+
+          scope.$eval(attrs.nuxeoOnDrop)(data, uid);
+        });
+
+        $rootScope.$on('nuxeoDragStart', function () {
+          el.addClass('nuxeo-target');
+        });
+
+        $rootScope.$on('nuxeoDragEnd', function () {
+          angular.element(el).removeClass('nuxeo-target');
+          angular.element(el).removeClass('nuxeo-over');
+        });
+      }
     };
   }]);
 angular.module('ngNuxeoUI')
@@ -155,12 +261,12 @@ angular.module('nuxeo-ui/views/nuxeo-audio.html', []).run(['$templateCache', fun
 
 angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-document.html',
-    '<div class=thumbnail draggable=true><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-folder ng-if="entry.type === \'Folder\'"></nuxeo-folder><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcURL}} ng-if=entry.srcURL><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
+    '<div class=thumbnail><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-folder ng-if="entry.type === \'Folder\'"></nuxeo-folder><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcURL}} ng-if=entry.srcURL><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-documents.html',
-    '<ul class=nuxeo-docs><li ng-repeat="entry in documents.entries"><nuxeo-document entry=entry publish-path={{publishPath}} on-success=onSuccess() on-error=onError()></nuxeo-document></li></ul>');
+    '<ul class=nuxeo-docs><li ng-repeat="entry in documents.entries" nuxeo-draggable=entry nuxeo-drop-target=entry nuxeo-on-drop=docsCtrl.dropped><nuxeo-document entry=entry publish-path={{publishPath}} on-success=onSuccess() on-error=onError()></nuxeo-document></li></ul>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-file.html', []).run(['$templateCache', function($templateCache) {

@@ -27,6 +27,15 @@ angular.module('ngNuxeoClient')
         }
       };
 
+      this.index = function (entries) {
+        if (angular.isArray(entries)) {
+          return entries.reduce(function (result, entry) {
+            result[entry.uid] = entry;
+            return result;
+          }, {});
+        }
+      };
+
       this.upload = function (fileInputElement, successCallback, errorCallback) {
         var file = fileInputElement.files[0], reader = new FileReader();
         reader.onloadend = function () {

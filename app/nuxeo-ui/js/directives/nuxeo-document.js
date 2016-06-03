@@ -4,7 +4,6 @@ angular.module('ngNuxeoUI')
 
     return {
       restrict: 'E',
-      replace: true, // replaces the <nuxeo-document> element
       templateUrl: 'nuxeo-ui/views/nuxeo-document.html',
       scope: {
         entry: '=',

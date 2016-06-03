@@ -157,6 +157,27 @@ angular.module('ngNuxeoClient')
       };
 
       /**
+       * Move Nuxeo Document to a Folder
+       * @param folder
+       * @param successCallback
+       * @param errorCallback
+       * @returns a Promise
+       */
+      Document.prototype.move = function (folder, successCallback, errorCallback) {
+        return this.automate({
+          url: url.automate + '/Document.Move',
+          headers: {
+            'X-NXVoidOperation': 'false'
+          },
+          data: {
+            input: this.path,
+            params: {target: folder.uid},
+            context: {}
+          }
+        }, successCallback, errorCallback);
+      };
+
+      /**
        * Upload a file to Nuxeo Document
        * @param file
        * @param successCallback
@@ -226,6 +247,48 @@ angular.module('ngNuxeoClient')
        */
       Document.prototype.createInUserWorkspace = function (successCallback, errorCallback) {
         return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
+      };
+
+      /**
+       * Return true is document is an instance of target type
+       * @param type
+       */
+      Document.prototype.is = function (type) {
+        return this.type === type;
+      };
+
+      /**
+       * Fold this Document with another Nuxeo Document
+       * @param document
+       * @param successCallback
+       * @param errorCallback
+       */
+      Document.prototype.fold = function (document, successCallback, errorCallback) {
+        var self = this;
+        var sourceIsFolder = this.is('Folder');
+        var targetIsFolder = document.is('Folder');
+
+        if (sourceIsFolder && targetIsFolder) {
+          errorCallback('Could not fold two folders');
+        } else if (sourceIsFolder || targetIsFolder) {
+          if (sourceIsFolder) {
+            document.move(this, successCallback, errorCallback);
+          } else {
+            this.move(document, successCallback, errorCallback);
+          }
+        } else {
+          var name = 'Untitled Folder';
+          return new Document({
+            name: name,
+            type: 'Folder',
+            properties: 'dc:title=' + name + '\ndc:description='+ name
+          }).createInUserWorkspace(function (response) {
+            var folder = response.data;
+            self.move(folder, function () {
+              document.move(folder, successCallback, errorCallback);
+            });
+          }, errorCallback);
+        }
       };
 
       /**
@@ -935,8 +998,8 @@ angular.module('ngNuxeoQueryPart')
 
       this.$get = [function () {
 
-        function pathQuery(val) {
-          return '(ecm:path STARTSWITH \'' + val + '\')';
+        function pathQuery(options, val) {
+          return '(ecm:path ' + (options.exactMode ? '=' : 'STARTSWITH') + ' \'' + val + '\')';
         }
 
         function addPath(options, path, negate) {
@@ -950,6 +1013,15 @@ angular.module('ngNuxeoQueryPart')
         }
 
         var QueryPart = function () {
+          /**
+           * Defined the mode Documents have to be placed in exact target path
+           * @param isExact must path be exact (equal) when searching documents
+           * @returns {*}
+           */
+          this.setExactPathMode = function (isExact) {
+            this.options.exactMode = isExact;
+            return this;
+          };
           /**
            * Documents have to be placed in target path
            * @param path
@@ -1013,13 +1085,13 @@ angular.module('ngNuxeoQueryPart')
           if (angular.isArray(options.paths)) {
             var terms = options.paths.reduce(function (result, path) {
               if (path.value.length) {
-                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
+                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(options, path.value);
               }
               return result;
             }, '');
             return terms.length ? ' AND (' + terms + ')' : '';
           } else if (angular.isString(options.paths) && options.paths.length) {
-            return ' AND ' + pathQuery(options.paths);
+            return ' AND ' + pathQuery(options, options.paths);
           }
           return '';
         };
@@ -1279,6 +1351,15 @@ angular.module('ngNuxeoClient')
           this[name] = $injector.get(name);
         } else {
           throw 'Nuxeo service registration failed for service [' + service + ']';
+        }
+      };
+
+      this.index = function (entries) {
+        if (angular.isArray(entries)) {
+          return entries.reduce(function (result, entry) {
+            result[entry.uid] = entry;
+            return result;
+          }, {});
         }
       };
 

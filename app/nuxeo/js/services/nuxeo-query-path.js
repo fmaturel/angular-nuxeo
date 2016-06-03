@@ -7,8 +7,8 @@ angular.module('ngNuxeoQueryPart')
 
       this.$get = [function () {
 
-        function pathQuery(val) {
-          return '(ecm:path STARTSWITH \'' + val + '\')';
+        function pathQuery(options, val) {
+          return '(ecm:path ' + (options.exactMode ? '=' : 'STARTSWITH') + ' \'' + val + '\')';
         }
 
         function addPath(options, path, negate) {
@@ -22,6 +22,15 @@ angular.module('ngNuxeoQueryPart')
         }
 
         var QueryPart = function () {
+          /**
+           * Defined the mode Documents have to be placed in exact target path
+           * @param isExact must path be exact (equal) when searching documents
+           * @returns {*}
+           */
+          this.setExactPathMode = function (isExact) {
+            this.options.exactMode = isExact;
+            return this;
+          };
           /**
            * Documents have to be placed in target path
            * @param path
@@ -85,13 +94,13 @@ angular.module('ngNuxeoQueryPart')
           if (angular.isArray(options.paths)) {
             var terms = options.paths.reduce(function (result, path) {
               if (path.value.length) {
-                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(path.value);
+                result += (result.length ? ' OR ' : '' ) + (path.negate ? 'NOT' : '') + pathQuery(options, path.value);
               }
               return result;
             }, '');
             return terms.length ? ' AND (' + terms + ')' : '';
           } else if (angular.isString(options.paths) && options.paths.length) {
-            return ' AND ' + pathQuery(options.paths);
+            return ' AND ' + pathQuery(options, options.paths);
           }
           return '';
         };

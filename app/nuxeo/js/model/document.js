@@ -82,6 +82,27 @@ angular.module('ngNuxeoClient')
       };
 
       /**
+       * Move Nuxeo Document to a Folder
+       * @param folder
+       * @param successCallback
+       * @param errorCallback
+       * @returns a Promise
+       */
+      Document.prototype.move = function (folder, successCallback, errorCallback) {
+        return this.automate({
+          url: url.automate + '/Document.Move',
+          headers: {
+            'X-NXVoidOperation': 'false'
+          },
+          data: {
+            input: this.path,
+            params: {target: folder.uid},
+            context: {}
+          }
+        }, successCallback, errorCallback);
+      };
+
+      /**
        * Upload a file to Nuxeo Document
        * @param file
        * @param successCallback
@@ -151,6 +172,48 @@ angular.module('ngNuxeoClient')
        */
       Document.prototype.createInUserWorkspace = function (successCallback, errorCallback) {
         return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
+      };
+
+      /**
+       * Return true is document is an instance of target type
+       * @param type
+       */
+      Document.prototype.is = function (type) {
+        return this.type === type;
+      };
+
+      /**
+       * Fold this Document with another Nuxeo Document
+       * @param document
+       * @param successCallback
+       * @param errorCallback
+       */
+      Document.prototype.fold = function (document, successCallback, errorCallback) {
+        var self = this;
+        var sourceIsFolder = this.is('Folder');
+        var targetIsFolder = document.is('Folder');
+
+        if (sourceIsFolder && targetIsFolder) {
+          errorCallback('Could not fold two folders');
+        } else if (sourceIsFolder || targetIsFolder) {
+          if (sourceIsFolder) {
+            document.move(this, successCallback, errorCallback);
+          } else {
+            this.move(document, successCallback, errorCallback);
+          }
+        } else {
+          var name = 'Untitled Folder';
+          return new Document({
+            name: name,
+            type: 'Folder',
+            properties: 'dc:title=' + name + '\ndc:description='+ name
+          }).createInUserWorkspace(function (response) {
+            var folder = response.data;
+            self.move(folder, function () {
+              document.move(folder, successCallback, errorCallback);
+            });
+          }, errorCallback);
+        }
       };
 
       /**

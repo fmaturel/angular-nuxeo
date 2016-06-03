@@ -17,36 +17,42 @@ body {
   float: right;
 }
 
-.demo ul.nuxeo-docs {
+ul.nuxeo-docs {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.demo ul.nuxeo-docs > li {
+ul.nuxeo-docs > li {
   display: block;
   float: left;
   padding: 5px;
+  transition: all 500ms ease-out;
 
   width: 16.6666666667%;
 }
 
 @media (max-width: 991px) {
-  .demo ul.nuxeo-docs > li {
+  ul.nuxeo-docs > li {
     width: 33.3334%;
   }
 }
 
 @media (max-width: 768px) {
-  .demo ul.nuxeo-docs > li {
+  ul.nuxeo-docs > li {
     width: 50%;
   }
 }
 
 @media (max-width: 384px) {
-  .demo ul.nuxeo-docs > li {
+  ul.nuxeo-docs > li {
     width: 100%;
   }
+}
+
+ul.nuxeo-docs > li.nuxeo-over {
+  transform: scale3d(0.9, 0.9, 0.9);
+  box-shadow: 0 0 10px 2px #aaa;
 }
 
 .thumbnail {
