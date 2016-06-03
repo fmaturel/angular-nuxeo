@@ -26,9 +26,27 @@ body {
 .demo ul.nuxeo-docs > li {
   display: block;
   float: left;
-  width: 16.6666666667%;
-
   padding: 5px;
+
+  width: 16.6666666667%;
+}
+
+@media (max-width: 991px) {
+  .demo ul.nuxeo-docs > li {
+    width: 33.3334%;
+  }
+}
+
+@media (max-width: 768px) {
+  .demo ul.nuxeo-docs > li {
+    width: 50%;
+  }
+}
+
+@media (max-width: 384px) {
+  .demo ul.nuxeo-docs > li {
+    width: 100%;
+  }
 }
 
 .thumbnail {

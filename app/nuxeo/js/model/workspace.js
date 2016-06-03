@@ -5,12 +5,10 @@ angular.module('ngNuxeoClient')
 
       var Workspace = utils.inherit(function Workspace(workspace) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {type: 'Workspace'});
+        workspace = angular.extend({type: 'Workspace'}, workspace);
 
         // Call Parent function with argument
-        if (workspace) {
-          Folder.call(this, workspace);
-        }
+        Folder.call(this, workspace);
       }, Folder);
 
       return Workspace;

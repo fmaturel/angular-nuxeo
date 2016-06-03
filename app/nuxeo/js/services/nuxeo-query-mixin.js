@@ -29,7 +29,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.defaultOptions = {
           excludeMixinTypes: [
-            'Folderish',
+            //'Folderish',
             'HiddenInNavigation'
           ]
         };

@@ -13,18 +13,17 @@ angular.module('ngNuxeoDemoApp')
 
       $scope.operations = {
         create: function () {
-          var name = $scope.model.selectedType.name;
-          $scope.model.selectedType.create(
-            {
-              name: 'New' + name,
-              properties: 'dc:title=My' + name + '\ndc:description= A simple ' + name
+          var NuxeoDocument = $scope.model.selectedType;
+          NuxeoDocument.create({
+              name: $scope.model.path,
+              properties: 'dc:title=' + $scope.model.path + '\ndc:description= A simple ' + NuxeoDocument.name
             },
-            $scope.model.selectedType.prototype.defaultPath + '/' + $scope.model.path
+            $scope.model.selectedType.prototype.defaultPath
           ).then(function (dir) {
-              $log.debug(dir);
-            }, function (response) {
-              $log.error('Error on creation operation : [' + response.config.url + ']');
-            });
+            $log.debug(dir);
+          }, function (response) {
+            $log.error('Error on creation operation : [' + response.config.url + ']');
+          });
         }
       };
     }]);

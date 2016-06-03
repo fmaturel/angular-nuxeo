@@ -1,13 +1,7 @@
 /*global module,require*/
 (function () {
-  // Generated on 2015-05-21 using generator-angular 0.11.1
   'use strict';
 
-  // # Globbing
-  // for performance reasons we're only matching one level down:
-  // 'test/spec/{,*/}*.js'
-  // use this if you want to recursively match all subfolders:
-  // 'test/spec/**/*.js'
   module.exports = function (grunt) {
 
     // Load grunt tasks automatically
@@ -16,13 +10,13 @@
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
 
-    var bower = require('./bower.json');
+    var serveStatic = require('serve-static');
 
     // Configurable paths for the application
     var appConfig = {
-      name: bower.name,
-      app: bower.appPath || 'app',
-      dist: 'dist'
+      app: 'app',
+      dist: 'dist',
+      test: 'test'
     };
 
     // Define the configuration for all the tasks
@@ -33,16 +27,6 @@
 
       // Watches files for changes and runs tasks based on the changed files
       watch: {
-        bower: {
-          files: ['bower.json'],
-          tasks: ['wiredep']
-        },
-        html: {
-          files: [
-            '<%= yeoman.app %>/**/views/*.html'
-          ],
-          tasks: ['newer:html2js']
-        },
         js: {
           files: ['<%= yeoman.app %>/**/*.js'],
           tasks: ['newer:concat', 'newer:jshint:all'],
@@ -51,8 +35,14 @@
           }
         },
         jsTest: {
-          files: ['test/spec/{,*/}*.js'],
+          files: ['<%= yeoman.test %>/spec/{,*/}*.js'],
           tasks: ['newer:jshint:test', 'karma']
+        },
+        html: {
+          files: [
+            '<%= yeoman.app %>/**/views/*.html'
+          ],
+          tasks: ['newer:html2js']
         },
         gruntfile: {
           files: ['Gruntfile.js']
@@ -62,8 +52,7 @@
             livereload: '<%= connect.options.livereload %>'
           },
           files: [
-            '<%= yeoman.app %>/**/*.html',
-            '<%= yeoman.app %>/*/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+            '<%= yeoman.app %>/*.*'
           ]
         }
       },
@@ -106,8 +95,9 @@
             },
             middleware: function (connect) {
               return [
-                connect.static(appConfig.app),
-                connect.static(appConfig.dist)
+                connect().use('/vendor', serveStatic('./node_modules')),
+                serveStatic(appConfig.app),
+                serveStatic(appConfig.dist)
               ];
             }
           }
@@ -115,11 +105,11 @@
         test: {
           options: {
             port: 9121,
-            middleware: function (connect) {
+            middleware: function () {
               return [
-                connect.static('test'),
-                connect.static(appConfig.app),
-                connect.static(appConfig.dist)
+                serveStatic(appConfig.test),
+                serveStatic(appConfig.app),
+                serveStatic(appConfig.dist)
               ];
             }
           }
@@ -143,14 +133,14 @@
         all: {
           src: [
             'Gruntfile.js',
-            '<%= yeoman.dist %>/js/*.js'
+            '<%= yeoman.app %>/**/*.js'
           ]
         },
         test: {
           options: {
             jshintrc: '.jshintrc'
           },
-          src: ['test/**/{,*/}*.js', '!test/helper.js']
+          src: ['<%= yeoman.test %>/**/{,*/}*.js', '!<%= yeoman.test %>/helper.js']
         }
       },
 
@@ -160,22 +150,8 @@
           files: [{
             dot: true,
             src: [
-              '<%= yeoman.dist %>/{,*/}*',
-              '!<%= yeoman.dist %>/.git{,*/}*'
+              '<%= yeoman.dist %>/{,*/}*'
             ]
-          }]
-        }
-      },
-
-      // ng-annotate tries to make the code safe for minification automatically
-      // by using the Angular long form for dependency injection.
-      ngAnnotate: {
-        dist: {
-          files: [{
-            expand: true,
-            cwd: '<%= yeoman.dist %>/js',
-            src: '*.js',
-            dest: '<%= yeoman.dist %>/js'
           }]
         }
       },
@@ -193,13 +169,16 @@
             ]
           }, {
             expand: true,
-            cwd: '<%= yeoman.app %>/bower_components',
-            src: '**',
-            dest: '<%= yeoman.dist %>/bower_components'
+            cwd: 'node_modules',
+            src: [
+              'angular/angular*.js',
+              'angular-route/angular-route.js'],
+            dest: '<%= yeoman.dist %>/vendor'
           }]
         }
       },
 
+      // Transforms html templates to js
       html2js: {
         options: {
           base: '<%= yeoman.app %>',
@@ -237,7 +216,9 @@
       }
 
       grunt.task.run([
+        'clean',
         'html2js',
+        'jshint:all',
         'concat',
         'connect:livereload',
         'watch'
@@ -247,21 +228,21 @@
     grunt.registerTask('test', [
       'html2js',
       'concat',
+      'jshint',
       'connect:test',
       'karma'
     ]);
 
     grunt.registerTask('build', [
-      'clean:dist',
+      'clean',
       'html2js',
       'concat',
-      'ngAnnotate',
       'copy:dist'
     ]);
 
     grunt.registerTask('default', [
-      'test',
       'newer:jshint',
+      'test',
       'build'
     ]);
   };

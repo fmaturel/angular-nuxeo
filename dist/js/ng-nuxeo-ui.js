@@ -92,6 +92,14 @@ angular.module('ngNuxeoUI')
   }]);
 angular.module('ngNuxeoUI')
 
+  .directive('nuxeoFolder', [function () {
+    return {
+      restrict: 'E',
+      templateUrl: 'nuxeo-ui/views/nuxeo-folder.html'
+    };
+  }]);
+angular.module('ngNuxeoUI')
+
   .directive('nuxeoNote', [function () {
     return {
       restrict: 'E',
@@ -138,7 +146,7 @@ angular.module('ngNuxeoUI')
       templateUrl: 'nuxeo-ui/views/nuxeo-video.html'
     };
   }]);
-angular.module('ngNuxeoUITemplates', ['nuxeo-ui/views/nuxeo-audio.html', 'nuxeo-ui/views/nuxeo-document.html', 'nuxeo-ui/views/nuxeo-documents.html', 'nuxeo-ui/views/nuxeo-file.html', 'nuxeo-ui/views/nuxeo-note.html', 'nuxeo-ui/views/nuxeo-picture.html', 'nuxeo-ui/views/nuxeo-select.html', 'nuxeo-ui/views/nuxeo-video.html']);
+angular.module('ngNuxeoUITemplates', ['nuxeo-ui/views/nuxeo-audio.html', 'nuxeo-ui/views/nuxeo-document.html', 'nuxeo-ui/views/nuxeo-documents.html', 'nuxeo-ui/views/nuxeo-file.html', 'nuxeo-ui/views/nuxeo-folder.html', 'nuxeo-ui/views/nuxeo-note.html', 'nuxeo-ui/views/nuxeo-picture.html', 'nuxeo-ui/views/nuxeo-select.html', 'nuxeo-ui/views/nuxeo-video.html']);
 
 angular.module('nuxeo-ui/views/nuxeo-audio.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-audio.html',
@@ -147,7 +155,7 @@ angular.module('nuxeo-ui/views/nuxeo-audio.html', []).run(['$templateCache', fun
 
 angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-document.html',
-    '<div class=thumbnail><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcURL}} ng-if=entry.srcURL><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
+    '<div class=thumbnail draggable=true><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-folder ng-if="entry.type === \'Folder\'"></nuxeo-folder><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcURL}} ng-if=entry.srcURL><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache', function($templateCache) {
@@ -158,6 +166,11 @@ angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache',
 angular.module('nuxeo-ui/views/nuxeo-file.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-file.html',
     '<img alt=file ng-src={{entry.thumbnailURL}}>');
+}]);
+
+angular.module('nuxeo-ui/views/nuxeo-folder.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('nuxeo-ui/views/nuxeo-folder.html',
+    '<svg xmlns=http://www.w3.org/2000/svg version=1.2 width=140 height=110 viewbox="0 0 140 110"><switch transform="matrix(.33333 0 0 .33846 0 0)"><g><lineargradient id=a gradientunits=userSpaceOnUse x1=210.75 x2=210.75 y2=827.286><stop offset=0 stop-color=#ffd445></stop><stop offset=.153 stop-color=#ff8f00></stop></lineargradient><path d="M204.515 24.667V10c0-5.5-4.5-10-10-10H44.849c-5.5 0-10 4.5-10 10v14.667H19.022c-3.483 0-9.411 4.5-9.506 9.999l.671 280.329c-.095 5.498 4.328 10.006 9.828 10.01h382.092c5.5.006 9.943-4.479 9.875-9.977L410.48 34.666c-.068-5.5-4.623-9.999-10.123-9.999H204.515z" fill=url(#a)></path><lineargradient id=b gradientunits=userSpaceOnUse x1=209.999 y1=320.691 x2=209.999 y2=36.765><stop offset=0 stop-color=#e6e6e6></stop><stop offset=.633 stop-color=#e8e8e8></stop><stop offset=.949 stop-color=#f0f0f0></stop><stop offset=1 stop-color=#f2f2f2></stop></lineargradient><path d="M390.244 320.691H29.753l-1-283.927h362.491z" fill=url(#b)></path><lineargradient id=c gradientunits=userSpaceOnUse x1=209.999 y1=320.691 x2=209.999 y2=49.765><stop offset=0 stop-color=#ccc></stop><stop offset=.427 stop-color=#cecece></stop><stop offset=.64 stop-color=#d6d6d6></stop><stop offset=.806 stop-color=#e3e3e3></stop><stop offset=.947 stop-color=#f6f6f6></stop><stop offset=1 stop-color=#fff></stop></lineargradient><path d="M390.244 320.691H29.753l-7-270.927h374.491z" fill=url(#c)></path><lineargradient id=d gradientunits=userSpaceOnUse x1=209.998 y1=63.999 x2=209.998 y2=325.004><stop offset=0 stop-color=#ffde4f></stop><stop offset=.595 stop-color=#ffca3b></stop><stop offset=.957 stop-color=#ffd041></stop><stop offset=1 stop-color=#ff8f00></stop></lineargradient><path d="M411.508 315.027c-.096 5.5-4.672 9.99-10.172 9.977H19.243c-5.5-.014-10.662-5.178-10.757-10.676L0 73.998A9.822 9.822 0 0 1 9.827 64H410.17c5.5 0 9.922 4.5 9.826 9.999l-8.488 241.028z" fill=url(#d)></path></g></switch></svg>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-note.html', []).run(['$templateCache', function($templateCache) {

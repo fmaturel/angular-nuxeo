@@ -104,7 +104,7 @@ angular.module('ngNuxeoQueryPart')
     return {
 
       objToArray: function (obj) {
-        return angular.isObject(obj) ?
+        return angular.isObject(obj) && !angular.isArray(obj) ?
           Object.keys(obj).reduce(function (result, key) {
             if (obj[key]) {
               result.push(key);

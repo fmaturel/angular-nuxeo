@@ -489,12 +489,10 @@ angular.module('ngNuxeoClient')
 
       var Workspace = utils.inherit(function Workspace(workspace) {
         // Default behaviour if no argument supplied
-        angular.extend(this, {type: 'Workspace'});
+        workspace = angular.extend({type: 'Workspace'}, workspace);
 
         // Call Parent function with argument
-        if (workspace) {
-          Folder.call(this, workspace);
-        }
+        Folder.call(this, workspace);
       }, Folder);
 
       return Workspace;
@@ -797,7 +795,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.defaultOptions = {
           excludeMixinTypes: [
-            'Folderish',
+            //'Folderish',
             'HiddenInNavigation'
           ]
         };
@@ -1283,7 +1281,7 @@ angular.module('ngNuxeoClient')
           throw 'Nuxeo service registration failed for service [' + service + ']';
         }
       };
-      
+
       this.upload = function (fileInputElement, successCallback, errorCallback) {
         var file = fileInputElement.files[0], reader = new FileReader();
         reader.onloadend = function () {
@@ -1415,7 +1413,7 @@ angular.module('ngNuxeoQueryPart')
     return {
 
       objToArray: function (obj) {
-        return angular.isObject(obj) ?
+        return angular.isObject(obj) && !angular.isArray(obj) ?
           Object.keys(obj).reduce(function (result, key) {
             if (obj[key]) {
               result.push(key);

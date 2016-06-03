@@ -46,18 +46,10 @@ angular.module('ngNuxeoDemoApp')
           $scope.search.mediaTypes = angular.copy($scope.search.mediaTypes);
         },
         upload: function () {
-          var file = document.getElementById('file').files[0], reader = new FileReader();
-          reader.onloadend = function () {
-            var document = new nuxeo.Document({
-              type: 'Picture',
-              name: file.name,
-              properties: {'dc:title': file.name}
-            });
-            document.upload(file, $scope.uiChange, function () {
-              window.alert('An error occurred uploading document');
-            });
-          };
-          reader.readAsBinaryString(file);
+          var file = document.getElementById('file');
+          nuxeo.upload(file, $scope.uiChange, function () {
+            window.alert('An error occurred uploading document');
+          });
         }
       };
 
@@ -71,7 +63,7 @@ angular.module('ngNuxeoDemoApp')
 
           // Basic search
           .withTerms($scope.search.terms.split(' '))
-          .withMedia($scope.search.mediaTypes)
+          .withMedia(angular.extend($scope.search.mediaTypes, {'Folder': true}))
 
           // Directory search
           .withCoverage($scope.search.advanced.selectedCountry || $scope.search.advanced.selectedContinent)
@@ -84,8 +76,8 @@ angular.module('ngNuxeoDemoApp')
           // Ordering
           //.sortBy('dc:title')
           //.sortBy('dc:title', 'DESC')
-          //.sortBy(['dc:title', 'dc:description'])
-          .sortBy({'dc:title': 'ASC', 'dc:description': 'DESC'});
+          //.sortBy(['dc:title', 'dc:description', 'dc:modified': 'DESC'])
+          .sortBy({'dc:modified': 'DESC', 'dc:title': 'ASC'});
 
         // If my media is selected
         if (!$scope.search.advanced.myMediaOnly) {
@@ -97,12 +89,12 @@ angular.module('ngNuxeoDemoApp')
         // Finally get documents
         query.$get(function (data) {
           $log.debug(data);
-          $scope.documents = angular.extend(data);
+          $scope.documents = data;
         });
       };
 
-      $scope.logError = function (response) {
-        $log.error('An error occurred on document operation [' + (response.config && response.config.url) + ']');
+      $scope.logError = function () {
+        $log.error('An error occurred on document operation');
       };
 
       $scope.$watchGroup([

@@ -26,7 +26,7 @@ angular.module('ngNuxeoClient')
           throw 'Nuxeo service registration failed for service [' + service + ']';
         }
       };
-      
+
       this.upload = function (fileInputElement, successCallback, errorCallback) {
         var file = fileInputElement.files[0], reader = new FileReader();
         reader.onloadend = function () {
