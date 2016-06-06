@@ -15,14 +15,14 @@ angular.module('ngNuxeoClient')
 
           var ctx = this.contextParameters;
           if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
-            this.thumbnailURL = ctx.thumbnail.url;
+            this.thumbnailUrl = ctx.thumbnail.url;
           }
 
           var properties = this.properties;
           if (properties) {
             var fileContent = properties['file:content'];
             if (fileContent && fileContent.data) {
-              this.srcURL = fileContent.data;
+              this.srcUrl = fileContent.data;
             }
           }
 

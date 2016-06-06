@@ -53,6 +53,6 @@
       "url": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png"
     }
   },
-  "srcURL": "http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav",
-  "thumbnailURL": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png"
+  "srcUrl": "http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.wav",
+  "thumbnailUrl": "http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/audio_100.png"
 }

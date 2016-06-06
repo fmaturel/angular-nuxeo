@@ -56,7 +56,7 @@ angular.module('ngNuxeoUI')
           el.addClass('nuxeo-over');
         });
 
-        el.bind('dragleave', function (e) {
+        el.bind('dragleave', function () {
           counter--;
           if (counter === 0) {
             el.removeClass('nuxeo-over');

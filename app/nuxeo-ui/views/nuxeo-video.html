@@ -1,3 +1,3 @@
-<video ng-if="entry.type === 'Video'" controls preload="none" ng-attr-poster="{{entry.thumbnailURL}}">
-  <source ng-src="{{entry.srcURL}}">
+<video controls preload="none" ng-attr-poster="{{::entry.thumbnailUrl}}">
+  <source ng-src="{{::entry.srcUrl}}">
 </video>

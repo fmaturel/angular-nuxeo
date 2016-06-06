@@ -13,7 +13,7 @@
     </div>
   </a>
   <div class="action">
-    <a class="download" title="Download" ng-href="{{entry.srcURL}}" ng-if="entry.srcURL">
+    <a class="download" title="Download" ng-href="{{entry.srcUrl}}" ng-if="entry.srcUrl">
       <span class="glyphicon glyphicon-download-alt"></span>
     </a>
     <a class="publish" title="Publish" href="javascript:void(0)" ng-if="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">
