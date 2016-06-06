@@ -19,7 +19,7 @@ angular.module('ngNuxeoQuery', [
 
   .constant('nuxeoConstants', {
     nuxeo: {
-      baseURL: 'http://demo.nuxeo.local/nuxeo',
+      baseURL: 'http://demo.nuxeo.com/nuxeo',
       apiPath: '/api/v1',
       automationPath: '/site/automation',
       timeout: 5 // Timeout in seconds
@@ -90,14 +90,14 @@ angular.module('ngNuxeoClient')
 
           var ctx = this.contextParameters;
           if (ctx && ctx.thumbnail && ctx.thumbnail.url) {
-            this.thumbnailURL = ctx.thumbnail.url;
+            this.thumbnailUrl = ctx.thumbnail.url;
           }
 
           var properties = this.properties;
           if (properties) {
             var fileContent = properties['file:content'];
             if (fileContent && fileContent.data) {
-              this.srcURL = fileContent.data;
+              this.srcUrl = fileContent.data;
             }
           }
 

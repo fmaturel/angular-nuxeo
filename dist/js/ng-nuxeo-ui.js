@@ -157,7 +157,7 @@ angular.module('ngNuxeoUI')
           el.addClass('nuxeo-over');
         });
 
-        el.bind('dragleave', function (e) {
+        el.bind('dragleave', function () {
           counter--;
           if (counter === 0) {
             el.removeClass('nuxeo-over');
@@ -220,7 +220,7 @@ angular.module('ngNuxeoUI')
       templateUrl: 'nuxeo-ui/views/nuxeo-picture.html',
       link: function (scope, element, attrs) {
         if (attrs.display === 'large') {
-          scope.thumbnailURL = cst.nuxeo.baseURL + '/nxbigfile/default/' + scope.entry.uid + '/picture:views/2/content/Medium_Photos.jpg';
+          scope.thumbnailUrl = cst.nuxeo.baseURL + '/nxbigfile/default/' + scope.entry.uid + '/picture:views/2/content/Medium_Photos.jpg';
         }
       }
     };
@@ -256,12 +256,12 @@ angular.module('ngNuxeoUITemplates', ['nuxeo-ui/views/nuxeo-audio.html', 'nuxeo-
 
 angular.module('nuxeo-ui/views/nuxeo-audio.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-audio.html',
-    '<img alt=audio ng-src={{entry.thumbnailURL}}><audio controls preload=none><source ng-src={{entry.srcURL}}></source></audio>');
+    '<img alt=audio ng-src={{::entry.thumbnailUrl}}><audio controls preload=none><source ng-src={{::entry.srcUrl}}></source></audio>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-document.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-document.html',
-    '<div class=thumbnail><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-folder ng-if="entry.type === \'Folder\'"></nuxeo-folder><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcURL}} ng-if=entry.srcURL><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
+    '<div class=thumbnail><a href=javascript:void(0)><div class=media ng-class="entry.type | lowercase"><nuxeo-folder ng-if="entry.type === \'Folder\'"></nuxeo-folder><nuxeo-picture ng-if="entry.type === \'Picture\'"></nuxeo-picture><nuxeo-audio ng-if="entry.type === \'Audio\'"></nuxeo-audio><nuxeo-video ng-if="entry.type === \'Video\'"></nuxeo-video><nuxeo-note ng-if="entry.type === \'Note\'"></nuxeo-note><nuxeo-file ng-if="entry.type === \'File\'"></nuxeo-file></div><div class=caption><span>{{entry.title | limitTo:25}}</span></div></a><div class=action><a class=download title=Download ng-href={{entry.srcUrl}} ng-if=entry.srcUrl><span class="glyphicon glyphicon-download-alt"></span></a> <a class=publish title=Publish href=javascript:void(0) ng-if=entry.isPublishable ng-click="entry.publish({target: publishPath}, onSuccess, onError)"><span class="glyphicon glyphicon-cloud-upload"></span></a> <a class=delete title=Delete href=javascript:void(0) ng-if=entry.isDeletable ng-click="entry.delete(onSuccess, onError)"><span class="glyphicon glyphicon-trash"></span></a></div></div>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache', function($templateCache) {
@@ -271,7 +271,7 @@ angular.module('nuxeo-ui/views/nuxeo-documents.html', []).run(['$templateCache',
 
 angular.module('nuxeo-ui/views/nuxeo-file.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-file.html',
-    '<img alt=file ng-src={{entry.thumbnailURL}}>');
+    '<img alt=file ng-src={{::entry.thumbnailUrl}}>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-folder.html', []).run(['$templateCache', function($templateCache) {
@@ -286,7 +286,7 @@ angular.module('nuxeo-ui/views/nuxeo-note.html', []).run(['$templateCache', func
 
 angular.module('nuxeo-ui/views/nuxeo-picture.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-picture.html',
-    '<img alt={{entry.title}} ng-src="{{thumbnailURL || entry.thumbnailURL}}">');
+    '<img alt={{::entry.title}} ng-src={{::entry.thumbnailUrl}}>');
 }]);
 
 angular.module('nuxeo-ui/views/nuxeo-select.html', []).run(['$templateCache', function($templateCache) {
@@ -296,6 +296,6 @@ angular.module('nuxeo-ui/views/nuxeo-select.html', []).run(['$templateCache', fu
 
 angular.module('nuxeo-ui/views/nuxeo-video.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('nuxeo-ui/views/nuxeo-video.html',
-    '<video ng-if="entry.type === \'Video\'" controls preload=none ng-attr-poster={{entry.thumbnailURL}}><source ng-src={{entry.srcURL}}></source></video>');
+    '<video controls preload=none ng-attr-poster={{::entry.thumbnailUrl}}><source ng-src={{::entry.srcUrl}}></source></video>');
 }]);
 }( window ));
