@@ -101,7 +101,7 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && this.path.indexOf('/default-domain/UserWorkspaces/' + user.pathId) === 0;
+          var isInUserworspace = this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0;
 
           this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
 
@@ -232,13 +232,7 @@ angular.module('ngNuxeoClient')
           upload(this);
         } else {
           // Else creates the document in user workspace before uploading
-          return this.createInUserWorkspace(function (response) {
-            if (response && response.data && response.data.uid) {
-              upload(response.data);
-            } else {
-              errorCallback(response);
-            }
-          }, errorCallback);
+          return this.createInUserWorkspace(upload, errorCallback);
         }
       };
 
@@ -246,7 +240,7 @@ angular.module('ngNuxeoClient')
        * Create a Nuxeo Document in User workspace
        */
       Document.prototype.createInUserWorkspace = function (successCallback, errorCallback) {
-        return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
+        return this.create(user.workspace.pathId, successCallback, errorCallback);
       };
 
       /**
@@ -281,9 +275,8 @@ angular.module('ngNuxeoClient')
           return new Document({
             name: name,
             type: 'Folder',
-            properties: 'dc:title=' + name + '\ndc:description='+ name
-          }).createInUserWorkspace(function (response) {
-            var folder = response.data;
+            properties: 'dc:title=' + name + '\ndc:description=' + name
+          }).createInUserWorkspace(function (folder) {
             self.move(folder, function () {
               document.move(folder, successCallback, errorCallback);
             });
@@ -654,12 +647,23 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function (user) {
           if (user && user.id) {
-            user.pathId = utils.generateId(user.id, '-', false, 30);
+            var pathId = utils.generateId(user.id, '-', false, 30);
+            user = {
+              id: user.id,
+              workspace: {
+                uid: '12345678910',
+                pathId: '/default-domain/UserWorkspaces/' + pathId
+              }
+            };
           }
-          defer.resolve(angular.extend(nuxeoUser, user));
+          nuxeoUser.register(user);
         }, function () {
           throw 'Error while retrieving current user';
         });
+      };
+
+      nuxeoUser.register = function (user) {
+        defer.resolve(angular.extend(nuxeoUser, user));
       };
 
       return nuxeoUser;
@@ -1069,7 +1073,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options, user) {
           if (options.userSubPath) {
-            var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
+            var userDirectory = user.workspace.pathId;
             if (angular.isString(options.userSubPath)) {
               userDirectory += '/' + options.userSubPath;
             }
@@ -1364,16 +1368,19 @@ angular.module('ngNuxeoClient')
       };
 
       this.upload = function (fileInputElement, successCallback, errorCallback) {
-        var file = fileInputElement.files[0], reader = new FileReader();
-        reader.onloadend = function () {
-          var document = new Document({
-            type: 'Picture',
-            name: file.name,
-            properties: {'dc:title': file.name}
-          });
-          document.upload(file, successCallback, errorCallback);
-        };
-        reader.readAsBinaryString(file);
+        var file = fileInputElement.files[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onloadend = function () {
+            var document = new Document({
+              type: 'Picture',
+              name: file.name,
+              properties: {'dc:title': file.name}
+            });
+            document.upload(file, successCallback, errorCallback);
+          };
+          reader.readAsBinaryString(file);
+        }
       };
     }]);
 angular.module('ngNuxeoClient')

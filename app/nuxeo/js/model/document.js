@@ -26,7 +26,7 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && this.path.indexOf('/default-domain/UserWorkspaces/' + user.pathId) === 0;
+          var isInUserworspace = this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0;
 
           this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
 
@@ -157,13 +157,7 @@ angular.module('ngNuxeoClient')
           upload(this);
         } else {
           // Else creates the document in user workspace before uploading
-          return this.createInUserWorkspace(function (response) {
-            if (response && response.data && response.data.uid) {
-              upload(response.data);
-            } else {
-              errorCallback(response);
-            }
-          }, errorCallback);
+          return this.createInUserWorkspace(upload, errorCallback);
         }
       };
 
@@ -171,7 +165,7 @@ angular.module('ngNuxeoClient')
        * Create a Nuxeo Document in User workspace
        */
       Document.prototype.createInUserWorkspace = function (successCallback, errorCallback) {
-        return this.create('/default-domain/UserWorkspaces/' + user.pathId, successCallback, errorCallback);
+        return this.create(user.workspace.pathId, successCallback, errorCallback);
       };
 
       /**
@@ -206,9 +200,8 @@ angular.module('ngNuxeoClient')
           return new Document({
             name: name,
             type: 'Folder',
-            properties: 'dc:title=' + name + '\ndc:description='+ name
-          }).createInUserWorkspace(function (response) {
-            var folder = response.data;
+            properties: 'dc:title=' + name + '\ndc:description=' + name
+          }).createInUserWorkspace(function (folder) {
             self.move(folder, function () {
               document.move(folder, successCallback, errorCallback);
             });

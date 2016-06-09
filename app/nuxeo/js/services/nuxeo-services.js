@@ -37,15 +37,18 @@ angular.module('ngNuxeoClient')
       };
 
       this.upload = function (fileInputElement, successCallback, errorCallback) {
-        var file = fileInputElement.files[0], reader = new FileReader();
-        reader.onloadend = function () {
-          var document = new Document({
-            type: 'Picture',
-            name: file.name,
-            properties: {'dc:title': file.name}
-          });
-          document.upload(file, successCallback, errorCallback);
-        };
-        reader.readAsBinaryString(file);
+        var file = fileInputElement.files[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onloadend = function () {
+            var document = new Document({
+              type: 'Picture',
+              name: file.name,
+              properties: {'dc:title': file.name}
+            });
+            document.upload(file, successCallback, errorCallback);
+          };
+          reader.readAsBinaryString(file);
+        }
       };
     }]);

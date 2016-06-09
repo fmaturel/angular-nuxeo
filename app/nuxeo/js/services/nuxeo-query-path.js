@@ -78,7 +78,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options, user) {
           if (options.userSubPath) {
-            var userDirectory = '/default-domain/UserWorkspaces/' + user.pathId;
+            var userDirectory = user.workspace.pathId;
             if (angular.isString(options.userSubPath)) {
               userDirectory += '/' + options.userSubPath;
             }

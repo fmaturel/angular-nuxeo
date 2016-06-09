@@ -30,12 +30,23 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function (user) {
           if (user && user.id) {
-            user.pathId = utils.generateId(user.id, '-', false, 30);
+            var pathId = utils.generateId(user.id, '-', false, 30);
+            user = {
+              id: user.id,
+              workspace: {
+                uid: '12345678910',
+                pathId: '/default-domain/UserWorkspaces/' + pathId
+              }
+            };
           }
-          defer.resolve(angular.extend(nuxeoUser, user));
+          nuxeoUser.register(user);
         }, function () {
           throw 'Error while retrieving current user';
         });
+      };
+
+      nuxeoUser.register = function (user) {
+        defer.resolve(angular.extend(nuxeoUser, user));
       };
 
       return nuxeoUser;
