@@ -24,7 +24,7 @@ angular.module('ngNuxeoClient')
 
           // Run the successCallback if available
           if (successCallback && angular.isFunction(successCallback)) {
-            return successCallback(response);
+            return successCallback(that);
           }
           // Don't forget to pass the object to other "then" methods
           return that;
