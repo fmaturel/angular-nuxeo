@@ -52,13 +52,13 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeo.Document', function () {
 
     it('should create a Document when requested', function () {
-      httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/api/v1/user/Administrator').respond(dataUser);
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
-      httpBackend.whenPOST('http://demo.nuxeo.local/nuxeo/site/automation/Document.Create').respond('{}');
+      httpBackend.whenPOST('http://demo.nuxeo.com/nuxeo/site/automation/Document.Create').respond('{\"type": \"Document\"}');
 
       nuxeo.Document.create('webbanner', '/default-domain/sections', function (result) {
         expect(result).toBeDefined();
-        expect(result.status).toEqual(200);
+        expect(result.type).toEqual('Document');
       });
 
       nuxeoUser.login('Administrator', 'Administrator');

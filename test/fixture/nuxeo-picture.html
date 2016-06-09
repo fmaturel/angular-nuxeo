@@ -1,21 +1,23 @@
-<a href="javascript:void(0)">
-  <div class="media picture" ng-class="entry.type | lowercase">
-    <nuxeo-picture ng-if="entry.type === 'Picture'" class="ng-scope">
-      <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg">
-    </nuxeo-picture>
+<div class="thumbnail">
+  <a href="javascript:void(0)">
+    <div class="media picture" ng-class="entry.type | lowercase">
+      <nuxeo-picture ng-if="entry.type === 'Picture'" class="ng-scope">
+        <img alt="test.jpg" ng-src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg" src="http://localhost:9132/nuxeo/nxthumb/default/0123456789/thumb:thumbnail/Small_test.jpg">
+      </nuxeo-picture>
+    </div>
+    <div class="caption">
+      <span class="ng-binding">test.jpg</span>
+    </div>
+  </a>
+  <div class="action">
+    <a class="download ng-scope" title="Download" ng-href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg" ng-if="entry.srcUrl" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg">
+      <span class="glyphicon glyphicon-download-alt"></span>
+    </a>
+    <a class="publish ng-scope" title="Publish" href="javascript:void(0)" ng-if="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">
+      <span class="glyphicon glyphicon-cloud-upload"></span>
+    </a>
+    <a class="delete ng-scope" title="Delete" href="javascript:void(0)" ng-if="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)">
+      <span class="glyphicon glyphicon-trash"></span>
+    </a>
   </div>
-  <div class="caption">
-    <span class="ng-binding">test.jpg</span>
-  </div>
-</a>
-<div class="action">
-  <a class="download ng-scope" title="Download" ng-href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg" ng-if="entry.srcUrl" href="http://localhost:9132/nuxeo/nxbigfile/default/0123456789/file:content/test.jpg">
-    <span class="glyphicon glyphicon-download-alt"></span>
-  </a>
-  <a class="publish ng-scope" title="Publish" href="javascript:void(0)" ng-if="entry.isPublishable" ng-click="entry.publish({target: publishPath}, onSuccess, onError)">
-    <span class="glyphicon glyphicon-cloud-upload"></span>
-  </a>
-  <a class="delete ng-scope" title="Delete" href="javascript:void(0)" ng-if="entry.isDeletable" ng-click="entry.delete(onSuccess, onError)">
-    <span class="glyphicon glyphicon-trash"></span>
-  </a>
 </div>

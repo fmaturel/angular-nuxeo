@@ -33,13 +33,13 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeo service', function () {
 
     it('should create a Section when requested', function () {
-      httpBackend.whenGET('http://demo.nuxeo.local/nuxeo/api/v1/user/Administrator').respond(dataUser);
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
-      httpBackend.whenPOST('http://demo.nuxeo.local/nuxeo/site/automation/Document.Create').respond('{}');
+      httpBackend.whenPOST('http://demo.nuxeo.com/nuxeo/site/automation/Document.Create').respond('{\"type": \"Section\"}');
 
-      nuxeo.Folder.create({name: 'newFolder'}, '/default-domain/workspaces', function (result) {
+      nuxeo.Section.create({name: 'newFolder'}, '/default-domain/workspaces', function (result) {
         expect(result).toBeDefined();
-        expect(result.status).toEqual(200);
+        expect(result.type).toEqual('Section');
       });
 
       nuxeoUser.login('Administrator', 'Administrator');
@@ -56,6 +56,7 @@ describe('ngNuxeoClient module', function () {
       expect(typeof section === 'object').toBe(true);
       expect(section instanceof nuxeo.Section).toBe(true);
       expect(section.constructor === nuxeo.Section).toBe(true);
+      expect(section.type === 'Section').toBe(true);
       expect(section.path).toEqual('/default-domain/sections');
     });
   });
