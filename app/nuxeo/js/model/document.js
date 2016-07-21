@@ -26,13 +26,13 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0;
+          var isInUserworspace = !!(this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0);
 
-          this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
+          this.isPublishable = !!(this.facets && this.facets.indexOf('Immutable') === -1);
 
-          this.isMine = properties && properties['dc:creator'] && properties['dc:creator'] === user.id;
+          this.isMine = !!(properties && properties['dc:creator'] && properties['dc:creator'] === user.id);
 
-          this.isDeletable = this.isMine || isInUserworspace;
+          this.isDeletable = !!(this.isMine || isInUserworspace);
         }
       }, Automation);
 

@@ -43,8 +43,7 @@ angular.module('ngNuxeoClient')
           reader.onloadend = function () {
             var document = new Document({
               type: 'Picture',
-              name: file.name,
-              properties: {'dc:title': file.name}
+              name: file.name
             });
             document.upload(file, successCallback, errorCallback);
           };

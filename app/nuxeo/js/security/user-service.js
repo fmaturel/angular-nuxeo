@@ -34,7 +34,7 @@ angular.module('ngNuxeoSecurity')
             user = {
               id: user.id,
               workspace: {
-                uid: '12345678910',
+                uid: undefined,
                 pathId: '/default-domain/UserWorkspaces/' + pathId
               }
             };
