@@ -493,7 +493,7 @@ angular.module('ngNuxeoQueryPart')
 
             // Fetch query in nuxeo and transform result into Document Type
             return queryService.query(that, function (response) {
-              var data = response.data;
+              var data = response.data || {};
               data.entries = data.entries ? data.entries.map(function (entry) {
                 if (nuxeo.hasOwnProperty(entry.type)) {
                   return new nuxeo[entry.type](entry);
