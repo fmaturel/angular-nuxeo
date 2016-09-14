@@ -101,13 +101,13 @@ angular.module('ngNuxeoClient')
             }
           }
 
-          var isInUserworspace = this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0;
+          var isInUserworspace = !!(this.path && user.workspace && this.path.indexOf(user.workspace.pathId) === 0);
 
-          this.isPublishable = this.facets && this.facets.indexOf('Immutable') === -1;
+          this.isPublishable = !!(this.facets && this.facets.indexOf('Immutable') === -1);
 
-          this.isMine = properties && properties['dc:creator'] && properties['dc:creator'] === user.id;
+          this.isMine = !!(properties && properties['dc:creator'] && properties['dc:creator'] === user.id);
 
-          this.isDeletable = this.isMine || isInUserworspace;
+          this.isDeletable = !!(this.isMine || isInUserworspace);
         }
       }, Automation);
 
@@ -494,13 +494,13 @@ angular.module('ngNuxeoQueryPart')
             // Fetch query in nuxeo and transform result into Document Type
             return queryService.query(that, function (response) {
               var data = response.data;
-              data.entries = data.entries.map(function (entry) {
+              data.entries = data.entries ? data.entries.map(function (entry) {
                 if (nuxeo.hasOwnProperty(entry.type)) {
                   return new nuxeo[entry.type](entry);
                 } else {
                   return new nuxeo.Document(entry);
                 }
-              });
+              }): [];
 
               // Add custom properties
               /* jshint -W064 */
@@ -651,7 +651,7 @@ angular.module('ngNuxeoSecurity')
             user = {
               id: user.id,
               workspace: {
-                uid: '12345678910',
+                uid: undefined,
                 pathId: '/default-domain/UserWorkspaces/' + pathId
               }
             };
