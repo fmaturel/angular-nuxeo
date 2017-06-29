@@ -1,4 +1,7 @@
-angular.module('ngNuxeoSecurity', []);
+angular.module('ngNuxeoSecurity', [
+  'ngCookies',
+  'ngResource'
+]);
 
 angular.module('ngNuxeoClient', [
   'ngNuxeoQueryPart'

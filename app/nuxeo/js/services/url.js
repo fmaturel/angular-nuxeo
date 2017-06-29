@@ -12,4 +12,6 @@ angular.module('ngNuxeoClient')
       this.query = apiBase + '/query';
 
       this.user = apiBase + '/user/:userName';
+
+      this.logout = cst.nuxeo.baseURL + '/logout';
     }]);
