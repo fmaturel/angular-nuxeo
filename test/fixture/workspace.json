@@ -1,0 +1,68 @@
+{
+  "entity-type": "documents",
+  "isPaginable": true,
+  "resultsCount": 1,
+  "pageSize": 0,
+  "maxPageSize": 0,
+  "currentPageSize": 1,
+  "currentPageIndex": 0,
+  "numberOfPages": 1,
+  "isPreviousPageAvailable": false,
+  "isNextPageAvailable": false,
+  "isLastPageAvailable": false,
+  "isSortable": true,
+  "hasError": false,
+  "errorMessage": null,
+  "totalSize": 1,
+  "pageIndex": 0,
+  "pageCount": 1,
+  "entries": [
+    {
+      "entity-type": "document",
+      "repository": "default",
+      "uid": "04c07ba0-dd41-40b0-aad2-ecf8f7d95cab",
+      "path": "/default-domain/UserWorkspaces/Administrator",
+      "type": "Workspace",
+      "state": "project",
+      "parentRef": "941f5101-4242-40e3-b212-5e8255483ec3",
+      "isCheckedOut": true,
+      "isVersion": false,
+      "isProxy": false,
+      "changeToken": "1424792290481",
+      "title": "Administrator",
+      "lastModified": "2015-02-24T15:38:10.481Z",
+      "properties": {
+        "dc:description": "",
+        "dc:language": null,
+        "dc:coverage": null,
+        "dc:valid": null,
+        "dc:creator": "Administrator",
+        "dc:modified": "2015-02-24T15:38:10.481Z",
+        "dc:lastContributor": "Administrator",
+        "dc:rights": null,
+        "dc:expired": null,
+        "dc:format": null,
+        "dc:created": "2015-02-24T15:38:10.481Z",
+        "dc:title": "Administrator",
+        "dc:issued": null,
+        "dc:nature": null,
+        "dc:subjects": [],
+        "dc:contributors": [
+          "Administrator"
+        ],
+        "dc:source": null,
+        "dc:publisher": null,
+        "file:content": null
+      },
+      "facets": [
+        "Folderish",
+        "SuperSpace"
+      ],
+      "contextParameters": {
+        "thumbnail": {
+          "url": "http://demo.nuxeo.com/nuxeo/api/v1/repo/default/id/04c07ba0-dd41-40b0-aad2-ecf8f7d95cab/@rendition/thumbnail"
+        }
+      }
+    }
+  ]
+}

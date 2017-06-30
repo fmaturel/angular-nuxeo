@@ -1,15 +1,16 @@
 describe('ngNuxeoClient module', function () {
   'use strict';
 
-  var httpBackend, nuxeo, nuxeoUser, dataUser;
+  var httpBackend, nuxeo, nuxeoUser, dataUser, dataWorkspace;
 
-  beforeEach(module('ngNuxeoClient', 'data/user.json'));
+  beforeEach(module('ngNuxeoClient', 'data/user.json', 'data/workspace.json'));
 
-  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_) {
+  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_, _dataWorkspace_) {
     httpBackend = $httpBackend;
     nuxeo = _nuxeo_;
     nuxeoUser = _nuxeoUser_;
     dataUser = _dataUser_;
+    dataWorkspace = _dataWorkspace_;
   }));
 
   describe('nuxeoFolder object', function () {
@@ -34,6 +35,10 @@ describe('ngNuxeoClient module', function () {
 
     it('should create a Section when requested', function () {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
+
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
+        'SELECT+*+FROM+Document+WHERE+ecm:path+%3D%22%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com%22'
+      ).respond(dataWorkspace);
 
       httpBackend.whenPOST('http://demo.nuxeo.com/nuxeo/site/automation/Document.Create').respond('{\"type": \"Section\"}');
 

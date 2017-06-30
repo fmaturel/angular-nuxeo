@@ -1,16 +1,16 @@
 describe('ngNuxeoClient module', function () {
   'use strict';
 
-  var httpBackend, nuxeo, nuxeoUser,
-    dataUser, dataDirectory, dataDocuments;
+  var httpBackend, nuxeo, nuxeoUser, dataUser, dataWorkspace, dataDirectory, dataDocuments;
 
-  beforeEach(module('ngNuxeoClient', 'data/user.json', 'data/directory.json', 'data/documents.json'));
+  beforeEach(module('ngNuxeoClient', 'data/user.json', 'data/workspace.json', 'data/directory.json', 'data/documents.json'));
 
-  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_, _dataDirectory_, _dataDocuments_) {
+  beforeEach(inject(function ($httpBackend, _nuxeo_, _nuxeoUser_, _dataUser_, _dataWorkspace_, _dataDirectory_, _dataDocuments_) {
     httpBackend = $httpBackend;
     nuxeo = _nuxeo_;
     nuxeoUser = _nuxeoUser_;
     dataUser = _dataUser_;
+    dataWorkspace = _dataWorkspace_;
     dataDirectory = _dataDirectory_;
     dataDocuments = _dataDocuments_;
   }));
@@ -19,6 +19,10 @@ describe('ngNuxeoClient module', function () {
 
     it('should fetch directories when requested', function () {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
+
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
+        'SELECT+*+FROM+Document+WHERE+ecm:path+%3D%22%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com%22'
+      ).respond(dataWorkspace);
 
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/directory/continent').respond(dataDirectory);
 
@@ -35,6 +39,10 @@ describe('ngNuxeoClient module', function () {
 
     it('should query nuxeo server in right path when requested', inject(function ($filter) {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
+
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
+        'SELECT+*+FROM+Document+WHERE+ecm:path+%3D%22%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com%22'
+      ).respond(dataWorkspace);
 
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query' +
         '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
@@ -58,6 +66,10 @@ describe('ngNuxeoClient module', function () {
 
     it('should query nuxeo server in user path when requested', inject(function ($filter) {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
+
+      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
+        'SELECT+*+FROM+Document+WHERE+ecm:path+%3D%22%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com%22'
+      ).respond(dataWorkspace);
 
       var request = 'http://demo.nuxeo.com/nuxeo/api/v1/query' +
         '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
