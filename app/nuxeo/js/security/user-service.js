@@ -1,7 +1,7 @@
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'nuxeoUrl', 'nuxeoUtils',
-    function($q, $injector, $http, $resource, $cookies, $log, url, utils) {
+  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'queryService', 'nuxeoUrl', 'nuxeoUtils',
+    function($q, $injector, $http, $resource, $cookies, $log, queryService, url, utils) {
 
       var USER_COOKIE = 'NG_NUXEO_UID';
 
@@ -32,16 +32,26 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function(user) {
           if (user && user.id) {
-            var pathId = utils.generateId(user.id, '-', false, 30);
-            user = {
-              id: user.id,
-              workspace: {
-                uid: undefined,
-                pathId: '/default-domain/UserWorkspaces/' + pathId
-              }
-            };
+            var pathId = '/default-domain/UserWorkspaces/' + utils.generateId(user.id, '-', false, 30);
+
+            queryService.query({
+              nxql: {
+                query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
+              },
+              getHeaders: function () {
+                return ['dublincore', 'file', 'webdisplay'];
+              },
+              isUserDependant: false
+            }).then(function (data) {
+              nuxeoUser.register({
+                id: user.id,
+                workspace: {
+                  uid: data.data.entries[0].uid,
+                  pathId: pathId
+                }
+              });
+            });
           }
-          nuxeoUser.register(user);
         }, function() {
           throw 'Error while retrieving current user';
         });
@@ -56,13 +66,9 @@ angular.module('ngNuxeoSecurity')
           var uid = $cookies.get(USER_COOKIE);
 
           if(uid && uid !== user.workspace.uid) {
-            nuxeoUser.logout().then(
-              function() {
-                defer.resolve(angular.extend(nuxeoUser, user));
-              }, function() {
-                console.error('Error while logout on current user');
-                defer.resolve(angular.extend(nuxeoUser, user));
-              });
+            nuxeoUser.logout().finally(function() {
+              defer.resolve(angular.extend(nuxeoUser, user));
+            });
           } else {
             defer.resolve(angular.extend(nuxeoUser, user));
           }

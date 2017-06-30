@@ -11,7 +11,7 @@ angular.module('ngNuxeoSecurity')
           }
 
           // DO NOT DEFER USER INDEPENDENT REQUEST
-          if (!config.isUserDependent) {
+          if (!config.isUserDependant) {
             return config;
           }
 

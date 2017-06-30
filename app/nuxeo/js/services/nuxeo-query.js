@@ -6,7 +6,7 @@ angular.module('ngNuxeoQueryPart')
       var getConfig = function (query) {
         return {
           params: query.nxql,
-          headers: {
+          headers: angular.extend({
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
              * Possible values: dublincore, file, picture, *,...
@@ -23,8 +23,8 @@ angular.module('ngNuxeoQueryPart')
              * This header can be used when you want to control the transaction duration in seconds
              */
             'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          },
-          isUserDependent: true
+          }, query.headers),
+          isUserDependant: query.isUserDependant === false ? false : true
         };
       };
 

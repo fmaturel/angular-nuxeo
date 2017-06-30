@@ -601,7 +601,7 @@ angular.module('ngNuxeoSecurity')
           }
 
           // DO NOT DEFER USER INDEPENDENT REQUEST
-          if (!config.isUserDependent) {
+          if (!config.isUserDependant) {
             return config;
           }
 
@@ -620,8 +620,8 @@ angular.module('ngNuxeoSecurity')
     }]);
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'nuxeoUrl', 'nuxeoUtils',
-    function($q, $injector, $http, $resource, $cookies, $log, url, utils) {
+  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'queryService', 'nuxeoUrl', 'nuxeoUtils',
+    function($q, $injector, $http, $resource, $cookies, $log, queryService, url, utils) {
 
       var USER_COOKIE = 'NG_NUXEO_UID';
 
@@ -652,16 +652,26 @@ angular.module('ngNuxeoSecurity')
 
         User.get({userName: userName}, function(user) {
           if (user && user.id) {
-            var pathId = utils.generateId(user.id, '-', false, 30);
-            user = {
-              id: user.id,
-              workspace: {
-                uid: undefined,
-                pathId: '/default-domain/UserWorkspaces/' + pathId
-              }
-            };
+            var pathId = '/default-domain/UserWorkspaces/' + utils.generateId(user.id, '-', false, 30);
+
+            queryService.query({
+              nxql: {
+                query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
+              },
+              getHeaders: function () {
+                return ['dublincore', 'file', 'webdisplay'];
+              },
+              isUserDependant: false
+            }).then(function (data) {
+              nuxeoUser.register({
+                id: user.id,
+                workspace: {
+                  uid: data.data.entries[0].uid,
+                  pathId: pathId
+                }
+              });
+            });
           }
-          nuxeoUser.register(user);
         }, function() {
           throw 'Error while retrieving current user';
         });
@@ -676,13 +686,9 @@ angular.module('ngNuxeoSecurity')
           var uid = $cookies.get(USER_COOKIE);
 
           if(uid && uid !== user.workspace.uid) {
-            nuxeoUser.logout().then(
-              function() {
-                defer.resolve(angular.extend(nuxeoUser, user));
-              }, function() {
-                console.error('Error while logout on current user');
-                defer.resolve(angular.extend(nuxeoUser, user));
-              });
+            nuxeoUser.logout().finally(function() {
+              defer.resolve(angular.extend(nuxeoUser, user));
+            });
           } else {
             defer.resolve(angular.extend(nuxeoUser, user));
           }
@@ -694,6 +700,7 @@ angular.module('ngNuxeoSecurity')
 
       return nuxeoUser;
     }]);
+
 angular.module('ngNuxeoClient')
 
   .service('NuxeoDirectory', ['$resource', 'nuxeoUrl',
@@ -1004,6 +1011,16 @@ angular.module('ngNuxeoQueryPart')
             this.options.parentIds = parentIds;
             return this;
           };
+
+          /**
+           * Documents must have ancestors that have one of the targeted ancestors id
+           * @param ancestorIds
+           * @returns {QueryPart}
+           */
+          this.withAncestorIn = function (ancestorIds) {
+            this.options.ancestorIds = ancestorIds;
+            return this;
+          };
         };
 
         QueryPart.getPart = function (options) {
@@ -1012,6 +1029,11 @@ angular.module('ngNuxeoQueryPart')
           } else if (angular.isString(options.parentIds) && options.parentIds.length) {
             return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
           }
+          if (angular.isArray(options.ancestorIds)) {
+            return options.ancestorIds.length ? ' AND ecm:ancestorId IN (\'' + options.ancestorIds.join('\',\'') + '\')' : '';
+          } else if (angular.isString(options.ancestorIds) && options.ancestorIds.length) {
+            return ' AND (ecm:ancestorId = \'' + options.ancestorIds + '\')';
+          }
           return '';
         };
 
@@ -1019,6 +1041,7 @@ angular.module('ngNuxeoQueryPart')
       }];
 
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryPath', ['QueryProvider',
@@ -1329,7 +1352,7 @@ angular.module('ngNuxeoQueryPart')
       var getConfig = function (query) {
         return {
           params: query.nxql,
-          headers: {
+          headers: angular.extend({
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
              * Possible values: dublincore, file, picture, *,...
@@ -1346,8 +1369,8 @@ angular.module('ngNuxeoQueryPart')
              * This header can be used when you want to control the transaction duration in seconds
              */
             'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
-          },
-          isUserDependent: true
+          }, query.headers),
+          isUserDependant: query.isUserDependant === false ? false : true
         };
       };
 
@@ -1355,6 +1378,7 @@ angular.module('ngNuxeoQueryPart')
         return $http.get(url.query, getConfig(query)).then(successCallback, errorCallback);
       };
     }]);
+
 angular.module('ngNuxeoClient')
 
   .service('nuxeo', ['$injector', 'Automation', 'Document', 'Folder', 'Section', 'Workspace', 'NuxeoDirectory', 'NuxeoTag',
