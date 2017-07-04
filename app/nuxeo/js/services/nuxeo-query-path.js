@@ -51,6 +51,16 @@ angular.module('ngNuxeoQueryPart')
             return this;
           };
           /**
+           * Documents have to be placed in target domain Section
+           * @param domainName domain name
+           * @param subPath a subPath where searching documents
+           * @returns {*}
+           */
+          this.inDomainSection = function (domainName, subPath) {
+            addPath(this.options, '/' + domainName + '/sections' + (subPath ? '/' + subPath : ''));
+            return this;
+          };
+          /**
            * Documents have to be placed in default type path
            * @returns {*}
            */

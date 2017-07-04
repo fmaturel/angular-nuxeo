@@ -38,11 +38,8 @@ angular.module('ngNuxeoSecurity')
               nxql: {
                 query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
               },
-              getHeaders: function () {
-                return ['dublincore', 'file', 'webdisplay'];
-              },
               isUserDependant: false
-            }).then(function (data) {
+            }).then(function(data) {
               nuxeoUser.register({
                 id: user.id,
                 workspace: {
@@ -62,10 +59,10 @@ angular.module('ngNuxeoSecurity')
       };
 
       nuxeoUser.register = function(user) {
-        if(user && user.workspace) {
+        if (user && user.workspace) {
           var uid = $cookies.get(USER_COOKIE);
 
-          if(uid && uid !== user.workspace.uid) {
+          if (uid && uid !== user.workspace.uid) {
             nuxeoUser.logout().finally(function() {
               defer.resolve(angular.extend(nuxeoUser, user));
             });

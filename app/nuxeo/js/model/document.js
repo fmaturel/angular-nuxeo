@@ -273,7 +273,7 @@ angular.module('ngNuxeoClient')
 
       Document.prototype.defaultPath = '/default-domain/workspaces';
 
-      Document.headers = {nxProperties: ['dublincore', 'file']};
+      Document.headers = {'X-NXproperties': ['dublincore', 'file']};
 
       //**********************************************************
       // STATIC METHODS

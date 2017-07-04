@@ -47,7 +47,7 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query' +
         '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
         $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
-        'AND+ecm:primaryType+NOT+IN+(\'Favorites\')+AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
+        'AND+ecm:primaryType+IN+(\'Document\')+AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
         'AND+((ecm:path+STARTSWITH+\'%2F\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'')
         .respond(dataDocuments);
 
@@ -74,7 +74,7 @@ describe('ngNuxeoClient module', function () {
       var request = 'http://demo.nuxeo.com/nuxeo/api/v1/query' +
         '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
         $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
-        'AND+ecm:primaryType+NOT+IN+(\'Favorites\')+AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
+        'AND+ecm:primaryType+IN+(\'Document\')+AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
         'AND+((ecm:path+STARTSWITH+\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'';
 
       httpBackend.whenGET(request).respond(dataDocuments);

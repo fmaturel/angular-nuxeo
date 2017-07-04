@@ -38,6 +38,10 @@ angular.module('ngNuxeoQueryPart')
          */
         function Query(query) {
           this.options = angular.copy(defaultOptions);
+          var defaultDocumentType = query.DocumentConstructor.name;
+          if(defaultDocumentType) {
+            this.options.mediaTypes = [defaultDocumentType];
+          }
           angular.extend(this, query);
         }
 
@@ -67,8 +71,9 @@ angular.module('ngNuxeoQueryPart')
             result = getHeader(this.headers);
           } else {
             var Constr = this.DocumentConstructor;
+            var unique = function(item, pos, self) { return self.indexOf(item) === pos; };
             while (Constr) {
-              result = result.concat(getHeader(Constr.headers));
+              result = result.concat(getHeader(Constr.headers)).filter(unique);
               Constr = Constr.super;
             }
           }
@@ -80,6 +85,7 @@ angular.module('ngNuxeoQueryPart')
          * Fetch result of query on nuxeo
          * @param successCallback
          * @param errorCallback
+         * @return a promise
          */
         Query.prototype.$get = function (successCallback, errorCallback) {
 
@@ -87,8 +93,7 @@ angular.module('ngNuxeoQueryPart')
             nuxeo = $injector.get('nuxeo'),
             nuxeoUser = $injector.get('nuxeoUser');
 
-          nuxeoUser.promise.then(function (user) {
-
+          return nuxeoUser.promise.then(function (user) {
             $log.debug(user);
 
             // Build query

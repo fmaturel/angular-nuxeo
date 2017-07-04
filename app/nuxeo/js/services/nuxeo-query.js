@@ -10,9 +10,10 @@ angular.module('ngNuxeoQueryPart')
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
              * Possible values: dublincore, file, picture, *,...
+             * @return {string}
              */
             'X-NXproperties': function () {
-              return query.getHeaders('nxProperties').join(',');
+              return query.getHeaders && query.getHeaders('X-NXproperties').join(',');
             },
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
@@ -24,7 +25,7 @@ angular.module('ngNuxeoQueryPart')
              */
             'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
           }, query.headers),
-          isUserDependant: query.isUserDependant === false ? false : true
+          isUserDependant: query.isUserDependant !== false
         };
       };
 

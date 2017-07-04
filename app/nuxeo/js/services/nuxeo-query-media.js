@@ -30,7 +30,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.defaultOptions = {
           // Rather use mixin exclusion = 'Folderish' and 'HiddenInNavigation'
           excludeMediaTypes: [
-            'Favorites'
+            //'Favorites'
             //'Domain', 'Section', 'UserProfile', 'Workspace',
             //'AdministrativeStatusContainer', 'AdministrativeStatus',
             //'DocumentRoute', 'Favorites', 'RouteNode',

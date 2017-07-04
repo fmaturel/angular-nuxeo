@@ -351,7 +351,7 @@ angular.module('ngNuxeoClient')
 
       Document.prototype.defaultPath = '/default-domain/workspaces';
 
-      Document.headers = {nxProperties: ['dublincore', 'file']};
+      Document.headers = {'X-NXproperties': ['dublincore', 'file']};
 
       //**********************************************************
       // STATIC METHODS
@@ -425,6 +425,10 @@ angular.module('ngNuxeoQueryPart')
          */
         function Query(query) {
           this.options = angular.copy(defaultOptions);
+          var defaultDocumentType = query.DocumentConstructor.name;
+          if(defaultDocumentType) {
+            this.options.mediaTypes = [defaultDocumentType];
+          }
           angular.extend(this, query);
         }
 
@@ -454,8 +458,9 @@ angular.module('ngNuxeoQueryPart')
             result = getHeader(this.headers);
           } else {
             var Constr = this.DocumentConstructor;
+            var unique = function(item, pos, self) { return self.indexOf(item) === pos; };
             while (Constr) {
-              result = result.concat(getHeader(Constr.headers));
+              result = result.concat(getHeader(Constr.headers)).filter(unique);
               Constr = Constr.super;
             }
           }
@@ -467,6 +472,7 @@ angular.module('ngNuxeoQueryPart')
          * Fetch result of query on nuxeo
          * @param successCallback
          * @param errorCallback
+         * @return a promise
          */
         Query.prototype.$get = function (successCallback, errorCallback) {
 
@@ -474,8 +480,7 @@ angular.module('ngNuxeoQueryPart')
             nuxeo = $injector.get('nuxeo'),
             nuxeoUser = $injector.get('nuxeoUser');
 
-          nuxeoUser.promise.then(function (user) {
-
+          return nuxeoUser.promise.then(function (user) {
             $log.debug(user);
 
             // Build query
@@ -658,11 +663,8 @@ angular.module('ngNuxeoSecurity')
               nxql: {
                 query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
               },
-              getHeaders: function () {
-                return ['dublincore', 'file', 'webdisplay'];
-              },
               isUserDependant: false
-            }).then(function (data) {
+            }).then(function(data) {
               nuxeoUser.register({
                 id: user.id,
                 workspace: {
@@ -682,10 +684,10 @@ angular.module('ngNuxeoSecurity')
       };
 
       nuxeoUser.register = function(user) {
-        if(user && user.workspace) {
+        if (user && user.workspace) {
           var uid = $cookies.get(USER_COOKIE);
 
-          if(uid && uid !== user.workspace.uid) {
+          if (uid && uid !== user.workspace.uid) {
             nuxeoUser.logout().finally(function() {
               defer.resolve(angular.extend(nuxeoUser, user));
             });
@@ -830,7 +832,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.defaultOptions = {
           // Rather use mixin exclusion = 'Folderish' and 'HiddenInNavigation'
           excludeMediaTypes: [
-            'Favorites'
+            //'Favorites'
             //'Domain', 'Section', 'UserProfile', 'Workspace',
             //'AdministrativeStatusContainer', 'AdministrativeStatus',
             //'DocumentRoute', 'Favorites', 'RouteNode',
@@ -1095,6 +1097,16 @@ angular.module('ngNuxeoQueryPart')
             return this;
           };
           /**
+           * Documents have to be placed in target domain Section
+           * @param domainName domain name
+           * @param subPath a subPath where searching documents
+           * @returns {*}
+           */
+          this.inDomainSection = function (domainName, subPath) {
+            addPath(this.options, '/' + domainName + '/sections' + (subPath ? '/' + subPath : ''));
+            return this;
+          };
+          /**
            * Documents have to be placed in default type path
            * @returns {*}
            */
@@ -1346,6 +1358,40 @@ angular.module('ngNuxeoQueryPart')
     }]);
 angular.module('ngNuxeoQueryPart')
 
+  .provider('NuxeoQueryUUID', ['QueryProvider',
+    function (QueryProvider) {
+
+      QueryProvider.addQueryPartProvider('NuxeoQueryUUID');
+
+      this.$get = [function () {
+        var QueryPart = function () {
+          /**
+           * Documents must have targeted uuids
+           * @param uuids
+           * @returns {QueryPart}
+           */
+          this.withUUIDs = function (uuids) {
+            this.options.uuids = uuids;
+            return this;
+          };
+        };
+
+        QueryPart.getPart = function (options) {
+          if (angular.isArray(options.uuids)) {
+            return options.uuids.length ? ' AND ecm:uuid IN (\'' + options.uuids.join('\',\'') + '\')' : '';
+          } else if (angular.isString(options.uuids) && options.uuids.length) {
+            return ' AND (ecm:uuid = \'' + options.uuids + '\')';
+          }
+          return '';
+        };
+
+        return QueryPart;
+      }];
+
+    }]);
+
+angular.module('ngNuxeoQueryPart')
+
   .service('queryService', ['$http', 'nuxeoUrl', 'nuxeoConstants',
     function ($http, url, cst) {
 
@@ -1356,9 +1402,10 @@ angular.module('ngNuxeoQueryPart')
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Special+HTTP+Headers
              * Possible values: dublincore, file, picture, *,...
+             * @return {string}
              */
             'X-NXproperties': function () {
-              return query.getHeaders('nxProperties').join(',');
+              return query.getHeaders && query.getHeaders('X-NXproperties').join(',');
             },
             /**
              * @see https://doc.nuxeo.com/display/NXDOC/Content+Enricher
@@ -1370,7 +1417,7 @@ angular.module('ngNuxeoQueryPart')
              */
             'Nuxeo-Transaction-Timeout': cst.nuxeo.timeout
           }, query.headers),
-          isUserDependant: query.isUserDependant === false ? false : true
+          isUserDependant: query.isUserDependant !== false
         };
       };
 
