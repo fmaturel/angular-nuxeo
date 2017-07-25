@@ -5,7 +5,7 @@ angular.module('ngNuxeoClient')
 
       var Document = utils.inherit(function Document(document) {
         // Default behaviour if no argument supplied
-        angular.extend(this, angular.extend({path: Document.prototype.defaultPath, type: 'Document'}, document || {}));
+        angular.extend(this, document);
 
         // Put some shortcuts on nuxeo properties
         if (document) {
@@ -55,7 +55,7 @@ angular.module('ngNuxeoClient')
           },
           data: {
             input: inPath,
-            params: this,
+            params: angular.extend({type: this.type}, this),
             context: {}
           }
         }, successCallback, errorCallback);
@@ -217,9 +217,13 @@ angular.module('ngNuxeoClient')
        */
       Document.prototype.download = function (successCallback, errorCallback) {
         return this.automate({
-          url: url.file.download,
+          url: url.automate + '/Document.GetBlob',
           headers: {
             'X-NXVoidOperation': 'false'
+          },
+          data: {
+            input: this.path,
+            params: {xpath: 'file:content'}
           },
           responseType: 'arraybuffer',
           transformResponse: function (data, headers) {
@@ -270,6 +274,9 @@ angular.module('ngNuxeoClient')
           }
         }, successCallback, errorCallback);
       };
+
+      // Media type
+      Document.prototype.type = 'Document';
 
       Document.prototype.defaultPath = '/default-domain/workspaces';
 

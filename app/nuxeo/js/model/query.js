@@ -33,22 +33,22 @@ angular.module('ngNuxeoQueryPart')
 
         /**
          * Query constructor
-         * @param query
+         * @param params
          * @constructor
          */
-        function Query(query) {
+        function Query(params) {
           this.options = angular.copy(defaultOptions);
-          var defaultDocumentType = query.DocumentConstructor.name;
-          if(defaultDocumentType) {
-            this.options.mediaTypes = [defaultDocumentType];
+          var defaultDocumentType = params.DocumentConstructor.prototype.type;
+          if(defaultDocumentType && defaultDocumentType !== 'Document') {
+           this.options.mediaTypes = [defaultDocumentType];
           }
-          angular.extend(this, query);
+          angular.extend(this, params);
         }
 
         /**
          * Get nuxeo query headers
          * @param headerName
-         * @returns {Array}
+         * @returns Array
          */
         Query.prototype.getHeaders = function (headerName) {
 

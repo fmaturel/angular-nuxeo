@@ -83,7 +83,7 @@ angular.module('ngNuxeoClient')
 
       var Document = utils.inherit(function Document(document) {
         // Default behaviour if no argument supplied
-        angular.extend(this, angular.extend({path: Document.prototype.defaultPath, type: 'Document'}, document || {}));
+        angular.extend(this, document);
 
         // Put some shortcuts on nuxeo properties
         if (document) {
@@ -133,7 +133,7 @@ angular.module('ngNuxeoClient')
           },
           data: {
             input: inPath,
-            params: this,
+            params: angular.extend({type: this.type}, this),
             context: {}
           }
         }, successCallback, errorCallback);
@@ -295,9 +295,13 @@ angular.module('ngNuxeoClient')
        */
       Document.prototype.download = function (successCallback, errorCallback) {
         return this.automate({
-          url: url.file.download,
+          url: url.automate + '/Document.GetBlob',
           headers: {
             'X-NXVoidOperation': 'false'
+          },
+          data: {
+            input: this.path,
+            params: {xpath: 'file:content'}
           },
           responseType: 'arraybuffer',
           transformResponse: function (data, headers) {
@@ -349,6 +353,9 @@ angular.module('ngNuxeoClient')
         }, successCallback, errorCallback);
       };
 
+      // Media type
+      Document.prototype.type = 'Document';
+
       Document.prototype.defaultPath = '/default-domain/workspaces';
 
       Document.headers = {'X-NXproperties': ['dublincore', 'file']};
@@ -376,12 +383,12 @@ angular.module('ngNuxeoClient')
     function (Document, utils) {
 
       var Folder = utils.inherit(function Folder(folder) {
-        // Default behaviour if no argument supplied
-        folder = angular.extend({type: 'Folder'}, folder);
-
         // Call Parent function with argument
         Document.call(this, folder);
       }, Document);
+
+      // Media type
+      Folder.prototype.type = 'Folder';
 
       return Folder;
     }]);
@@ -420,22 +427,22 @@ angular.module('ngNuxeoQueryPart')
 
         /**
          * Query constructor
-         * @param query
+         * @param params
          * @constructor
          */
-        function Query(query) {
+        function Query(params) {
           this.options = angular.copy(defaultOptions);
-          var defaultDocumentType = query.DocumentConstructor.name;
-          if(defaultDocumentType) {
-            this.options.mediaTypes = [defaultDocumentType];
+          var defaultDocumentType = params.DocumentConstructor.prototype.type;
+          if(defaultDocumentType && defaultDocumentType !== 'Document') {
+           this.options.mediaTypes = [defaultDocumentType];
           }
-          angular.extend(this, query);
+          angular.extend(this, params);
         }
 
         /**
          * Get nuxeo query headers
          * @param headerName
-         * @returns {Array}
+         * @returns Array
          */
         Query.prototype.getHeaders = function (headerName) {
 
@@ -534,14 +541,13 @@ angular.module('ngNuxeoClient')
     function (Folder, utils) {
 
       var Section = utils.inherit(function Section(section) {
-        // Default behaviour if no argument supplied
-        section = angular.extend({path: Section.prototype.defaultPath, type: 'Section'}, section);
-
         // Call Parent function with argument
         Folder.call(this, section);
       }, Folder);
 
-      // Inherit
+      // Media Type
+      Section.prototype.type = 'Section';
+
       Section.prototype.defaultPath = '/default-domain/sections';
 
       return Section;
@@ -552,9 +558,6 @@ angular.module('ngNuxeoClient')
     function (Folder, utils) {
 
       var Workspace = utils.inherit(function Workspace(workspace) {
-        // Default behaviour if no argument supplied
-        workspace = angular.extend({type: 'Workspace'}, workspace);
-
         // Call Parent function with argument
         Folder.call(this, workspace);
       }, Folder);
