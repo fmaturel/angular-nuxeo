@@ -1,11 +1,8 @@
 .DS_Store
 .idea
 .tmp
-*.iml
 logs/*
 !.gitkeep
 node_modules/
-app/bower_components/
-dist/bower_components/
 dist/*
 !dist/js*

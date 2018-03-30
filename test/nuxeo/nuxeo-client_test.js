@@ -37,7 +37,7 @@ describe('ngNuxeoClient module', function () {
       httpBackend.flush();
     });
 
-    it('should query nuxeo server in right path when requested', inject(function ($filter) {
+    it('should query nuxeo server in right path when requested', inject(function () {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
@@ -45,10 +45,9 @@ describe('ngNuxeoClient module', function () {
       ).respond(dataWorkspace);
 
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query' +
-        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
-        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
-        'AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
-        'AND+((ecm:path+STARTSWITH+\'%2F\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'')
+        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+' +
+        'AND+((ecm:path+STARTSWITH+\'%2F\'))+' +
+        'AND+ecm:isProxy+%3D+0')
         .respond(dataDocuments);
 
       nuxeo.Document.query()
@@ -64,7 +63,7 @@ describe('ngNuxeoClient module', function () {
       httpBackend.flush();
     }));
 
-    it('should query nuxeo server in user path when requested', inject(function ($filter) {
+    it('should query nuxeo server in user path when requested', inject(function () {
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
       httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
@@ -72,10 +71,9 @@ describe('ngNuxeoClient module', function () {
       ).respond(dataWorkspace);
 
       var request = 'http://demo.nuxeo.com/nuxeo/api/v1/query' +
-        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+AND+(dc:expired+IS+NULL+OR+dc:expired+%3E%3D+DATE+\'' +
-        $filter('date')(new Date(), 'yyyy-MM-dd') + '\')+' +
-        'AND+ecm:mixinType+NOT+IN+(\'HiddenInNavigation\')+' +
-        'AND+((ecm:path+STARTSWITH+\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))+AND+ecm:currentLifeCycleState+%3C%3E+\'deleted\'';
+        '?query=SELECT+*+FROM+Document+WHERE+1%3D1+' +
+        'AND+((ecm:path+STARTSWITH+\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))+' +
+        'AND+ecm:isProxy+%3D+0';
 
       httpBackend.whenGET(request).respond(dataDocuments);
 

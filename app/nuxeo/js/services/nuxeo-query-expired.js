@@ -25,7 +25,8 @@ angular.module('ngNuxeoQueryPart')
           };
         };
 
-        QueryPart.defaultOptions = {excludeExpired: true};
+        // Don't provide default behaviour
+        // QueryPart.defaultOptions = {excludeExpired: false};
 
         QueryPart.getPart = function (options) {
           if (options.excludeExpired) {

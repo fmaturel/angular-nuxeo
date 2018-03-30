@@ -27,12 +27,8 @@ angular.module('ngNuxeoQueryPart')
           };
         };
 
-        QueryPart.defaultOptions = {
-          excludeMixinTypes: [
-            //'Folderish',
-            'HiddenInNavigation'
-          ]
-        };
+        // Don't provide default behaviour
+        // QueryPart.defaultOptions = { excludeMixinTypes: ['Folderish', 'HiddenInNavigation'] };
 
         QueryPart.getPart = function (options) {
           // Exclusion

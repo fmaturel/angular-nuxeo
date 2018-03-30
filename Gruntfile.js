@@ -1,8 +1,8 @@
 /*global module,require*/
-(function () {
+(function() {
   'use strict';
 
-  module.exports = function (grunt) {
+  module.exports = function(grunt) {
 
     // Load grunt tasks automatically
     require('load-grunt-tasks')(grunt);
@@ -93,8 +93,19 @@
             open: {
               target: 'http://localhost:9020/demo'
             },
-            middleware: function (connect) {
+            middleware: function(connect) {
               return [
+                function(req, res, next) {
+                  res.setHeader('Access-Control-Allow-Origin', '*');
+                  res.setHeader('Access-Control-Allow-Methods', '*');
+                  res.setHeader('Access-Control-Allow-Credentials', 'true');
+                  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+                  res.setHeader('Access-Control-Allow-Headers',
+                    'Accept, Content-type, Authorization, ' +
+                    'Nuxeo-Transaction-Timeout, X-NXproperties, X-NXVoidOperation, X-NXenrichers.document');
+
+                  next();
+                },
                 connect().use('/vendor', serveStatic('./node_modules')),
                 serveStatic(appConfig.app),
                 serveStatic(appConfig.dist)
@@ -105,7 +116,7 @@
         test: {
           options: {
             port: 9121,
-            middleware: function () {
+            middleware: function() {
               return [
                 serveStatic(appConfig.test),
                 serveStatic(appConfig.app),
@@ -210,7 +221,7 @@
       }
     });
 
-    grunt.registerTask('serve', 'Compile then start a connect web server', function (target) {
+    grunt.registerTask('serve', 'Compile then start a connect web server', function(target) {
       if (target === 'dist') {
         return grunt.task.run(['build', 'connect:dist:keepalive']);
       }

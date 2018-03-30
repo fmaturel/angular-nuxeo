@@ -25,7 +25,8 @@ angular.module('ngNuxeoQueryPart')
           };
         };
 
-        QueryPart.defaultOptions = {excludeDeleted: true};
+        // Don't provide default behaviour
+        // QueryPart.defaultOptions = {excludeDeleted: false};
 
         QueryPart.getPart = function (options) {
           if (options.excludeDeleted) {
