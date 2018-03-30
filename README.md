@@ -15,7 +15,7 @@ An angular JS client for the nuxeo platform
 
 Then run
 
-`grunt serve:dist`
+`grunt serve`
 
 ## License
 

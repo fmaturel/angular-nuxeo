@@ -124,14 +124,6 @@
               ];
             }
           }
-        },
-        dist: {
-          options: {
-            open: {
-              target: 'http://demo.nuxeo.local/demo'
-            },
-            base: '<%= yeoman.dist %>'
-          }
         }
       },
 
@@ -221,16 +213,10 @@
       }
     });
 
-    grunt.registerTask('serve', 'Compile then start a connect web server', function(target) {
-      if (target === 'dist') {
-        return grunt.task.run(['build', 'connect:dist:keepalive']);
-      }
-
+    grunt.registerTask('serve', 'Compile then start a connect web server', function() {
       grunt.task.run([
-        'clean',
-        'html2js',
         'jshint:all',
-        'concat',
+        'build',
         'connect:livereload',
         'watch'
       ]);
