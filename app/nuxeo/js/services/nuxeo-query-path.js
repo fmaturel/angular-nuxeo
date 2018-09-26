@@ -94,7 +94,7 @@ angular.module('ngNuxeoQueryPart')
             }
             addPath(options, userDirectory);
             if (options.notInUserWorkspace) {
-              throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+              throw 'InUserWorkspacenotInUserWorkspace both present, watch your query options!';
             }
           }
           if (options.notInUserWorkspace) {
@@ -108,9 +108,9 @@ angular.module('ngNuxeoQueryPart')
               }
               return result;
             }, '');
-            return terms.length ? ' AND (' + terms + ')' : '';
+            return terms.length ? '(' + terms + ')' : '';
           } else if (angular.isString(options.paths) && options.paths.length) {
-            return ' AND ' + pathQuery(options, options.paths);
+            return '' + pathQuery(options, options.paths);
           }
           return '';
         };

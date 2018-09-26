@@ -28,9 +28,9 @@ angular.module('ngNuxeoQueryPart')
           var continentId = options.continentId;
           var country = options.country;
           if (angular.isString(continentId)) {
-            return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
+            return continentId.length ? '(dc:coverage STARTSWITH \'' + continentId + '\')' : '';
           } else if (angular.isObject(country)) {
-            return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
+            return '(dc:coverage = \'' + country.parent + '/' + country.id + '\')';
           }
           return '';
         };

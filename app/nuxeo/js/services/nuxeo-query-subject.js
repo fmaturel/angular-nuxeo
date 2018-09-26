@@ -43,7 +43,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.getPart = function (options) {
           var subjectId = options.subjectId;
           if (angular.isString(subjectId)) {
-            return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
+            return subjectId.length ? '(dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
           }
           return '';
         };

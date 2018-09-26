@@ -22,7 +22,7 @@ angular.module('ngNuxeoQuery', [
 
   .constant('nuxeoConstants', {
     nuxeo: {
-      baseURL: 'http://demo.nuxeo.com/nuxeo',
+      baseURL: 'https://demo.nuxeo.com/nuxeo',
       apiPath: '/api/v1',
       automationPath: '/site/automation',
       timeout: 5 // Timeout in seconds
@@ -397,7 +397,7 @@ angular.module('ngNuxeoQueryPart')
 
   .provider('Query', [function () {
 
-    var baseQuery = 'SELECT * FROM Document WHERE 1=1';
+    var baseQuery = 'SELECT * FROM Document';
 
     var queryParts = [];
 
@@ -493,11 +493,14 @@ angular.module('ngNuxeoQueryPart')
 
             // Build query
             that.nxql = {query: baseQuery};
+            var index = 0;
             parts.forEach(function (getPart) {
+              // Spaces are important in clause
               var result = getPart(that.options, user);
               if (result) {
+                var clause = index++ === 0 ? ' WHERE ' : ' AND ';
                 if (angular.isString(result)) {
-                  that.nxql.query += result;
+                  that.nxql.query += clause + result;
                 } else if (angular.isObject(result)) {
                   angular.extend(that.nxql, result);
                 }
@@ -536,6 +539,7 @@ angular.module('ngNuxeoQueryPart')
         return Query;
       }];
   }]);
+
 angular.module('ngNuxeoClient')
 
   .factory('Section', ['Folder', 'nuxeoUtils',
@@ -629,8 +633,8 @@ angular.module('ngNuxeoSecurity')
     }]);
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'queryService', 'nuxeoUrl', 'nuxeoUtils',
-    function($q, $injector, $http, $resource, $cookies, $log, queryService, url, utils) {
+  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'nuxeoUrl', 'nuxeoUtils',
+    function($q, $injector, $http, $resource, $cookies, $log, url, utils) {
 
       var USER_COOKIE = 'NG_NUXEO_UID';
 
@@ -663,20 +667,22 @@ angular.module('ngNuxeoSecurity')
           if (user && user.id) {
             var pathId = '/default-domain/UserWorkspaces/' + utils.generateId(user.id, '-', false, 30);
 
-            queryService.query({
-              nxql: {
-                query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
-              },
-              isUserDependant: false
-            }).then(function(data) {
-              nuxeoUser.register({
-                id: user.id,
-                workspace: {
-                  uid: data.data.entries[0].uid,
-                  pathId: pathId
+            $http.get(url.path + pathId)
+              .then(function(response) {
+                if (response.status === 200) {
+                  return response.data;
                 }
+                throw 'Error while getting path [' + pathId + ']';
+              })
+              .then(function(data) {
+                nuxeoUser.register({
+                  id: user.id,
+                  workspace: {
+                    uid: data.uid,
+                    pathId: pathId
+                  }
+                });
               });
-            });
           }
         }, function() {
           throw 'Error while retrieving current user';
@@ -755,9 +761,9 @@ angular.module('ngNuxeoQueryPart')
           var continentId = options.continentId;
           var country = options.country;
           if (angular.isString(continentId)) {
-            return continentId.length ? ' AND (dc:coverage STARTSWITH \'' + continentId + '\')' : '';
+            return continentId.length ? '(dc:coverage STARTSWITH \'' + continentId + '\')' : '';
           } else if (angular.isObject(country)) {
-            return ' AND (dc:coverage = \'' + country.parent + '/' + country.id + '\')';
+            return '(dc:coverage = \'' + country.parent + '/' + country.id + '\')';
           }
           return '';
         };
@@ -765,6 +771,7 @@ angular.module('ngNuxeoQueryPart')
         return QueryPart;
       }];
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryExpiration', ['QueryProvider',
@@ -797,7 +804,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.excludeExpired) {
-            return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
+            return '(dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
           }
           return '';
         };
@@ -836,7 +843,7 @@ angular.module('ngNuxeoQueryPart')
         };
 
         QueryPart.defaultOptions = {
-          // Rather use mixin exclusion = 'Folderish' and 'HiddenInNavigation'
+          // Rather use mixin exclusion = 'Folderish''HiddenInNavigation'
           excludeMediaTypes: [
             //'Favorites'
             //'Domain', 'Section', 'UserProfile', 'Workspace',
@@ -852,17 +859,17 @@ angular.module('ngNuxeoQueryPart')
 
           var excl = options.excludeMediaTypes;
           if (angular.isArray(excl) && excl.length) {
-            criterias += ' AND ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
+            criterias += 'ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
           } else if (angular.isString(excl) && excl.length) {
-            criterias += ' AND ecm:primaryType <> \'' + excl + '\'';
+            criterias += 'ecm:primaryType <> \'' + excl + '\'';
           }
 
           // Inclusion
           var incl = utils.objToArray(options.mediaTypes);
           if (angular.isArray(incl) && incl.length) {
-            criterias += ' AND ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
+            criterias += 'ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
           } else if (angular.isString(incl) && incl.length) {
-            criterias += ' AND ecm:primaryType = \'' + incl + '\'';
+            criterias += 'ecm:primaryType = \'' + incl + '\'';
           }
 
           return criterias;
@@ -872,6 +879,7 @@ angular.module('ngNuxeoQueryPart')
       }];
 
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryMixin', ['QueryProvider',
@@ -910,17 +918,17 @@ angular.module('ngNuxeoQueryPart')
 
           var excl = options.excludeMixinTypes;
           if (angular.isArray(excl) && excl.length) {
-            criterias += ' AND ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
+            criterias += 'ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
           } else if (angular.isString(excl) && excl.length) {
-            criterias += ' AND ecm:mixinType <> \'' + excl + '\'';
+            criterias += 'ecm:mixinType <> \'' + excl + '\'';
           }
 
           // Inclusion : Transform if Object => Array
           var incl = utils.objToArray(options.mixin);
           if (angular.isArray(incl) && incl.length) {
-            criterias += ' AND ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
+            criterias += 'ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
           } else if (angular.isString(incl) && incl.length) {
-            criterias += ' AND ecm:mixinType = \'' + incl + '\'';
+            criterias += 'ecm:mixinType = \'' + incl + '\'';
           }
 
           return criterias;
@@ -956,7 +964,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.getPart = function (options) {
           var natureId = options.natureId;
           if (angular.isString(natureId)) {
-            return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
+            return natureId.length ? '(dc:nature = \'' + natureId + '\')' : '';
           }
           return '';
         };
@@ -965,6 +973,7 @@ angular.module('ngNuxeoQueryPart')
       }];
 
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryPaginate', ['QueryProvider',
@@ -1030,14 +1039,14 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (angular.isArray(options.parentIds)) {
-            return options.parentIds.length ? ' AND ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
+            return options.parentIds.length ? 'ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.parentIds) && options.parentIds.length) {
-            return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
+            return '(ecm:parentId = \'' + options.parentIds + '\')';
           }
           if (angular.isArray(options.ancestorIds)) {
-            return options.ancestorIds.length ? ' AND ecm:ancestorId IN (\'' + options.ancestorIds.join('\',\'') + '\')' : '';
+            return options.ancestorIds.length ? 'ecm:ancestorId IN (\'' + options.ancestorIds.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.ancestorIds) && options.ancestorIds.length) {
-            return ' AND (ecm:ancestorId = \'' + options.ancestorIds + '\')';
+            return '(ecm:ancestorId = \'' + options.ancestorIds + '\')';
           }
           return '';
         };
@@ -1143,7 +1152,7 @@ angular.module('ngNuxeoQueryPart')
             }
             addPath(options, userDirectory);
             if (options.notInUserWorkspace) {
-              throw 'InUserWorkspace and notInUserWorkspace both present, watch your query options!';
+              throw 'InUserWorkspacenotInUserWorkspace both present, watch your query options!';
             }
           }
           if (options.notInUserWorkspace) {
@@ -1157,9 +1166,9 @@ angular.module('ngNuxeoQueryPart')
               }
               return result;
             }, '');
-            return terms.length ? ' AND (' + terms + ')' : '';
+            return terms.length ? '(' + terms + ')' : '';
           } else if (angular.isString(options.paths) && options.paths.length) {
-            return ' AND ' + pathQuery(options, options.paths);
+            return '' + pathQuery(options, options.paths);
           }
           return '';
         };
@@ -1167,6 +1176,7 @@ angular.module('ngNuxeoQueryPart')
         return QueryPart;
       }];
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryProxy', ['QueryProvider',
@@ -1178,7 +1188,7 @@ angular.module('ngNuxeoQueryPart')
         var QueryPart = function () {
           /**
            * Documents must be proxy (A proxy is very much like a symbolic link on an Unix-like OS)
-           * A proxy points to a document and will look like a document from the user point of view:
+           * A proxy points to a documentwill look like a document from the user point of view:
            * - The proxy will have the same metadata as the target document,
            * - The proxy will hold the same files as the target documents (since file is a special kind of metadata).
            * @see https://doc.nuxeo.com/nxdoc/repository-concepts/#proxies
@@ -1203,10 +1213,10 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.isProxy) {
-            return ' AND ecm:isProxy = 1';
+            return 'ecm:isProxy = 1';
           }
           if (options.isNotProxy) {
-            return ' AND ecm:isProxy = 0';
+            return 'ecm:isProxy = 0';
           }
           return '';
         };
@@ -1304,7 +1314,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.excludeDeleted) {
-            return ' AND ecm:currentLifeCycleState <> \'deleted\'';
+            return 'ecm:currentLifeCycleState <> \'deleted\'';
           }
           return '';
         };
@@ -1358,7 +1368,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.getPart = function (options) {
           var subjectId = options.subjectId;
           if (angular.isString(subjectId)) {
-            return subjectId.length ? ' AND (dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
+            return subjectId.length ? '(dc:subjects STARTSWITH \'' + map(subjectId) + '\')' : '';
           }
           return '';
         };
@@ -1366,6 +1376,7 @@ angular.module('ngNuxeoQueryPart')
         return QueryPart;
       }];
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryTerm', ['QueryProvider',
@@ -1399,9 +1410,9 @@ angular.module('ngNuxeoQueryPart')
               }
               return result;
             }, '');
-            return terms.length ? ' AND (' + terms + ')' : '';
+            return terms.length ? '(' + terms + ')' : '';
           } else if (angular.isString(options.terms) && options.terms.length) {
-            return ' AND ' + termsQuery(options.terms);
+            return '' + termsQuery(options.terms);
           }
           return '';
         };
@@ -1409,6 +1420,7 @@ angular.module('ngNuxeoQueryPart')
         return QueryPart;
       }];
     }]);
+
 angular.module('ngNuxeoQueryPart')
 
   .provider('NuxeoQueryUUID', ['QueryProvider',
@@ -1431,9 +1443,9 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (angular.isArray(options.uuids)) {
-            return options.uuids.length ? ' AND ecm:uuid IN (\'' + options.uuids.join('\',\'') + '\')' : '';
+            return options.uuids.length ? 'ecm:uuid IN (\'' + options.uuids.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.uuids) && options.uuids.length) {
-            return ' AND (ecm:uuid = \'' + options.uuids + '\')';
+            return '(ecm:uuid = \'' + options.uuids + '\')';
           }
           return '';
         };
@@ -1701,7 +1713,7 @@ angular.module('ngNuxeoQueryPart')
       inherit: function inherit(NewType, ParentType) {
 
         if (!angular.isFunction(NewType) || !angular.isFunction(ParentType)) {
-          throw 'New type and parent type in hierarchy should be Function';
+          throw 'New typeparent type in hierarchy should be Function';
         }
 
         // Inherit
@@ -1718,14 +1730,15 @@ angular.module('ngNuxeoQueryPart')
       }
     };
   }]);
+
 angular.module('ngNuxeoClient')
 
   .service('nuxeoUrl', ['nuxeoConstants',
     function (cst) {
 
-      var apiBase = cst.nuxeo.baseURL + cst.nuxeo.apiPath, automationBase = cst.nuxeo.baseURL + cst.nuxeo.automationPath;
+      var apiBase = cst.nuxeo.baseURL + cst.nuxeo.apiPath;
 
-      this.automate = automationBase;
+      this.automate = cst.nuxeo.baseURL + cst.nuxeo.automationPath;
 
       this.request = apiBase + '/directory/:object';
 
@@ -1733,5 +1746,8 @@ angular.module('ngNuxeoClient')
 
       this.user = apiBase + '/user/:userName';
 
+      this.path = apiBase + '/path';
+
       this.logout = cst.nuxeo.baseURL + '/logout';
-    }]);}( window ));
+    }]);
+}( window ));

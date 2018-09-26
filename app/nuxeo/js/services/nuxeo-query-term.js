@@ -31,9 +31,9 @@ angular.module('ngNuxeoQueryPart')
               }
               return result;
             }, '');
-            return terms.length ? ' AND (' + terms + ')' : '';
+            return terms.length ? '(' + terms + ')' : '';
           } else if (angular.isString(options.terms) && options.terms.length) {
-            return ' AND ' + termsQuery(options.terms);
+            return '' + termsQuery(options.terms);
           }
           return '';
         };

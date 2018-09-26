@@ -30,14 +30,14 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (angular.isArray(options.parentIds)) {
-            return options.parentIds.length ? ' AND ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
+            return options.parentIds.length ? 'ecm:parentId IN (\'' + options.parentIds.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.parentIds) && options.parentIds.length) {
-            return ' AND (ecm:parentId = \'' + options.parentIds + '\')';
+            return '(ecm:parentId = \'' + options.parentIds + '\')';
           }
           if (angular.isArray(options.ancestorIds)) {
-            return options.ancestorIds.length ? ' AND ecm:ancestorId IN (\'' + options.ancestorIds.join('\',\'') + '\')' : '';
+            return options.ancestorIds.length ? 'ecm:ancestorId IN (\'' + options.ancestorIds.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.ancestorIds) && options.ancestorIds.length) {
-            return ' AND (ecm:ancestorId = \'' + options.ancestorIds + '\')';
+            return '(ecm:ancestorId = \'' + options.ancestorIds + '\')';
           }
           return '';
         };

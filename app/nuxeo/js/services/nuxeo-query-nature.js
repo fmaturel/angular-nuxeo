@@ -23,7 +23,7 @@ angular.module('ngNuxeoQueryPart')
         QueryPart.getPart = function (options) {
           var natureId = options.natureId;
           if (angular.isString(natureId)) {
-            return natureId.length ? ' AND (dc:nature = \'' + natureId + '\')' : '';
+            return natureId.length ? '(dc:nature = \'' + natureId + '\')' : '';
           }
           return '';
         };

@@ -34,13 +34,12 @@ describe('ngNuxeoClient module', function () {
   describe('nuxeo service', function () {
 
     it('should create a Section when requested', function () {
-      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
+      httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/user/Administrator').respond(dataUser);
 
-      httpBackend.whenGET('http://demo.nuxeo.com/nuxeo/api/v1/query?query=' +
-        'SELECT+*+FROM+Document+WHERE+ecm:path+%3D%22%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com%22'
+      httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/path/default-domain/UserWorkspaces/fmaturel-github-com'
       ).respond(dataWorkspace);
 
-      httpBackend.whenPOST('http://demo.nuxeo.com/nuxeo/site/automation/Document.Create').respond('{\"type": \"Section\"}');
+      httpBackend.whenPOST('https://demo.nuxeo.com/nuxeo/site/automation/Document.Create').respond('{\"type": \"Section\"}');
 
       nuxeo.Section.create({name: 'newFolder'}, '/default-domain/workspaces', function (result) {
         expect(result).toBeDefined();

@@ -60,7 +60,7 @@
       ],
       "contextParameters": {
         "thumbnail": {
-          "url": "http://demo.nuxeo.com/nuxeo/api/v1/repo/default/id/04c07ba0-dd41-40b0-aad2-ecf8f7d95cab/@rendition/thumbnail"
+          "url": "https://demo.nuxeo.com/nuxeo/api/v1/repo/default/id/04c07ba0-dd41-40b0-aad2-ecf8f7d95cab/@rendition/thumbnail"
         }
       }
     }

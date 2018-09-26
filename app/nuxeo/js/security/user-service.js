@@ -1,7 +1,7 @@
 angular.module('ngNuxeoSecurity')
 
-  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'queryService', 'nuxeoUrl', 'nuxeoUtils',
-    function($q, $injector, $http, $resource, $cookies, $log, queryService, url, utils) {
+  .service('nuxeoUser', ['$q', '$injector', '$http', '$resource', '$cookies', '$log', 'nuxeoUrl', 'nuxeoUtils',
+    function($q, $injector, $http, $resource, $cookies, $log, url, utils) {
 
       var USER_COOKIE = 'NG_NUXEO_UID';
 
@@ -34,20 +34,22 @@ angular.module('ngNuxeoSecurity')
           if (user && user.id) {
             var pathId = '/default-domain/UserWorkspaces/' + utils.generateId(user.id, '-', false, 30);
 
-            queryService.query({
-              nxql: {
-                query: 'SELECT * FROM Document WHERE ecm:path ="' + pathId + '"'
-              },
-              isUserDependant: false
-            }).then(function(data) {
-              nuxeoUser.register({
-                id: user.id,
-                workspace: {
-                  uid: data.data.entries[0].uid,
-                  pathId: pathId
+            $http.get(url.path + pathId)
+              .then(function(response) {
+                if (response.status === 200) {
+                  return response.data;
                 }
+                throw 'Error while getting path [' + pathId + ']';
+              })
+              .then(function(data) {
+                nuxeoUser.register({
+                  id: user.id,
+                  workspace: {
+                    uid: data.uid,
+                    pathId: pathId
+                  }
+                });
               });
-            });
           }
         }, function() {
           throw 'Error while retrieving current user';

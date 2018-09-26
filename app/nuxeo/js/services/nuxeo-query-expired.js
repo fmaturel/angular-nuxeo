@@ -30,7 +30,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.excludeExpired) {
-            return ' AND (dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
+            return '(dc:expired IS NULL OR dc:expired >= DATE \'' + $filter('date')(new Date(), 'yyyy-MM-dd') + '\')';
           }
           return '';
         };

@@ -36,17 +36,17 @@ angular.module('ngNuxeoQueryPart')
 
           var excl = options.excludeMixinTypes;
           if (angular.isArray(excl) && excl.length) {
-            criterias += ' AND ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
+            criterias += 'ecm:mixinType NOT IN (\'' + excl.join('\',\'') + '\')';
           } else if (angular.isString(excl) && excl.length) {
-            criterias += ' AND ecm:mixinType <> \'' + excl + '\'';
+            criterias += 'ecm:mixinType <> \'' + excl + '\'';
           }
 
           // Inclusion : Transform if Object => Array
           var incl = utils.objToArray(options.mixin);
           if (angular.isArray(incl) && incl.length) {
-            criterias += ' AND ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
+            criterias += 'ecm:mixinType IN (\'' + incl.join('\',\'') + '\')';
           } else if (angular.isString(incl) && incl.length) {
-            criterias += ' AND ecm:mixinType = \'' + incl + '\'';
+            criterias += 'ecm:mixinType = \'' + incl + '\'';
           }
 
           return criterias;

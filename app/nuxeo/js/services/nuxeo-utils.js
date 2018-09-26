@@ -155,7 +155,7 @@ angular.module('ngNuxeoQueryPart')
       inherit: function inherit(NewType, ParentType) {
 
         if (!angular.isFunction(NewType) || !angular.isFunction(ParentType)) {
-          throw 'New type and parent type in hierarchy should be Function';
+          throw 'New typeparent type in hierarchy should be Function';
         }
 
         // Inherit

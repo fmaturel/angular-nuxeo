@@ -20,9 +20,9 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (angular.isArray(options.uuids)) {
-            return options.uuids.length ? ' AND ecm:uuid IN (\'' + options.uuids.join('\',\'') + '\')' : '';
+            return options.uuids.length ? 'ecm:uuid IN (\'' + options.uuids.join('\',\'') + '\')' : '';
           } else if (angular.isString(options.uuids) && options.uuids.length) {
-            return ' AND (ecm:uuid = \'' + options.uuids + '\')';
+            return '(ecm:uuid = \'' + options.uuids + '\')';
           }
           return '';
         };

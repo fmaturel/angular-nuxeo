@@ -30,7 +30,7 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.excludeDeleted) {
-            return ' AND ecm:currentLifeCycleState <> \'deleted\'';
+            return 'ecm:currentLifeCycleState <> \'deleted\'';
           }
           return '';
         };

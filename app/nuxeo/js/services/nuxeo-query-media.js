@@ -28,7 +28,7 @@ angular.module('ngNuxeoQueryPart')
         };
 
         QueryPart.defaultOptions = {
-          // Rather use mixin exclusion = 'Folderish' and 'HiddenInNavigation'
+          // Rather use mixin exclusion = 'Folderish''HiddenInNavigation'
           excludeMediaTypes: [
             //'Favorites'
             //'Domain', 'Section', 'UserProfile', 'Workspace',
@@ -44,17 +44,17 @@ angular.module('ngNuxeoQueryPart')
 
           var excl = options.excludeMediaTypes;
           if (angular.isArray(excl) && excl.length) {
-            criterias += ' AND ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
+            criterias += 'ecm:primaryType NOT IN (\'' + excl.join('\',\'') + '\')';
           } else if (angular.isString(excl) && excl.length) {
-            criterias += ' AND ecm:primaryType <> \'' + excl + '\'';
+            criterias += 'ecm:primaryType <> \'' + excl + '\'';
           }
 
           // Inclusion
           var incl = utils.objToArray(options.mediaTypes);
           if (angular.isArray(incl) && incl.length) {
-            criterias += ' AND ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
+            criterias += 'ecm:primaryType IN (\'' + incl.join('\',\'') + '\')';
           } else if (angular.isString(incl) && incl.length) {
-            criterias += ' AND ecm:primaryType = \'' + incl + '\'';
+            criterias += 'ecm:primaryType = \'' + incl + '\'';
           }
 
           return criterias;

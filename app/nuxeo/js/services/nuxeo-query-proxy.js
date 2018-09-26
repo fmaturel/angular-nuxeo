@@ -9,7 +9,7 @@ angular.module('ngNuxeoQueryPart')
         var QueryPart = function () {
           /**
            * Documents must be proxy (A proxy is very much like a symbolic link on an Unix-like OS)
-           * A proxy points to a document and will look like a document from the user point of view:
+           * A proxy points to a documentwill look like a document from the user point of view:
            * - The proxy will have the same metadata as the target document,
            * - The proxy will hold the same files as the target documents (since file is a special kind of metadata).
            * @see https://doc.nuxeo.com/nxdoc/repository-concepts/#proxies
@@ -34,10 +34,10 @@ angular.module('ngNuxeoQueryPart')
 
         QueryPart.getPart = function (options) {
           if (options.isProxy) {
-            return ' AND ecm:isProxy = 1';
+            return 'ecm:isProxy = 1';
           }
           if (options.isNotProxy) {
-            return ' AND ecm:isProxy = 0';
+            return 'ecm:isProxy = 0';
           }
           return '';
         };

@@ -2,7 +2,7 @@ angular.module('ngNuxeoQueryPart')
 
   .provider('Query', [function () {
 
-    var baseQuery = 'SELECT * FROM Document WHERE 1=1';
+    var baseQuery = 'SELECT * FROM Document';
 
     var queryParts = [];
 
@@ -98,11 +98,14 @@ angular.module('ngNuxeoQueryPart')
 
             // Build query
             that.nxql = {query: baseQuery};
+            var index = 0;
             parts.forEach(function (getPart) {
+              // Spaces are important in clause
               var result = getPart(that.options, user);
               if (result) {
+                var clause = index++ === 0 ? ' WHERE ' : ' AND ';
                 if (angular.isString(result)) {
-                  that.nxql.query += result;
+                  that.nxql.query += clause + result;
                 } else if (angular.isObject(result)) {
                   angular.extend(that.nxql, result);
                 }

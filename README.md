@@ -3,6 +3,14 @@ An angular JS client for the nuxeo platform
 
 [![Build Status](https://secure.travis-ci.org/fmaturel/angular-nuxeo.svg)](http:/travis-ci.org/fmaturel/angular-nuxeo)
 
+## Version compatibility
+
+| nuxeo version | angular-nuxeo version |
+|---------------|-----------------------|
+| <=9           | <=0.2.0               |
+| >10           | >0.2.0                |
+
+
 ## Demo
 
 - Run the demo @home with few steps (prerequisite git & node V0.10+ & npm installed):
