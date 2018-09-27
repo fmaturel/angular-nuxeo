@@ -42,8 +42,8 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/path/default-domain/UserWorkspaces/fmaturel-github-com'
       ).respond(dataWorkspace);
 
-      httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/query' +
-        '?query=SELECT+*+FROM+Document+' +
+      httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/search/pp/nxql_search/execute' +
+        '?queryParams=SELECT+*+FROM+Document+' +
         'WHERE+((ecm:path+STARTSWITH+\'%2F\'))+' +
         'AND+ecm:isProxy+%3D+0')
         .respond(dataDocuments);
@@ -67,8 +67,8 @@ describe('ngNuxeoClient module', function () {
       httpBackend.whenGET('https://demo.nuxeo.com/nuxeo/api/v1/path/default-domain/UserWorkspaces/fmaturel-github-com'
       ).respond(dataWorkspace);
 
-      var request = 'https://demo.nuxeo.com/nuxeo/api/v1/query' +
-        '?query=SELECT+*+FROM+Document+' +
+      var request = 'https://demo.nuxeo.com/nuxeo/api/v1/search/pp/nxql_search/execute' +
+        '?queryParams=SELECT+*+FROM+Document+' +
         'WHERE+((ecm:path+STARTSWITH+\'%2Fdefault-domain%2FUserWorkspaces%2Ffmaturel-github-com\'))+' +
         'AND+ecm:isProxy+%3D+0';
 

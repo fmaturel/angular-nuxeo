@@ -97,7 +97,7 @@ angular.module('ngNuxeoQueryPart')
             $log.debug(user);
 
             // Build query
-            that.nxql = {query: baseQuery};
+            that.nxql = {queryParams: baseQuery};
             var index = 0;
             parts.forEach(function (getPart) {
               // Spaces are important in clause
@@ -105,7 +105,7 @@ angular.module('ngNuxeoQueryPart')
               if (result) {
                 var clause = index++ === 0 ? ' WHERE ' : ' AND ';
                 if (angular.isString(result)) {
-                  that.nxql.query += clause + result;
+                  that.nxql.queryParams += clause + result;
                 } else if (angular.isObject(result)) {
                   angular.extend(that.nxql, result);
                 }
@@ -113,7 +113,7 @@ angular.module('ngNuxeoQueryPart')
             });
 
             // Log query
-            $log.debug('Resulting query: ' + that.nxql.query);
+            $log.debug('Resulting query: ' + that.nxql.queryParams);
 
             // Fetch query in nuxeo and transform result into Document Type
             return queryService.query(that, function (response) {

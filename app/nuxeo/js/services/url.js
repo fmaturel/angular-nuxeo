@@ -9,7 +9,7 @@ angular.module('ngNuxeoClient')
 
       this.request = apiBase + '/directory/:object';
 
-      this.query = apiBase + '/query';
+      this.query = apiBase + '/search/pp/nxql_search/execute';
 
       this.user = apiBase + '/user/:userName';
 
